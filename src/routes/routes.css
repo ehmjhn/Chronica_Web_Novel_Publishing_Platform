@@ -1,0 +1,37 @@
+
+.header{
+    width: 100%;
+    height: 70px;
+    background: linear-gradient(to top right, #0C0C1D, #1E2A38, #523A28, #A47E3B);
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    color: white;
+    align-items: center;
+    position: sticky; 
+    top:0;
+}
+
+.header h1{
+    font-family: 'Firlest', 'Montserrat', 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    letter-spacing: 3px;
+    font-weight: 550;
+    color: goldenrod;
+}
+
+.header img{
+    margin: 0;
+    width: 60px;
+    height: 60px;
+}
+
+.footer{
+    border-top: 2px solid #726a68;
+    height: 40px;
+    width: 100%;
+    background-color: #373432;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}

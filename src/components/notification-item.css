@@ -1,0 +1,35 @@
+body {
+    display: flex;
+    justify-content: center;
+}
+
+.main-container {
+    width: 90%;
+    box-shadow: gray 2px 2px 2px 2px;
+    background-color: white;
+}
+
+.top {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.top h1{
+    margin:0;
+}
+
+.top button {
+    width: 40px;
+    padding: 7px;
+}
+
+.unread {
+    background-color: rgb(161, 47, 47);
+    color: white;
+}
+
+.read {
+    background-color: rgba(255, 205, 130, 0.806);
+    color:white;
+}

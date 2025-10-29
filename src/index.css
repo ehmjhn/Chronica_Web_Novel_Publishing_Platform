@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.cdnfonts.com/css/firlest');
+
+
+*{
+    text-decoration: none;
+    font-family: "Montserrat", "Roboto Condensed", 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    box-sizing: border-box;
+    
+}
+
+body{
+    height: 100%;
+    margin: 0;
+    background-color:#373432 ;
+}
+
+h1,h2,h3,h4,h5,h6,p{
+    margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1; 
+}
+
+

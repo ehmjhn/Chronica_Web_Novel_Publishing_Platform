@@ -1,0 +1,42 @@
+.main-container h1, .main-container h2{
+    text-align: center;
+}
+
+.main-container h1{
+    margin-top: 30px;
+    font-size: 20px;
+    margin-bottom: 40px;
+    font-weight: 00;
+    color: rgb(255, 45, 45);
+    font-family: verdana, sans-serif;
+}
+
+.main-container h2{
+    margin-top: -10px;
+    font-size: 15px;
+    margin-bottom: 50px;
+    font-weight: 500;
+    font-family: Verdana,sans-serif;
+}
+
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    background-color: white;
+    border-radius: 20px;
+}
+.main-container img{
+    width: 50%;
+    margin-left: 30px
+}
+
+.box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - (70px + 50px));
+    background-color: rgb(117, 0, 0);
+}
