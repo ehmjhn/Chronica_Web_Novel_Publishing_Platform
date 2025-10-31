@@ -1,34 +1,40 @@
 import './home.css'
+import { useState, useEffect } from 'react';
+import { readComic } from '../../firebase/db';
+
+import StoryCard from '../../components/StoryCard';
 
 function FeaturedStories() {
+const [comicList, setComicList] = useState([]);
 
-    /*
-      FIREBASE INTEGRATION (to be added later):
-      - Import Firestore functions:
-          import { collection, getDocs } from "firebase/firestore";
-          import { db } from "../../firebase"; // your firebase config
+  useEffect(() => {
+    readComic(setComicList); 
+  }, []);
 
-      - Inside useEffect or function:
-          const querySnapshot = await getDocs(collection(db, "featuredStories"));
-          const data = querySnapshot.docs.map(doc => doc.data());
-          setFeaturedStories(data);
-    */
-
-    return (
-        <div className="featured-page">
-            <h1>Featured Stories</h1>
-
-            {/* 🔸 Display list of featured stories here later
-                Example:
-                {featuredStories.map((story, index) => (
-                  <div key={index}>
-                    <h2>{story.title}</h2>
-                    <p>By {story.author}</p>
-                  </div>
-                ))}
-            */}
-        </div>
-    );
+  return (
+    <div className="latest-content">
+      <h1>Featured Stories</h1>
+      <div className="latest-page">
+        {comicList.length > 0 ? (
+          comicList.map((comic) => (
+            <StoryCard
+              key={comic.id}
+              storyId={comic.id}
+              title={comic.title}
+              author={comic.author?.author || comic.author || "Unknown"}
+              coverImage={comic.coverImage?.coverImage || comic.coverImage || ""}
+              views={comic.views?.views || comic.views || 0}
+              rate={comic.rate?.rate || comic.rate || 0}
+              isFeatured={comic.isFeatured || false}
+              showFeatured={true}
+            />
+          ))
+        ) : (
+          <p className="no-comics">No comics available.</p>
+        )}
+      </div>
+    </div>
+  );   
 }
 
 export default FeaturedStories;

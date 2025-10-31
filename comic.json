@@ -1,0 +1,114 @@
+{
+  "comic": {
+    "-OcppUrdbkeqK5bMJAsM": {
+      "author": { "author": "jhaezer anne david", "profilePic": "https://example.com/profiles/jhaezer.jpg", "uid": "user001" },
+      "genre": ["Fantasy", "Adventure"],
+      "isCompleted": 1,
+      "likes": 230,
+      "rate": 4.7,
+      "title": "My Baby",
+      "userID": true,
+      "coverImage": "https://example.com/stories/my-baby-cover.jpg",
+      "summary": "A short description of My Baby story for the readers to get interested.",
+      "totalChapters": 12,
+      "views": 1543,
+      "bookmarks": 102,
+      "createdAt": "2025-10-31T08:00:00Z",
+      "updatedAt": "2025-10-31T12:30:00Z",
+      "latestChapter": {
+        "chapterId": "chap12",
+        "title": "The Dragon's Secret",
+        "publishedAt": "2025-10-30T15:45:00Z"
+      },
+      "isFeatured": true
+    },
+    "-OcppVhjeYzH7biyBaI4": {
+      "author": { "author": "Arvin Santos", "profilePic": "https://example.com/profiles/arvin.jpg", "uid": "user002" },
+      "genre": ["Romance", "Drama"],
+      "isCompleted": 0,
+      "likes": 150,
+      "rate": 4.3,
+      "title": "Summer Love",
+      "userID": true,
+      "coverImage": "https://example.com/stories/summer-love-cover.jpg",
+      "summary": "A heartwarming story of first love and unexpected encounters.",
+      "totalChapters": 8,
+      "views": 980,
+      "bookmarks": 75,
+      "createdAt": "2025-10-15T09:00:00Z",
+      "updatedAt": "2025-10-28T11:20:00Z",
+      "latestChapter": {
+        "chapterId": "chap08",
+        "title": "Confession Time",
+        "publishedAt": "2025-10-28T10:30:00Z"
+      },
+      "isFeatured": true
+    },
+    "-OcppVoeKhsZarsboP5x": {
+      "author": { "author": "Maria Lopez", "profilePic": "https://example.com/profiles/maria.jpg", "uid": "user003" },
+      "genre": ["Mystery", "Thriller"],
+      "isCompleted": 0,
+      "likes": 320,
+      "rate": 4.9,
+      "title": "The Hidden Key",
+      "userID": true,
+      "coverImage": "https://example.com/stories/hidden-key-cover.jpg",
+      "summary": "Detective Lara uncovers secrets behind a mysterious key that could change everything.",
+      "totalChapters": 15,
+      "views": 2100,
+      "bookmarks": 190,
+      "createdAt": "2025-09-20T14:00:00Z",
+      "updatedAt": "2025-10-29T16:45:00Z",
+      "latestChapter": {
+        "chapterId": "chap15",
+        "title": "The Final Revelation",
+        "publishedAt": "2025-10-29T16:00:00Z"
+      },
+      "isFeatured": true
+    },
+    "-OcppXxptJzF8wEasC2b": {
+      "author": { "author": "John Reyes", "profilePic": "https://example.com/profiles/john.jpg", "uid": "user004" },
+      "genre": ["Comedy", "Slice of Life"],
+      "isCompleted": 1,
+      "likes": 95,
+      "rate": 4.0,
+      "title": "Cafe Chronicles",
+      "userID": true,
+      "coverImage": "https://example.com/stories/cafe-chronicles-cover.jpg",
+      "summary": "Follow the hilarious and heartwarming stories of a quirky cafe staff.",
+      "totalChapters": 10,
+      "views": 870,
+      "bookmarks": 60,
+      "createdAt": "2025-10-01T10:00:00Z",
+      "updatedAt": "2025-10-20T09:30:00Z",
+      "latestChapter": {
+        "chapterId": "chap10",
+        "title": "Coffee Disaster",
+        "publishedAt": "2025-10-20T09:00:00Z"
+      },
+      "isFeatured": true
+    },
+    "-OcppYyqtKlsG9xHeD3f": {
+      "author": { "author": "Ella Cruz", "profilePic": "https://example.com/profiles/ella.jpg", "uid": "user005" },
+      "genre": ["Sci-Fi", "Adventure"],
+      "isCompleted": 0,
+      "likes": 410,
+      "rate": 5.0,
+      "title": "Stars Beyond",
+      "userID": true,
+      "coverImage": "https://example.com/stories/stars-beyond-cover.jpg",
+      "summary": "An interstellar journey of explorers uncovering distant planets and civilizations.",
+      "totalChapters": 20,
+      "views": 3200,
+      "bookmarks": 250,
+      "createdAt": "2025-08-15T12:00:00Z",
+      "updatedAt": "2025-10-30T14:30:00Z",
+      "latestChapter": {
+        "chapterId": "chap20",
+        "title": "The Alien Encounter",
+        "publishedAt": "2025-10-30T14:00:00Z"
+      },
+      "isFeatured": true
+    }
+  }
+}

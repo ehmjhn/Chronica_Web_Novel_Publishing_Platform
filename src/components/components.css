@@ -97,8 +97,9 @@ nav .search {
   background-color: #e0d9b8;
 }
 
-.account .fa-circle-user {
-  font-size: 32px;
+.account img {
+  width: 36px;
+  border-radius: 50%;
 }
 
 .account .fa-caret-down {
@@ -116,7 +117,7 @@ nav .search {
   right: 0;
   background-color: #F5F5DC;
   color: #373432;
-  max-width: 250px;
+  min-width: 250px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;

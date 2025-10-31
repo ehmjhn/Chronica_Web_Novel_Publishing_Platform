@@ -1,32 +1,45 @@
 import './home.css'
+import { readComic } from '../../firebase/db';
+import { useState, useEffect } from 'react';
+
+import StoryCard from '../../components/StoryCard';
 
 function PopularWorks() {
 
-    /*
-      FIREBASE INTEGRATION (to be added later):
-      - Import Firestore functions:
-          import { collection, getDocs } from "firebase/firestore";
-          import { db } from "../../firebase";
+    const [popularComics, setPopular] = useState([])
 
-      - Inside useEffect or function:
-          const querySnapshot = await getDocs(collection(db, "popularWorks"));
-          const data = querySnapshot.docs.map(doc => doc.data());
-          setPopularWorks(data);
-    */
+    useEffect(()=>{
+        readComic((comics)=>{
+            if (!comics) return;
+
+            const popular = comics.sort((a, b)=> b.views - a.views);
+
+            setPopular(popular)
+        });
+    },[])
 
     return (
-        <div className="popular-page">
+        <div className="latest-content">
             <h1>Popular Works</h1>
-
-            {/* Display list of popular works here later
-                Example:
-                {popularWorks.map((story, index) => (
-                  <div key={index}>
-                    <h2>{story.title}</h2>
-                    <p>By {story.author}</p>
-                  </div>
-                ))}
-            */}
+            <div className="latest-page">
+                {popularComics.length > 0 ? (
+                popularComics.map((comic) => (
+                    <StoryCard
+                    key={comic.id}
+                    storyId={comic.id}
+                    title={comic.title}
+                    author={comic.author?.author || comic.author || "Unknown"}
+                    coverImage={comic.coverImage?.coverImage || comic.coverImage || ""}
+                    views={comic.views?.views || comic.views || 0}
+                    rate={comic.rate?.rate || comic.rate || 0}
+                    isFeatured={comic.isFeatured || false}
+                    showFeatured={false}
+                    />
+                ))
+                ) : (
+                <p className="no-comics">No comics available.</p>
+                )}
+            </div>
         </div>
     );
 }

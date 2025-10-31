@@ -8,15 +8,15 @@
 /* START OF LOGIN CSS */
 .log-wrapper {
   background: linear-gradient(to top, #b4b4b4f5 60%, #000000a3 , #00000046, #00000000);
-  height: calc(100vh - (70px + 50px));
+  height: calc(100vh - (70px + 40px));
   display: flex;
   justify-content: center; 
   align-items: center;
 }
 
 .login-cont {
-  height: 450px;
-  width: 700px;
+  height: 520px;
+  width: 750px; 
   background: linear-gradient(to top right, #0C0C1D, #1E2A38, #523A28, #A47E3B);
 
   width: fit-content;
@@ -136,7 +136,7 @@
 /* FORGOT PASS CSS */
 .form-container {
   background: linear-gradient(to top, #b4b4b4f5 60%, #000000a3 , #00000046, #00000000);
-  height: calc(100vh - (70px + 50px));
+  height: calc(100vh - (70px + 40px));
   display: flex;
   justify-content: center; 
   align-items: center;
@@ -289,7 +289,7 @@
 /* START OF REGISTRATION */
 .register-wrapper {
   background: linear-gradient(to top, #b4b4b4f5 60%, #000000a3, #00000046, #00000000);
-  height: calc(100vh - (70px + 50px));
+  height: calc(100vh - (70px + 40px));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -415,3 +415,96 @@
   width: 320px;
 }
 /* END OF REGISTRATION */
+
+/* RESET PASSWORD CSS */
+.reset-card {
+  display: flex;
+  flex-direction: row;
+  background: linear-gradient(to top right, #0C0C1D, #1E2A38, #523A28, #A47E3B);
+  width: 700px;
+  height: 450px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.1);
+  color: #ffffff;
+}
+
+.reset-form {
+  padding: 45px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.reset-img {
+  height: 100%;
+}
+
+.reset-img img {
+  border-radius: 0px 20px 20px 0px;
+  height: 100%;
+  width: 300px;
+}
+
+.lock-icon {
+  width: 80px;
+  height: 80px;
+  color: #e6b000;
+  margin: 0 auto 20px auto;
+}
+
+.pass-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.password-input-container {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 10px;
+  color: #888888;
+}
+
+.password-input-container input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #333;
+  background: transparent;
+}
+
+.show-icon {
+  font-size: 20px;
+  color: #a1a1a1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.show-icon:hover {
+  color: #e6b000;
+}
+
+.submit-npassword-btn {
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px;
+  background: #b48a00;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s ease;
+}
+
+.submit-npassword-btn:hover {
+  background: #e6b000;
+}
+/* END RESET PASSWORD CSS */

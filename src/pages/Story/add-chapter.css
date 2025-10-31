@@ -1,0 +1,128 @@
+.addchapter-container {
+  max-width: 1000px;
+  margin: 50px auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.addchapter-header h1 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.breadcrumb {
+  color: #777;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+.series-info h2,
+.chapter-form h2 {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.series-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.series-image img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #eee;
+}
+
+.series-details {
+  flex: 1;
+}
+
+.series-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.series-genre {
+  font-size: 14px;
+  color: #666;
+  margin: 5px 0;
+}
+
+.series-description {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.chapter-form {
+  margin-top: 40px;
+}
+
+.chapter-form label {
+  display: block;
+  font-weight: 600;
+  color: #444;
+  margin: 15px 0 6px;
+}
+
+.chapter-form input,
+.chapter-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  resize: none;
+}
+
+.chapter-form textarea {
+  min-height: 150px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-btn,
+.save-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s;
+}
+
+.cancel-btn {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background: #c9c9c9;
+}
+
+.save-btn {
+  background: #007bff;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #0056b3;
+}

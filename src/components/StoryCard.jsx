@@ -1,45 +1,36 @@
 import React from 'react';
 import './story-card.css';
 
-const StoryCard = ({ story, onClick }) => {
-  const handleClick = () => {
-    if (onClick) {
-      onClick(story);
-    }
-  };
+import { NavLink } from 'react-router';
+
+function StoryCard({ storyId, title, author, coverImage, views, rate, isFeatured, showFeatured }) {
 
   return (
-    <div className="story-card" onClick={handleClick}>
-      <div 
+    <NavLink to={`/story/${storyId}`} className="story-card">
+      <div
         className="story-card-image"
         style={{
-          backgroundImage: story.coverImage 
-            ? `url(${story.coverImage})` 
-            : undefined
+          backgroundImage: coverImage ? `url(${coverImage})` : undefined,
         }}
       >
-        {story.isFeatured && (
-          <span className="story-badge">Featured</span>
-        )}
+        {isFeatured && showFeatured && <span className="story-badge">Featured</span>}
       </div>
-      
+
       <div className="story-card-content">
-        <h3 className="story-title">{story.title}</h3>
-        <p className="story-author">by {story.author}</p>
-        
+        <h3 className="story-title">{title}</h3>
+        <p className="story-author">by {author}</p>
+
         <div className="story-stats">
           <span className="stat">
-            {/*Icon here */ }
-            <span>{story.views}</span>
+            <span><i className="fa-solid fa-eye"></i> {views}</span>
           </span>
           <span className="stat">
-            {/*Icon here */}
-            <span>{story.comments}</span>
+            <span><i className="fa-solid fa-star"></i> {rate}</span>
           </span>
         </div>
       </div>
-    </div>
+    </NavLink>
   );
-};
+}
 
 export default StoryCard;

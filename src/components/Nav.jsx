@@ -1,14 +1,45 @@
 import "./components.css";
 import Mythryl from '../assets/Mythryl.png'
-import { NavLink } from "react-router";
+import { NavLink} from "react-router";
+import { logout, subscribeAuthChanges } from '../firebase/auth';
+import { useEffect, useState } from "react";
 
 function Nav() {
+
+  const [user, setUser] = useState(null);
+  const [image, setImage] = useState(null)  
+  useEffect(() => {
+    console.log(image)
+    const unsubscribe = subscribeAuthChanges((currentUser) => {
+      if (currentUser) {
+        setUser(currentUser.displayName || currentUser.email); // yung || , kapag nag log sya manually hindi by google, temporary email nalang muna lalabas
+        setImage(currentUser.photoURL);
+      } else {
+        setUser(null);
+        setImage(null);
+      }
+    });
+
+      return () => unsubscribe(); 
+
+    }, []);
+    
+    function handleLogout(){
+        logout();
+        window.location.href = '/login'
+    }
+  
   return (
+    //wait tama moko kung mali ako, pero ang pagkaka  gets ko kasi sa authentication ng firebase ay email and pass lang nakukuha nya?
+    //pag naka login na ung user, pede maget ung pinaka name if google acc ata ang gamit
+    //bali pala ano, hindi lang diio
     <>
-    <nav>
+      <nav>
         <div className="title">
           <img src={Mythryl} alt="Chronica logo" />
-          <NavLink to='/home'><h1>Chronica</h1></NavLink>
+          <NavLink to="/home">
+            <h1>Chronica</h1>
+          </NavLink>
         </div>
 
         <div className="search">
@@ -23,28 +54,67 @@ function Nav() {
         </div>
 
         <div className="account-wrapper">
-          <div className="account">
-            <i className="fa-solid fa-circle-user"></i>
-            <i className="fa-solid fa-caret-down"></i>
-          </div>
+          {!user ? (
+            <>
+              <div className="account">
+                <i
+                  style={{ fontSize: "30px" }}
+                  className="fa-solid fa-circle-user"
+                ></i>
+                <i className="fa-solid fa-caret-down"></i>
+              </div>
 
-          <div className="nav-settings">
-            <h2>SDPTSolutions</h2>
-            <NavLink to="">Account Settings</NavLink>
-            <NavLink to="">Profile Page</NavLink>
-            <NavLink to="/bookmark">Reading List</NavLink>
-            <NavLink to="">My Series</NavLink>
-            <NavLink to="">Log Out</NavLink>
-          </div>
+              <div className="nav-settings">
+                <h2>Guest</h2>
+                <NavLink to="/login">Login</NavLink>
+                <NavLink to="/register">Register</NavLink>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="account">
+                {image == null ? (
+                  <>
+                    <i
+                      style={{ fontSize: "30px" }}
+                      className="fa-solid fa-circle-user"
+                    ></i>
+                  </>
+                ) : (
+                  <>
+                    <img src={image} alt="" />
+                  </>
+                )}
+                <i className="fa-solid fa-caret-down"></i>
+              </div>
+
+              <div className="nav-settings">
+                <h2>{user}</h2>
+                <NavLink to="">Account Settings</NavLink>
+                <NavLink to="home/profile">Profile Page</NavLink>
+                <NavLink to="home/bookmark">Reading List</NavLink>
+                <NavLink to="">My Series</NavLink>
+                <NavLink to="" onClick={handleLogout}>
+                  Log Out
+                </NavLink>
+              </div>
+            </>
+          )}
         </div>
       </nav>
 
       <div className="nav2">
         {/* Conditional Render: if Homepage is accesed */}
         <div className="nav2-left">
-          <NavLink to="/home/featured-stories" className="dropbtn">Featured Stories</NavLink>
-          <NavLink to="/home/latest-releases" className="dropbtn">Latest Releases</NavLink>
-          <NavLink to="/home/popular-works" className="dropbtn">Popular Works</NavLink>
+          <NavLink to="/home/featured-stories" className="dropbtn">
+            Featured Stories
+          </NavLink>
+          <NavLink to="/home/latest-releases" className="dropbtn">
+            Latest Releases
+          </NavLink>
+          <NavLink to="/home/popular-works" className="dropbtn">
+            Popular Works
+          </NavLink>
 
           <div className="dropdown">
             <button className="dropbtn">
@@ -88,4 +158,4 @@ function Nav() {
   );
 }
 
-export default Nav;
+export default Nav

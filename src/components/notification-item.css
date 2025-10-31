@@ -1,35 +1,127 @@
-body {
-    display: flex;
-    justify-content: center;
-}
-
 .main-container {
-    width: 90%;
-    box-shadow: gray 2px 2px 2px 2px;
-    background-color: white;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 90%;
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 25px 30px;
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 480px;
 }
 
 .top {
-    display: flex;
-    width: 100%;
-    flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  width: 100%;
 }
 
-.top h1{
-    margin:0;
+
+.series {
+  font-size: 22px;
+  color: #1d336d;
+  margin: 0;
+  font-weight: 600;
 }
 
-.top button {
-    width: 40px;
-    padding: 7px;
+.btn-top {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-top button {
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
 }
 
 .unread {
-    background-color: rgb(161, 47, 47);
-    color: white;
+  background-color: #7b5b5b;
+  color: #fff;
 }
 
 .read {
-    background-color: rgba(255, 205, 130, 0.806);
-    color:white;
+  background-color: #c9aa8a;
+  color: #fff;
+}
+
+.btn-top button:hover {
+  opacity: 0.85;
+}
+
+.notif-container {
+  background-color: #e7f1ee;
+  border-radius: 6px;
+  padding: 15px 20px;
+  margin-bottom: 12px;
+}
+
+.notif-name {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.message {
+  color: #555;
+  font-size: 14px;
+  margin: 0;
+}
+
+.bottom {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 15px;
+  margin-top: auto;
+}
+
+.bottom p {
+  font-size: 14px;
+  color: #555;
+}
+
+.btn-bot {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-bot button {
+  border: none;
+  padding: 7px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.btn-bot button:first-child {
+  background-color: #dbe7dc;
+  color: #333;
+}
+
+.btn-bot button:last-child {
+  background-color: #a5b7a4;
+  color: #fff;
+}
+
+.btn-bot button:hover {
+  opacity: 0.85;
+}
+
+.top {
+  text-align: left;
 }

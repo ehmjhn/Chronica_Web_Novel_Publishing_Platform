@@ -1,68 +1,82 @@
+/* Card container */
 .story-card {
-  background-color: white;
-  border-radius: 8px;
+  background-color: #fff;
+  border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 250px;
 }
 
 .story-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.15);
 }
 
+/* Image section */
 .story-card-image {
   width: 100%;
-  height: 180px;
-  background: linear-gradient(to bottom, #1a5f7a 0%, #f4a261 50%, #e76f51 100%);
+  height: 200px;
+  background: linear-gradient(135deg, #1a5f7a, #f4a261, #e76f51);
   background-size: cover;
   background-position: center;
   position: relative;
 }
 
+/* Featured badge */
 .story-badge {
   position: absolute;
   top: 10px;
   right: 10px;
   background-color: #2d8b8e;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 4px;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 5px;
   font-size: 11px;
-  font-weight: bold;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
+/* Content section */
 .story-card-content {
-  padding: 12px;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
 }
 
+/* Title & author */
 .story-title {
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 5px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .story-author {
-  font-size: 12px;
+  font-size: 13px;
   color: #666;
-  margin: 0 0 10px 0;
+  margin-bottom: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* Stats section */
 .story-stats {
   display: flex;
   gap: 15px;
   font-size: 12px;
-  color: #666;
+  color: #555;
 }
 
 .stat {
@@ -71,24 +85,38 @@
   gap: 5px;
 }
 
-.stat svg {
-  flex-shrink: 0;
-}
-
-.stat span {
-  font-size: 12px;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .story-card-image {
-    height: 150px;
+    height: 160px;
   }
-  
+
+  .story-title {
+    font-size: 14px;
+  }
+
+  .story-author {
+    font-size: 12px;
+  }
+
+  .story-stats {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .story-card {
+    border-radius: 8px;
+  }
+
+  .story-card-image {
+    height: 140px;
+  }
+
   .story-title {
     font-size: 13px;
   }
-  
+
   .story-author {
     font-size: 11px;
   }

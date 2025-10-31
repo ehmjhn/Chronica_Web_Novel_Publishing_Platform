@@ -1,13 +1,13 @@
 import './components.css'
 import './notification-item.css'
 
+// mali pala, item lang pala here buo nalagay q haha tom nah antok na q ih - david feel ko si toni fowler to litsi  
 function NotificationItem (){
-// alis aq here - david
     return( 
         <>
             <div className='main-container'>
                 <div className='top'>
-                    <h1>Series</h1>
+                    <p className='series'>Series</p>
 
                     <div className='btn-top'>
                         <button className='unread'>Unread</button>
@@ -19,7 +19,7 @@ function NotificationItem (){
                 {/* may mapping here for notif */}
                 <div className='notif-container'>
                     <p className='notif-name'>Notif Name</p>
-                    <p className='message'>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Similique vitae et tempora, aspernatur doloremque est. Rerum est tenetur laborum? Recusandae est dolor dolorum adipisci quaerat exercitationem velit, aperiam eveniet quidem!</p>
+                    <p className='message'>hay tangina pagod na ako mag-aral gusto ko nalang makipag-live in tapos gabi gabi kaming makikinig kay niki tapos ulam namin lagi sinigang,,, cote m david </p>
                 </div>
 
                 <div className='bottom'>

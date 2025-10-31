@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { subscribeAuthChanges } from "../firebase/auth";
 import { Navigate } from "react-router";
 
-function ProtectedRoute ({children}){
+function GuestRoute ({children}){
     const [user, setUser] = useState(undefined);
     const [loading, isLoading] = useState(true);
 
@@ -17,9 +17,9 @@ function ProtectedRoute ({children}){
 
     if (loading) return <p>Loading...</p>;
 
-    if (!user) return <Navigate to='/login' replace/>; //ginagamit si replace para d makabalik sa prev activity/page
+    if (user) return <Navigate to='/home' replace/>; //ginagamit si replace para d makabalik sa prev activity/page
 
     return children;
 }
 
-export default ProtectedRoute
+export default GuestRoute
