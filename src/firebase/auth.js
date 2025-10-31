@@ -6,9 +6,6 @@ import {
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
-  EmailAuthProvider,
-  fetchSignInMethodsForEmail,
-  linkWithCredential
 } from "firebase/auth";
 import { app } from "./firebase-config";
 
@@ -37,27 +34,11 @@ export const loginUser = (email, password) =>
 //google gamit
 export const signInWithGoogle = () => {
   signInWithPopup(auth, provider)
-    .then((result) => {
-      const user = result.user;
-
-      fetchSignInMethodsForEmail(auth, user.email)
-        .then((methods) => {
-
-          if (!methods.includes("password")) { //chineck kung first time nya lang iconnect yung account, kapag hindi, lilink sya
-
-            const password = prompt("Set a password for manual login:"); //dapat modal??? pero alert muna 
-            const credential = EmailAuthProvider.credential(user.email, password); 
-            linkWithCredential(user, credential) //link para pwede na si user mag sign in via google ulit or manual using same account
-              .then(() => alert("Google linked with manual login!")); 
-
-          }
-
-        });
-
+    .then(() => {
       window.location.href = "/home";
     })
     .catch((error) => {
-      console.log(error.message);
+      alert(error.message);
     });
 };
 

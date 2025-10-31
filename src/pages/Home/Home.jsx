@@ -2,7 +2,7 @@ import './home.css';
 import JZ from '../../assets/NovelBG.png';
 
 import { useEffect, useState } from 'react';
-import { getComicList } from "../../firebase/db.js";
+import { readComic } from '../../firebase/db.js';
 
 import Carousel from '../../components/Carousel.jsx';
 import StorySection from '../../components/StorySection.jsx';
@@ -12,6 +12,36 @@ function Home() {
   const [latestStories, setLatestStories] = useState([]);
   const [popularWorks, setPopularWorks] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+    useEffect(() => {
+      
+      readComic((comics)=>{
+        if (!comics) return;
+
+        const today = new Date()
+        const monthDue = 1
+
+        const featured = comics.filter(comic => comic.isFeatured === true)
+
+        const popular = comics.sort((a,b)=> b.views - a.views)
+
+        const latest = comics.filter((comic)=>{
+          const dateCreated = new Date(comic.createdAt)
+          const diffDate =
+            (today.getFullYear() - dateCreated.getFullYear()) * 12 +
+            (today.getMonth() - dateCreated.getMonth())
+
+          return diffDate < monthDue;
+        });
+
+        setFeaturedStories(featured)
+        setLatestStories(latest)
+        setPopularWorks(popular)
+      });
+
+      setLoading(false)
+  
+    },[]);
 
   const carouselSlides = [
     {
@@ -51,32 +81,6 @@ function Home() {
     },
   ];
 
-  useEffect(() => {
-    fetchStories();
-  }, []);
-
-  const fetchStories = async () => {
-    try {
-      const comics = await getComicList();
-
-      // Example processing
-      setFeaturedStories(comics.filter(c => c.isFeatured));
-      setLatestStories(comics
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 5)
-      );
-      setPopularWorks(comics
-        .sort((a, b) => b.views - a.views)
-        .slice(0, 10)
-      );
-
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching stories:', error);
-      setLoading(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="homepage">
@@ -94,6 +98,7 @@ function Home() {
           title="Featured Stories" 
           stories={featuredStories} 
           viewAllPath="/home/featured-stories"
+          showFeaturedBadge={true}
         />
 
         <StorySection 

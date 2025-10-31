@@ -2,8 +2,8 @@ import { NavLink } from 'react-router-dom';
 import StoryCard from './StoryCard.jsx';
 import './story-section.css';
 
-function StorySection({ title, stories, viewAllPath }) {
-  
+function StorySection({ title, stories, viewAllPath, showFeaturedBadge = false }) {
+
   return (
     <section className="story-section">
       <div className="story-section-header">
@@ -27,7 +27,7 @@ function StorySection({ title, stories, viewAllPath }) {
               rate={story.rate}
               coverImage={story.coverImage}
               isFeatured={story.isFeatured}
-              showFeatured={false} // or true if needed
+              showFeatured={showFeaturedBadge && story.isFeatured}
             />
           ))
         ) : (

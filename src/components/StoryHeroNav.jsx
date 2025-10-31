@@ -1,7 +1,7 @@
-import { NavLink } from 'react-router';
-import './story.css';
+import { NavLink } from 'react-router-dom';
+import '../pages/Story/story.css'
 
-function StoryView() {
+function StoryHeroNav() {
   return (
     <div className="storyview-hero">
 
@@ -31,13 +31,19 @@ function StoryView() {
 
       {/* NAV */}
       <div className="storyview-nav">
-        <NavLink to="/story-details" >Overview</NavLink>
-        <NavLink to="/story-chapter-list">Chapter List</NavLink>
-        <NavLink to="/story-reviews">Reviews</NavLink>
+        <NavLink to="/story-view" end className={({ isActive }) => isActive ? "active" : ""}>
+          Overview
+        </NavLink>
+        <NavLink to="/story-view/chapters" className={({ isActive }) => isActive ? "active" : ""}>
+          Chapter List
+        </NavLink>
+        <NavLink to="/story-view/reviews" className={({ isActive }) => isActive ? "active" : ""}>
+          Reviews
+        </NavLink>
       </div>
 
     </div>
   );
 }
 
-export default StoryView;
+export default StoryHeroNav;

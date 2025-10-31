@@ -91,8 +91,8 @@ function Nav() {
               <div className="nav-settings">
                 <h2>{user}</h2>
                 <NavLink to="">Account Settings</NavLink>
-                <NavLink to="home/profile">Profile Page</NavLink>
-                <NavLink to="home/bookmark">Reading List</NavLink>
+                <NavLink to="/profile">Profile Page</NavLink>
+                <NavLink to="/bookmark">Reading List</NavLink>
                 <NavLink to="">My Series</NavLink>
                 <NavLink to="" onClick={handleLogout}>
                   Log Out

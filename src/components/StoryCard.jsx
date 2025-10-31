@@ -6,7 +6,7 @@ import { NavLink } from 'react-router';
 function StoryCard({ storyId, title, author, coverImage, views, rate, isFeatured, showFeatured }) {
 
   return (
-    <NavLink to={`/story/${storyId}`} className="story-card">
+    <NavLink to={`/story-details/${storyId}`} className="story-card"> 
       <div
         className="story-card-image"
         style={{

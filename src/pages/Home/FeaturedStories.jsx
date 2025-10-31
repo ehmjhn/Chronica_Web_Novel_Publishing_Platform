@@ -5,18 +5,24 @@ import { readComic } from '../../firebase/db';
 import StoryCard from '../../components/StoryCard';
 
 function FeaturedStories() {
-const [comicList, setComicList] = useState([]);
+const [featuredComics, setFeatured] = useState([]);
 
   useEffect(() => {
-    readComic(setComicList); 
+    readComic((comics)=>{
+        if (!comics) return;
+
+        const featured = comics.filter(comic => comic.isFeatured === true)
+
+        setFeatured(featured)
+    }); 
   }, []);
 
   return (
     <div className="latest-content">
       <h1>Featured Stories</h1>
       <div className="latest-page">
-        {comicList.length > 0 ? (
-          comicList.map((comic) => (
+        {featuredComics.length > 0 ? (
+          featuredComics.map((comic) => (
             <StoryCard
               key={comic.id}
               storyId={comic.id}

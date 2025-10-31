@@ -1,18 +1,5 @@
 import './home.css'
 
-/*
-  FIREBASE INTEGRATION (to be added later):
-  - Import Firestore functions:
-      import { collection, query, where, getDocs } from "firebase/firestore";
-      import { db } from "../../firebase";
-
-  - Inside each category component (or a shared function):
-      const q = query(collection(db, "stories"), where("genre", "==", "Action"));
-      const querySnapshot = await getDocs(q);
-      const data = querySnapshot.docs.map(doc => doc.data());
-      setActionStories(data);
-*/
-
 export function Action() {
     return (
         <div className="category-page">

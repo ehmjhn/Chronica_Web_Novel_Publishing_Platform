@@ -1,5 +1,4 @@
 import './story.css'
-import './add-chapter.css'
 
 function AddChapter (){
 

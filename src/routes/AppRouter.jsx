@@ -1,6 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 import { AuthLayout, MainLayout } from "./NavLayouts";
-// import { useState } from "react";
 
 // AUTH PAGES
 import Login from "../pages/Auth/Login";
@@ -13,12 +12,16 @@ import Home from "../pages/Home/Home";
 import FeaturedStories from "../pages/Home/FeaturedStories";
 import LatestRelease from "../pages/Home/LatestRelease";
 import PopularWorks from "../pages/Home/PopularWorks";
-import Bookmark from "../pages/Reader/Bookmark";
-import NotificationItem from '../components/NotificationItem';
 import ProfileSettings from '../pages/Profile/ProfileSettings'
 import EditProfile from '../pages/Profile/EditProfile';
 import AuthorProfile from '../pages/Profile/AuthorProfile';
 import AddChapter from '../pages/Story/AddChapter';
+
+import Bookmark from "../pages/Reader/Bookmark";
+import NotificationItem from '../components/NotificationItem';
+import StoryDetails from '../pages/Story/StoryDetails';
+import StoryReviews from "../pages/Story/StoryReviews";
+import ChapterList from "../pages/Story/ChapterList";
 import SearchDiscovery from '../pages/Reader/SearchDiscovery';
 
 // ACCESSS CONTROL PAGE
@@ -43,8 +46,9 @@ function AppRouter() {
             <Route path="featured-stories" element={<FeaturedStories />} />
             <Route path="latest-releases" element={<LatestRelease />} />
             <Route path="popular-works" element={<PopularWorks />} />
-            
-            <Route path="notification" 
+          </Route>
+
+          <Route path="notification" 
               element={
               <ProtectedRoute>
                 <NotificationItem />
@@ -83,19 +87,22 @@ function AppRouter() {
 
             <Route path="search-discovery" 
               element={
-              <ProtectedRoute>
+                <ProtectedRoute>
                 <SearchDiscovery/>
               </ProtectedRoute>
             } 
             />
             <Route path="bookmark" 
               element={
-              <ProtectedRoute>
+                <ProtectedRoute>
                 <Bookmark/>
               </ProtectedRoute>
             } 
             />
-          </Route>
+            
+            <Route path="story-details" element={<StoryDetails/>}/>
+            <Route path="story-chapter-list" element={<ChapterList/>}/>
+            <Route path="story-reviews" element={<StoryReviews/>}/>
         
           <Route index element={<Home />} />
 

@@ -1,7 +1,7 @@
 import './story.css'
 import StoryView from './StoryView';
 
-function ChapterList (){
+function StoryReviews (){
 
     return(
         <div className="storyview-page">
@@ -11,4 +11,4 @@ function ChapterList (){
     );
 }
 
-export default ChapterList
+export default StoryReviews

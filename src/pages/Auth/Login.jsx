@@ -1,6 +1,7 @@
 import "./auth.css";
-import { NavLink } from "react-router";
 import Mythryl from '../../assets/Mythryl.png'
+
+import { NavLink } from "react-router";
 import { useState } from "react";
 import { loginUser, signInWithGoogle } from "../../firebase/auth";
 
@@ -55,7 +56,10 @@ function Login() {
             </div>
           </div>
           <button onClick={handleLogin}>SIGN IN</button>
-          <button onClick={handleGoogleLogin}>Sign in with Google</button>
+          <button className="google-login-btn" onClick={handleGoogleLogin}>
+            <i className="fab fa-google"></i>
+            Sign in with Google
+          </button>
           <div className="log-link">
             <NavLink to="/forgot-password">Forgot Password?</NavLink> |
             <NavLink to="/register"> Create Account</NavLink>

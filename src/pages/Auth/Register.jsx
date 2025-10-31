@@ -1,8 +1,9 @@
 import "./auth.css";
-import { Navigate, NavLink } from "react-router";
+import Mythryl from "../../assets/Mythryl.png";
+
+import { NavLink } from "react-router";
 import { useState } from "react";
 import { registerUser } from "../../firebase/auth";
-import Mythryl from "../../assets/Mythryl.png";
 
 function Registration() {
 

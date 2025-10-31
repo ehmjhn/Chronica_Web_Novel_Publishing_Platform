@@ -1,11 +1,9 @@
 import "./home.css";
-import { insertComic,readComic } from "../../firebase/db.js";
-// import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { db } from "../../firebase/firebase-config.js";
-import StorySection from "../../components/StorySection.jsx";
-import { getDocs, collection } from "firebase/firestore";
+
+import { readComic } from "../../firebase/db.js";
 import { useEffect, useState } from "react";
-import  StoryCard from "../../components/StoryCard.jsx";
+
+import StoryCard from "../../components/StoryCard.jsx";
 
 function LatestStories() {
   const [latestComics, setLatest] = useState([]);
@@ -16,7 +14,7 @@ function LatestStories() {
       const monthDue = 1
 
       const latest = Comics.filter((comic)=>{
-        if (!comic.createdAt) return false;
+        if (!comic.createdAt) return;
 
         const createdDate = new Date (comic.createdAt);
         const diffMonths = 
