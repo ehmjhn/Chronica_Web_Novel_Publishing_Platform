@@ -6,6 +6,7 @@ import {
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
+  updateProfile 
 } from "firebase/auth";
 import { app } from "./firebase-config";
 
@@ -13,14 +14,26 @@ export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 
 // Register ngani
-export const registerUser = (email, password) =>
+export const registerUser = (email, password, displayName) =>
   createUserWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      window.location.href = "/login";
+  .then((userCredential) => {
+    const user = userCredential.user;
+    updateProfile(user, {
+      displayName: displayName,
     })
-    .catch((error) => {
-      alert(error.message);
-    });
+      .then(() => {
+        console.log("User created and displayName added:", user.displayName);
+      })
+      .catch((error) => {
+        console.error("Error updating profile:", error);
+      });
+  })
+  .catch((error) => {
+    // An error occurred during user creation
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.error("Error creating user:", errorCode, errorMessage);
+  });
 // Sign in ngani
 export const loginUser = (email, password) =>
   signInWithEmailAndPassword(auth, email, password)

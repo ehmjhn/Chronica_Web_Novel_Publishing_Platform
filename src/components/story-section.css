@@ -15,7 +15,7 @@
 .story-section-title {
   font-size: 24px;
   font-weight: bold;
-  color: #333;
+  color: #ece3e3;
   margin: 0;
 }
 
@@ -39,7 +39,7 @@
 .story-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
+  gap: 10px;
 }
 
 /* Fallback if no stories */

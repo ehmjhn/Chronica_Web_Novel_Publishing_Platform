@@ -1,76 +1,69 @@
 import "./auth.css";
-import Mythryl from '../../assets/Mythryl.png'
-
+import AUTH from "../../assets/AUTH.png";
 import { NavLink } from "react-router";
 import { useState } from "react";
 import { loginUser, signInWithGoogle } from "../../firebase/auth";
 
 function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  // const [cpass, setcShow] = useState(false);
-
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-
-  function handleLogin(){
-    loginUser(email, password)
+  function handleLogin() {
+    loginUser(email, password);
   }
-  function handleGoogleLogin(){
-      signInWithGoogle();
+  function handleGoogleLogin() {
+    signInWithGoogle();
   }
+
   return (
-    <div className="log-wrapper">
-      <div className="login-cont">
-        <div className="login-form">
-          <div className="form-head">
-            <img src={Mythryl} alt="logo" />
-            <h2>LOG IN</h2>
-            <p>Please Enter your Login Credentials</p>
+    <div className="login-page">
+      <div className="log-wrapper">
+        <div className="login-cont">
+          <div className="login-img">
+            <img src={AUTH} alt="image" />
           </div>
-          <div className="input-icons">
-            <i className="fa fa-envelope icon"></i>
-            <p>Email Address</p>
-            <div className="input-field-ul">
-              <input
-                className="input-field"
-                type="email"
-                placeholder="your email address"
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
-              />
-            </div>
-          </div>
-          <div className="input-icons">
-            <i className="fa fa-key icon"></i>
-            <p>Password</p>
-            <div className="input-field-ul">
-              <input
-                className="input-field"
-                type="password"
-                placeholder="must at least 8 characters"
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                }}
-              />
-            </div>
-          </div>
-          <button onClick={handleLogin}>SIGN IN</button>
-          <button className="google-login-btn" onClick={handleGoogleLogin}>
-            <i className="fab fa-google"></i>
-            Sign in with Google
-          </button>
-          <div className="log-link">
-            <NavLink to="/forgot-password">Forgot Password?</NavLink> |
-            <NavLink to="/register"> Create Account</NavLink>
-          </div>
-        </div>
 
-        <div className="login-img">
-          <img
-            src="https://img.freepik.com/premium-photo/colorful-illustration-book-with-mountain-top_900101-55218.jpg"
-            alt="image"
-          />
+          <div className="login-form">
+            <div className="form-head">
+              <img src="src/assets/CHRONICA.png" alt="logo" />
+            </div>
+
+            <p className="login-text">Please enter your Login credentials</p>
+
+            <div className="input-icons">
+              <div className="input-field-ul">
+                <i className="fas fa-envelope input-icon"></i>
+                <input
+                  className="input-field"
+                  type="email"
+                  placeholder="Email"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="input-icons">
+              <div className="input-field-ul">
+                <i className="fas fa-lock input-icon"></i>
+                <input
+                  className="input-field"
+                  type="password"
+                  placeholder="Password"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <button onClick={handleLogin}>SIGN IN</button>
+            <button className="google-login-btn" onClick={handleGoogleLogin}>
+              <i className="fab fa-google"></i> Sign in with Google
+            </button>
+
+            <div className="log-link">
+              <NavLink to="/register">Create Account</NavLink> |{" "}
+              <NavLink to="/forgot-password">Forgot Password?</NavLink>
+            </div>
+          </div>
         </div>
       </div>
     </div>

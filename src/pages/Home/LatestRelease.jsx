@@ -9,25 +9,19 @@ function LatestStories() {
   const [latestComics, setLatest] = useState([]);
 
   useEffect(() => {
-    readComic((Comics)=>{
+    readComic((Comics) => {
       const today = new Date();
-      const monthDue = 1
+      const latest = Comics.filter((comic) => {
+        if (!comic.createdAt) return false;
+        const createdDate = new Date(comic.createdAt);
+        const diffDays = (today - createdDate) / (1000 * 60 * 60 * 24);
+        return diffDays <= 30; 
+      });
 
-      const latest = Comics.filter((comic)=>{
-        if (!comic.createdAt) return;
-
-        const createdDate = new Date (comic.createdAt);
-        const diffMonths = 
-          (today.getFullYear() - createdDate.getFullYear()) * 12 +
-          (today.getMonth() - createdDate.getMonth());
-
-        return diffMonths < monthDue
-      })
-
-      setLatest(latest)
-
-    }); 
-  }, []);
+      latest.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setLatest(latest);
+    });
+  }, [])
 
   return (
     <div className="latest-content">
@@ -39,7 +33,7 @@ function LatestStories() {
               key={comic.id}
               storyId={comic.id}
               title={comic.title}
-              author={comic.author?.author || comic.author || "Unknown"}
+              author={comic.author?.name || comic.author.name || "Unknown"}
               coverImage={comic.coverImage?.coverImage || comic.coverImage || ""}
               views={comic.views?.views || comic.views || 0}
               rate={comic.rate?.rate || comic.rate || 0}
@@ -48,7 +42,7 @@ function LatestStories() {
             />
           ))
         ) : (
-          <p className="no-comics">No comics available.</p>
+          <p className="no-comics">No new releases available.</p>
         )}
       </div>
     </div>

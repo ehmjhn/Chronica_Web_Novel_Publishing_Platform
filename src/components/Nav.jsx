@@ -9,10 +9,10 @@ function Nav() {
   const [user, setUser] = useState(null);
   const [image, setImage] = useState(null)  
   useEffect(() => {
-    console.log(image)
+
     const unsubscribe = subscribeAuthChanges((currentUser) => {
       if (currentUser) {
-        setUser(currentUser.displayName || currentUser.email); // yung || , kapag nag log sya manually hindi by google, temporary email nalang muna lalabas
+        setUser(currentUser.displayName); // yung || , kapag nag log sya manually hindi by google, temporary email nalang muna lalabas
         setImage(currentUser.photoURL);
       } else {
         setUser(null);
@@ -30,9 +30,7 @@ function Nav() {
     }
   
   return (
-    //wait tama moko kung mali ako, pero ang pagkaka  gets ko kasi sa authentication ng firebase ay email and pass lang nakukuha nya?
-    //pag naka login na ung user, pede maget ung pinaka name if google acc ata ang gamit
-    //bali pala ano, hindi lang diio
+
     <>
       <nav>
         <div className="title">
@@ -50,7 +48,7 @@ function Nav() {
             className="search-bar"
             aria-label="Search"
           />
-          <i className="fa-solid fa-bell"></i>
+          <NavLink to='/notification'><i className="fa-solid fa-bell"></i></NavLink>
         </div>
 
         <div className="account-wrapper">
@@ -141,6 +139,9 @@ function Nav() {
               </div>
             </div>
           </div>
+          <NavLink to="/about-us" className="dropbtn">
+            About
+          </NavLink>
         </div>
 
         <div className="nav2-right">

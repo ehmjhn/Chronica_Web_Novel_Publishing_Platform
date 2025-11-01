@@ -28,7 +28,7 @@ function PopularWorks() {
                     key={comic.id}
                     storyId={comic.id}
                     title={comic.title}
-                    author={comic.author?.author || comic.author || "Unknown"}
+                    author={comic.author?.name || comic.author || "Unknown"}
                     coverImage={comic.coverImage?.coverImage || comic.coverImage || ""}
                     views={comic.views?.views || comic.views || 0}
                     rate={comic.rate?.rate || comic.rate || 0}

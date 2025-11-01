@@ -5,6 +5,10 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  background-image: linear-gradient(to top, #0e0f20 30%, #0e0f2021); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .main-content {
@@ -232,7 +236,7 @@ html {
 }
 
 .no-comics {
-  color: #666;
+  color: #eee2e2;
   font-size: 14px;
   text-align: center;
   width: 100%;

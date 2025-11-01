@@ -1,10 +1,11 @@
 .carousel {
   position: relative;
-  width: 100%;
+  width: 90%;
   height: 500px;
   overflow: hidden;
   border-radius: 0px 0px 12px 12px;
   margin-bottom: 50px;
+  margin-top: 70px;
   margin: 0 auto;
   
 }
@@ -51,7 +52,7 @@
   position: relative;
   z-index: 2;
   color: white;
-  padding: 60px;
+  padding: 80px;
   max-width: 600px;
   height: 100%;
   display: flex;
@@ -84,7 +85,7 @@
 
 .carousel-author,
 .carousel-category {
-  padding: 6px 12px;
+  padding: 20px 12px;
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   backdrop-filter: blur(10px);

@@ -1,42 +1,63 @@
-import { NavLink } from 'react-router';
+import { NavLink, useParams } from 'react-router';
+import {useState,useEffect} from 'react';
+import { readComic } from '../../firebase/db';
 import './story.css';
 
 function StoryView() {
+ 
+
+    const {id} = useParams()
+    const [viewStory, setView] = useState([]);
+    
+    useEffect(() => {
+      
+        readComic(setView)
+    
+    },[])  
+
+    //AYANNN TAMA
   return (
-    <div className="storyview-hero">
+    <>
+      {viewStory
+        .filter((story) => story.id === id)
+        .map((story) => {
+          return (
+            <div className="storyview-hero">
+              <div className="storyview-wrapper">
+                <img
+                  src="https://fantasy-faction.com/wp-content/uploads/2025/01/image-2.jpeg"
+                  alt="Cover"
+                  className="storyview-cover"
+                />
 
-      {/* HERO */}
-      <div className="storyview-wrapper">
-        <img
-          src="https://fantasy-faction.com/wp-content/uploads/2025/01/image-2.jpeg"
-          alt="Cover"
-          className="storyview-cover"
-        />
+                <div className="storyview-hero-info">
+                  <h1>{story.title}</h1>
+                  <p className="meta">100% • Favorites • Chapters</p>
 
-        <div className="storyview-hero-info">
-          <h1>Hindi ko Alam ang Title</h1>
-          <p className="meta">100% • Favorites • Chapters</p>
+                  <div className="storyview-rating">
+                    <i className="fa fa-star star-icon"></i>
+                    <span>{story.rate+ "  / " + story.views + " views"}</span>
+                  </div>
 
-          <div className="storyview-rating">
-            <i className="fa fa-star star-icon"></i>
-            <span>9.5/10 (732 ratings)</span>
-          </div>
+                  <div className="storyview-buttons">
+                    <button className="btn read">Read</button>
+                    <button className="btn download">
+                      Ano to Add Bookmark saglit lang
+                    </button>
+                  </div>
+                </div>
+              </div>
 
-          <div className="storyview-buttons">
-            <button className="btn read">Read</button>
-            <button className="btn download">Download</button>
-          </div>
-        </div>
-      </div>
-
-      {/* NAV */}
-      <div className="storyview-nav">
-        <NavLink to="/story-details" >Overview</NavLink>
-        <NavLink to="/story-chapter-list">Chapter List</NavLink>
-        <NavLink to="/story-reviews">Reviews</NavLink>
-      </div>
-
-    </div>
+              {/* NAV TAS IPASA DITO STORY ID SA NAV LINK*/}
+              <div className="storyview-nav">
+                <NavLink to={`/story-details/${id}`}>Overview</NavLink>
+                <NavLink to={`/story-chapter-list`}>Chapter List</NavLink>
+                <NavLink to={`/story-reviews`}>Reviews</NavLink>
+              </div>
+            </div>
+          );
+        })}
+    </>
   );
 }
 
