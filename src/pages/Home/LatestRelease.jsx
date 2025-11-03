@@ -33,7 +33,7 @@ function LatestStories() {
               key={comic.id}
               storyId={comic.id}
               title={comic.title}
-              author={comic.author?.name || comic.author.name || "Unknown"}
+              author={comic.author || "Unknown"}
               coverImage={comic.coverImage?.coverImage || comic.coverImage || ""}
               views={comic.views?.views || comic.views || 0}
               rate={comic.rate?.rate || comic.rate || 0}

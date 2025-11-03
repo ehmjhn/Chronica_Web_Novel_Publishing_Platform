@@ -4,26 +4,37 @@ import { auth } from "../firebase/auth.js";
 import { ref, push, set, onValue, update } from "firebase/database";
 import { db, database } from "../firebase/firebase-config.js";
 import StorySection from "../components/StorySection.jsx";
-import { getDocs, collection } from "firebase/firestore";
+import { getDocs, collection,addDoc } from "firebase/firestore";
 
 //pang users natong firestore database
 //USER(FIRESTORE)
 
 //getUserAccs
 const userCollectionRef = collection(db, "users");
-export const getUserList = async (users) => {
+export const getUserList = async () => {
   try {
     const data = await getDocs(userCollectionRef);
     const filteredData = data.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
     }));
-    getUserList(users)
-    console.log(filteredData);
+    return filteredData
+    
   } catch (e) {
     console.error(e);
   }
 };
+
+export const addUser = async (user) => {
+  try {
+    const docRef = await addDoc(userCollectionRef, user);
+    console.log("Document written with ID: ", docRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+};
+
+
 
 //REALTIME DATABASE
 export function insertComic(
@@ -61,7 +72,7 @@ export function insertComic(
 
 // Read comics
 export function readComic(setComicList) {
-  const comicRef = ref(database, "comics/"); // <- changed to "comics"
+  const comicRef = ref(database, "comics/"); 
   onValue(comicRef, (snapshot) => {
     const data = snapshot.val() || {};
     const comics = Object.keys(data).map((key) => {
@@ -75,7 +86,7 @@ export function readComic(setComicList) {
         coverImage: comic.coverImage || "",
         views: comic.views || 0,
         bookmarks: comic.bookmarks || 0,
-        rate: comic.rate || 0,
+        rating: comic.rating || 0,
         isFeatured: comic.isFeatured || false,
         isCompleted: comic.isCompleted || false,
         genre: comic.genre || [],

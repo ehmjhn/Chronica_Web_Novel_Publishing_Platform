@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import './reader.css'
 
 function Notification() {
@@ -46,39 +47,48 @@ function Notification() {
         setCurrentPage(prev => Math.min(prev + 1, totalPages));
     }
 
-    return (
-        <div className='main-container'>
-            <div className='top'>
-                <p className='series'>Notifications</p>
+    const navigate = useNavigate()
+    const handleClose = () => {
+        navigate(-1); 
+    };
 
-                <div className='btn-top'>
-                    <button className='unread' onClick={() => handleFilter("unread")}>Unread</button>
-                    <button className='read' onClick={() => handleFilter("read")}>Read</button>
-                    <button onClick={() => handleFilter("all")}>All</button>
+    return (
+        <div className="notifacation">
+            <div className='notif-cont'>
+                <div className='top'>
+                    <p className='series'>Notifications</p>
+
+                    <div className='btn-top'>
+                        <button className='unread' onClick={() => handleFilter("unread")}>
+                            {`Unread${allNotifications.filter((notif) => !notif.read).length > 0 ? ` (${allNotifications.filter((notif) => !notif.read).length})`: ""}`}
+                        </button>
+                        <button className='read' onClick={() => handleFilter("read")}>Read</button>
+                        <button onClick={() => handleFilter("all")}>All</button>
+                    </div>
+
+                    <button onClick={handleClose}>X</button>
                 </div>
 
-                <button>X</button>
-            </div>
+                <div className='notif-container'>
+                    {currentNotifications.length === 0 ? (
+                        <p>No notifications found.</p>
+                    ) : (
+                        currentNotifications.map(notif => (
+                            <div key={notif.id} className='notif-item'>
+                                <p className='notif-name'>{notif.name}</p>
+                                <p className='message'>{notif.message}</p>
+                            </div>
+                        ))
+                    )}
+                </div>
 
-            <div className='notif-container'>
-                {currentNotifications.length === 0 ? (
-                    <p>No notifications found.</p>
-                ) : (
-                    currentNotifications.map(notif => (
-                        <div key={notif.id} className='notif-item'>
-                            <p className='notif-name'>{notif.name}</p>
-                            <p className='message'>{notif.message}</p>
-                        </div>
-                    ))
-                )}
-            </div>
+                <div className='bottom'>
+                    <p>{currentPage}/{totalPages}</p>
 
-            <div className='bottom'>
-                <p>{currentPage}/{totalPages}</p>
-
-                <div className='btn-bot'>
-                    <button onClick={handlePrevPage} disabled={currentPage === 1}>Back</button>
-                    <button onClick={handleNextPage} disabled={currentPage === totalPages}>Next</button>
+                    <div className='btn-bot'>
+                        <button onClick={handlePrevPage} disabled={currentPage === 1}>Back</button>
+                        <button onClick={handleNextPage} disabled={currentPage === totalPages}>Next</button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,74 +1,78 @@
-import React from 'react';
 import './profile.css';
-import './profile-settings.css'; // optional if you have more overrides
+import { FaFacebook, FaInstagram, FaEnvelope, FaDiscord } from "react-icons/fa";
 
 function ProfileSettings() {
   return (
-    <div className="profile-container">
-      <div className="profile-header">
-        <img src="your-profile-pic.jpg" alt="Profile" className="profile-pic" />
-        <div className="profile-info">
-          <h2>Jhaezer Anne David</h2>
-          <p>Following: 10 &nbsp; Followers: 999</p>
+    <div className="profile-wrapper">
+      <div className="profile-card">
+        {/* LEFT SIDE */}
+        <div className="profile-left">
+          <div className="profile-image">
+            <div className="image-circle">
+              <img src="your-profile-pic.jpg" alt="Profile" />
+            </div>
+            <h2>Jhaezer Anne David</h2>
+            <p>@jhaezer</p>
+            <p>Following: 10 | Followers: 999</p>
+          </div>
+
+          <div className="social-icons">
+            <FaFacebook />
+            <FaInstagram />
+            <FaEnvelope />
+            <FaDiscord />
+          </div>
+
+          <div className="profile-nav">
+            <button className="signout-btn">Sign Out</button>
+          </div>
         </div>
-      </div>
 
-      <div className="profile-content">
-        <div className="about-section">
-          <h4>About me</h4>
-          <p>Ramdam kong nag-init ka lalo na’t ‘pag lasing ka...</p>
-          <p className="joined-date">Joined: July 2023</p>
-        </div>
-
-        <div className="info-section">
-          <div className="info-row">
-            <div className="info-field">
-              <label>Full Name</label>
-              <p>Jhaezer Anne David</p>
-            </div>
-            <div className="info-field">
-              <label>Birthdate</label>
-              <p>April 15, 2004</p>
-            </div>
+        {/* RIGHT SIDE */}
+        <div className="profile-right">
+          <div className="profile-header">
+            <h2>Personal Information</h2>
           </div>
 
-          <div className="info-row">
-            <div className="info-field">
-              <label>Email</label>
-              <p>jhaezer@example.com</p>
-            </div>
-            <div className="info-field">
-              <label>Gender</label>
-              <p>Female</p>
-            </div>
-          </div>
+          <div className="profile-info">
+            <label>About Me</label>
+            <textarea
+              value="Ramdam kong nag-init ka lalo na’t ‘pag lasing ka..."
+              readOnly
+            />
 
-          <div className="info-row">
-            <div className="info-field">
-              <label>Location</label>
-              <p>Bulacan</p>
-            </div>
-            <div className="info-field">
-              <label>Username</label>
-              <p>@jhaezer</p>
-            </div>
-          </div>
+            <label>Joined</label>
+            <input type="text" value="July 2023" readOnly />
 
-          <div className="info-row">
-            <div className="info-field full">
-              <label>Contact No</label>
-              <p>0912 345 6789</p>
-            </div>
-          </div>
+            <label>Full Name</label>
+            <input type="text" value="Jhaezer Anne David" readOnly />
 
-          <div className="profile-actions">
-            <div className="social-icons">
-              <i className="fab fa-facebook"></i>
-              <i className="fab fa-instagram"></i>
-              <i className="fas fa-envelope"></i>
-              <i className="fab fa-discord"></i>
+            <label>Birthdate</label>
+            <input type="text" value="April 15, 2004" readOnly />
+
+            <label>Email</label>
+            <input type="email" value="jhaezer@example.com" readOnly />
+
+            <label>Gender</label>
+            <input type="text" value="Female" readOnly />
+
+            <label>Location</label>
+            <input type="text" value="Bulacan" readOnly />
+
+            <label>Username</label>
+            <input type="text" value="@jhaezer" readOnly />
+
+            <label>Contact No</label>
+            <input type="text" value="0912 345 6789" readOnly />
+
+            <div className="edit-btn-container">
+              <button
+                className="edit-btn"
+                onClick={() => (window.location.href = '/edit-profile')}
+              >
+                Edit Profile
+              </button>
             </div>
-            <button className="edit-btn">Edit Profile</button>
           </div>
         </div>
       </div>

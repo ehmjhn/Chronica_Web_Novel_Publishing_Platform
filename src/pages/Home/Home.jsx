@@ -1,8 +1,8 @@
 import './home.css';
 import JZ from '../../assets/jz.png';
 
-import { useEffect, useState } from 'react';
-import { readComic } from '../../firebase/db.js';
+import { useEffect, useState} from 'react';
+import { readComic, getUserList} from '../../firebase/db.js';
 
 import Carousel from '../../components/Carousel.jsx';
 import StorySection from '../../components/StorySection.jsx';
@@ -12,9 +12,14 @@ function Home() {
   const [latestStories, setLatestStories] = useState([]);
   const [popularWorks, setPopularWorks] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [userList, setUserList] = useState([])
+
     useEffect(() => {
-      
+      const fetchUsers = async () =>{
+          const users = await getUserList()
+          setUserList(users)
+      }
+      fetchUsers()
       readComic((comics)=>{
         if (!comics) return;
 
@@ -40,10 +45,11 @@ function Home() {
       setLoading(false)
   
     },[]);
+    
 
   const carouselSlides = [
     {
-      image: JZ, //ayan jan nakaset
+      image: JZ, 
       title: 'Featured Story',
       description: 'Discover amazing stories from talented authors',
       author: 'Author Name',
@@ -88,32 +94,31 @@ function Home() {
   }
 
   return (
-    <div className="background">
-      <div className="homepage"> 
-        <Carousel slides={carouselSlides} />
+    <div className="homepage"> 
+      <Carousel slides={carouselSlides} />
 
-        <main className="main-content">
-          <StorySection 
-            title="Featured Stories" 
-            stories={featuredStories} 
-            viewAllPath="/home/featured-stories"
-            showFeaturedBadge={true}
-          />
+      <div className="main-content">
+        <StorySection 
+          title="Featured Stories" 
+          stories={featuredStories} 
+          viewAllPath="/home/featured-stories"
+          showFeaturedBadge={true}
+        />
 
-          <StorySection 
-            title="Latest Release" 
-            stories={latestStories} 
-            viewAllPath="/home/latest-releases"
-          />
+        <StorySection 
+          title="Latest Release" 
+          stories={latestStories} 
+          viewAllPath="/home/latest-releases"
+        />
 
-          <StorySection 
-            title="Popular Works" 
-            stories={popularWorks} 
-            viewAllPath="/home/popular-works"
-          />
-        </main>
+        <StorySection 
+          title="Popular Works" 
+          stories={popularWorks} 
+          viewAllPath="/home/popular-works"
+        />
       </div>
     </div>
+
   );
 }
 

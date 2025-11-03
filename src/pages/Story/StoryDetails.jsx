@@ -70,6 +70,18 @@ useEffect(() => {
                 </div>
               </div>
 
+              {/* TAGS */}
+              <div className="storyview-genre">
+                <h2>Genre</h2>
+                <div className="genre-list">
+                  <span>Transmigration</span>
+                  <span>Slice of Life</span>
+                  <span>Romance</span>
+                  <span>Action</span>
+                  <span>Sci-Fi</span>
+                </div>
+              </div>
+
               {/* CONTENT WARNING */}
               <div className="storyview-warning">
                 <h2>Content Warning</h2>

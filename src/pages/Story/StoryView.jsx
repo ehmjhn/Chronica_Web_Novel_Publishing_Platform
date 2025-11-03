@@ -15,13 +15,19 @@ function StoryView() {
     
     },[])  
 
-    //AYANNN TAMA
   return (
     <>
       {viewStory
         .filter((story) => story.id === id)
         .map((story) => {
+          console.log(story)
           return (
+            <>
+            <div className="subnav-control">
+              <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
+              <p>Series</p>/
+              <p>{story.title}</p>
+            </div>
             <div className="storyview-hero">
               <div className="storyview-wrapper">
                 <img
@@ -36,7 +42,9 @@ function StoryView() {
 
                   <div className="storyview-rating">
                     <i className="fa fa-star star-icon"></i>
-                    <span>{story.rate+ "  / " + story.views + " views"}</span>
+                    <span>
+                      {story.rating+ "  / " + story.views + " views"}
+                    </span>
                   </div>
 
                   <div className="storyview-buttons">
@@ -46,15 +54,20 @@ function StoryView() {
                     </button>
                   </div>
                 </div>
+                {/* <NavLink to='/home'>
+                  <button className="back">
+                    <i className="fa-solid fa-arrow-left"></i> BACK
+                  </button>
+                </NavLink> */}
               </div>
 
-              {/* NAV TAS IPASA DITO STORY ID SA NAV LINK*/}
               <div className="storyview-nav">
                 <NavLink to={`/story-details/${id}`}>Overview</NavLink>
-                <NavLink to={`/story-chapter-list`}>Chapter List</NavLink>
-                <NavLink to={`/story-reviews`}>Reviews</NavLink>
+                <NavLink to={`/story-chapter-list/${id}`}>Chapter List</NavLink>
+                <NavLink to={`/story-reviews/${id}`}>Reviews</NavLink>
               </div>
             </div>
+            </>
           );
         })}
     </>

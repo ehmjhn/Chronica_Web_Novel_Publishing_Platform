@@ -20,8 +20,7 @@ export function AuthLayout() {
   return (
       <div className="background">
         <div className="header">
-            <img src={Mythryl} alt="logo" />
-            <h1>Chronica</h1>
+            <img src="src/assets/CHRONICA.png" alt="logo" />
         </div>
 
         <main>

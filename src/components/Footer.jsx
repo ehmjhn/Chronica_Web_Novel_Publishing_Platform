@@ -54,9 +54,9 @@ function Footer (){
             </div>
 
             <footer>
-                <p class="footer-brand">Chronica</p>
+                <p className="footer-brand">Chronica</p>
                 <p>© 2025 ISIP KAYO PANGALAN NATIN AS A GROUP PLSS. All Rights Reserved.</p>
-                <div class="footer-links">
+                <div className="footer-links">
                     <a href="/privacy">Privacy Policy</a>
                     <a href="/terms">Terms of Service</a>
                     <a href="/contact">Contact</a>

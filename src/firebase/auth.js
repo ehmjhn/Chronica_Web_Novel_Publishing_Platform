@@ -8,6 +8,7 @@ import {
   GoogleAuthProvider,
   updateProfile 
 } from "firebase/auth";
+import {addUser} from "./db.js"
 import { app } from "./firebase-config";
 
 export const auth = getAuth(app);
@@ -17,32 +18,47 @@ export const provider = new GoogleAuthProvider();
 export const registerUser = (email, password, displayName) =>
   createUserWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
-    const user = userCredential.user;
+    const user = userCredential.user; 
     updateProfile(user, {
       displayName: displayName,
     })
-      .then(() => {
+
+    const usertoDB = {
+      userID : user.uid,
+      name : displayName,
+      viewedStory : {},
+      bookmarkedStory:{}
+    }
+
+    //add to database
+    addUser(usertoDB)
+      .then( () => {
         console.log("User created and displayName added:", user.displayName);
+        window.location.reload();
+
       })
       .catch((error) => {
         console.error("Error updating profile:", error);
       });
   })
-  .catch((error) => {
+    .catch((error) => {
     // An error occurred during user creation
     const errorCode = error.code;
     const errorMessage = error.message;
     console.error("Error creating user:", errorCode, errorMessage);
   });
+
 // Sign in ngani
 export const loginUser = (email, password) =>
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
+    
       window.location.href = "/home";
     })
     .catch((error) => {
       alert(error.message);
     });
+
 
 //google gamit
 export const signInWithGoogle = () => {
@@ -61,6 +77,7 @@ export const logout = () =>
     .catch((error) => {
       console.log(error.message);
     });
+
 
 //reusable na onAuthStateChanged
 export const subscribeAuthChanges = (callback) =>{

@@ -1,5 +1,5 @@
 import React from 'react';
-import './story-card.css';
+import './components.css';
 
 import { NavLink } from 'react-router';
 
