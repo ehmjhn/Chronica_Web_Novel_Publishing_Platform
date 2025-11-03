@@ -34,30 +34,27 @@ function Registration() {
         <div className="register-form">
           <div className="register-head">
             <img src="src/assets/CHRONICA.png" alt="logo" />
-            <h2>CREATE ACCOUNT</h2>
-            <p>Please fill in your details to register</p>
           </div>
 
+          <p className='title-text'>CREATE ACCOUNT </p>
           <div className="reg-input-icons">
-            <p>Pen Name</p>
             <div className="reg-input-field-ul">
               <input
                 className="reg-input-field"
                 type="text"
-                placeholder="your pen name"
+                placeholder="Enter your Username"
                 onChange={(e) => setUsername(e.target.value)}
               />
-              <i className="fa fa-envelope icon"></i>
+              <i className="fa fa-user"></i>
             </div>
           </div>
 
           <div className="reg-input-icons">
-            <p>Email Address</p>
             <div className="reg-input-field-ul">
               <input
                 className="reg-input-field"
                 type="email"
-                placeholder="your email address"
+                placeholder="Enter your email address"
                 onChange={(e) => setEmail(e.target.value)}
               />
               <i className="fa fa-envelope icon"></i>
@@ -65,12 +62,11 @@ function Registration() {
           </div>
 
           <div className="reg-input-icons">
-            <p>Password</p>
             <div className="reg-input-field-ul">
               <input
                 className="reg-input-field"
                 type="password"
-                placeholder="must at least 8 characters"
+                placeholder="Must at least 8 characters"
                 onChange={(e) => setPassword(e.target.value)}
               />
               <i className="fa fa-key icon"></i>
@@ -78,12 +74,11 @@ function Registration() {
           </div>
 
           <div className="reg-input-icons">
-            <p>Confirm Password</p>
             <div className="reg-input-field-ul">
               <input
                 className="reg-input-field"
                 type="password"
-                placeholder="re-enter your password"
+                placeholder="Re-enter your password"
                 onChange={(e) => setConfirmPass(e.target.value)}
               />
               <i className="fa fa-check-circle icon"></i>

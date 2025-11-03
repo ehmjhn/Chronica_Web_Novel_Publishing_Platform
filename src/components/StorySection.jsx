@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import StoryCard from './StoryCard.jsx';
-import './story-section.css';
+import './components.css';
 
 function StorySection({ title, stories, viewAllPath, showFeaturedBadge = false }) {
 
@@ -18,13 +18,14 @@ function StorySection({ title, stories, viewAllPath, showFeaturedBadge = false }
       <div className="story-grid">
         {stories && stories.length > 0 ? (
           stories.map((story, index) => (
+           
             <StoryCard 
               key={story.id || index}
               storyId={story.id}
               title={story.title}
-              author={story.author.name}
+              author={story.author}
               views={story.views}
-              rate={story.rate}
+              rate={story.rating}
               coverImage={story.coverImage}
               isFeatured={story.isFeatured}
               showFeatured={showFeaturedBadge && story.isFeatured}

@@ -29,7 +29,7 @@ function ForgotPassword (){
                     </div>
                 </div>
                 <div className="forgot-img">
-                    <img src='https://ai-previews.123rf.com/ai-txt2img/600nwm/d122b1ab-d63b-4c55-a4e4-2c7de514d36e.jpg' alt="image" />
+                    <img src='src/assets/AUTH.png' alt="image" />
                 </div>
 
             </div>

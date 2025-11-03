@@ -1,6 +1,6 @@
 import "./components.css";
-import Mythryl from '../assets/Mythryl.png'
-import { NavLink } from "react-router";
+import LOGO from '../assets/CHRONICA.png'
+import { NavLink} from "react-router";
 import { logout, subscribeAuthChanges } from '../firebase/auth';
 import { useEffect, useState } from "react";
 import { getUserID } from "../firebase/db";
@@ -13,7 +13,7 @@ function Nav() {
 
     const unsubscribe = subscribeAuthChanges((currentUser) => {
       if (currentUser) {
-        setUser(currentUser.displayName); // yung || , kapag nag log sya manually hindi by google, temporary email nalang muna lalabas
+        setUser(currentUser.displayName);
         setImage(currentUser.photoURL);
         getUserID(currentUser.getIdToken)
       } else {
@@ -36,9 +36,8 @@ function Nav() {
     <>
       <nav>
         <div className="title">
-          <img src={Mythryl} alt="Chronica logo" />
           <NavLink to="/home">
-            <h1>Chronica</h1>
+            <img src={LOGO} alt="Chronica logo" />
           </NavLink>
         </div>
 
@@ -90,10 +89,10 @@ function Nav() {
 
               <div className="nav-settings">
                 <h2>{user}</h2>
-                <NavLink to="">Account Settings</NavLink>
-                <NavLink to="/profile">Profile Page</NavLink>
+                <NavLink to="/profile">Account Settings</NavLink>
+                <NavLink to="/author-profile">Profile Page</NavLink>
                 <NavLink to="/bookmark">Reading List</NavLink>
-                <NavLink to="">My Series</NavLink>
+                <NavLink to="/my-series">My Series</NavLink>
                 <NavLink to="" onClick={handleLogout}>
                   Log Out
                 </NavLink>
@@ -147,12 +146,12 @@ function Nav() {
         </div>
 
         <div className="nav2-right">
-          <button className="nav2-btn">
-            <i className="fa-brands fa-readme"></i> Read
-          </button>
-          <button className="nav2-btn">
-            <i className="fa-solid fa-feather"></i> Write
-          </button>
+          <NavLink to='/search-discovery' className="nav2-btn">
+            <i className="fa-brands fa-readme"></i> Read Story
+          </NavLink>
+          <NavLink to='/create-story' className="nav2-btn">
+            <i className="fa-solid fa-feather"></i> Write Story
+          </NavLink>
         </div>
 
         {/* Conditional Render:  */}

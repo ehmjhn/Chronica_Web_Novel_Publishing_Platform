@@ -25,13 +25,17 @@ body {
 }
 
 main {
-  flex: 1; 
+  flex: 1;
+  background-image: url(./assets/NovelBG.png);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover; 
 }
 
 .background {
-background-image: url(./assets/NovelBG.png);
-background-repeat: no-repeat;
-background-attachment: fixed;
-background-size: cover;
+  background-image: url(./assets/NovelBG.png);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
 }
 

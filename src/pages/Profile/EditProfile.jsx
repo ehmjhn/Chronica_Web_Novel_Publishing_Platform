@@ -1,89 +1,77 @@
-import './profile.css'
-import './edit-profile.css'
+import './profile.css';
+import { FaFacebook, FaInstagram, FaTiktok, FaEnvelope } from "react-icons/fa";
 
-// me na here - david (medj auzin ko pa 'to wit)
-function EditProfile (){
-
-    return(
-    <div class="profile-container">
-        <div class="profile-header">
-            <img src="your-profile-pic.jpg" alt="Profile Picture" class="profile-pic" />
-            <div class="profile-info">
-            <h2>Edit Profile</h2>
-            <p>Make changes to your information below</p>
+function EditProfile() {
+  return (
+    <div className="edit-profile-wrapper">
+      <div className="edit-profile-card">
+        {/* LEFT SIDE */}
+        <div className="edit-left">
+          <div className="profile-image">
+            <div className="image-circle">
+              <img src="https://via.placeholder.com/150" alt="Profile" />
             </div>
+            <h2>Jhaezer Anne David</h2>
+            <p>@jhaezer</p>
+          </div>
+
+          <div className="social-icons">
+            <FaFacebook />
+            <FaInstagram />
+            <FaTiktok />
+            <FaEnvelope />
+          </div>
+
+          <div className="profile-nav">
+            <button className="signout-btn">Sign Out</button>
+          </div>
         </div>
 
-        <div class="profile-content">
-            <div class="about-section">
-            <h4>About Me</h4>
-            <textarea placeholder="Write something about yourself...">Ramdam kong nag-init ka lalo na’t ‘pag lasing ka...</textarea>
-            <p>Joined: July 2023</p>
-            </div>
+        {/* RIGHT SIDE */}
+        <div className="edit-right">
+          <div className="edit-header">
+            <h2>Edit Personal Information</h2>
+          </div>
 
-            <div class="info-section">
-            <div class="info-row">
-                <div class="info-field">
-                <label>Full Name</label>
-                <input type="text" value="Jhaezer Anne David" />
-                </div>
-                <div class="info-field">
-                <label>Birthdate</label>
-                <input type="date" value="2004-04-15" />
-                </div>
-            </div>
+          <div className="edit-info">
+            <label>About Me</label>
+            <textarea defaultValue="Lorem ipsum dolor sit amet, consectetur adipiscing elit..." />
 
-            <div class="info-row">
-                <div class="info-field">
-                <label>Email</label>
-                <input type="email" value="jhaezer@example.com" />
-                </div>
-                <div class="info-field">
-                <label>Gender</label>
-                <select>
-                    <option>Female</option>
-                    <option>Male</option>
-                    <option>Other</option>
-                </select>
-                </div>
-            </div>
+            <label>Full Name</label>
+            <input type="text" defaultValue="Jhaezer Anne David" />
 
-            <div class="info-row">
-                <div class="info-field">
-                <label>Location</label>
-                <input type="text" value="Bulacan" />
-                </div>
-                <div class="info-field">
-                <label>Username</label>
-                <input type="text" value="@jhaezer" />
-                </div>
-            </div>
+            <label>Username</label>
+            <input type="text" defaultValue="@jhaezer" />
 
-            <div class="info-row">
-                <div class="info-field full">
-                <label>Contact No</label>
-                <input type="text" value="0912 345 6789" />
-                </div>
-            </div>
+            <label>Email</label>
+            <input type="email" defaultValue="user@gmail.com" />
 
-            <div class="profile-actions">
-                <div class="social-icons">
-                <i class="fab fa-facebook"></i>
-                <i class="fab fa-instagram"></i>
-                <i class="fas fa-envelope"></i>
-                <i class="fab fa-discord"></i>
-                </div>
-                <div class="btn-group">
-                <button class="cancel-btn">Cancel</button>
-                <button class="save-btn">Save Changes</button>
-                </div>
+            <label>Password</label>
+            <input type="password" defaultValue="**************" />
+
+            <label>Birthdate</label>
+            <input type="date" defaultValue="2004-04-15" />
+
+            <label>Gender</label>
+            <input type="text" defaultValue="Female" />
+
+            <label>Location</label>
+            <input type="text" defaultValue="Bulacan" />
+
+            <label>Contact No</label>
+            <input type="text" defaultValue="0912 345 6789" />
+
+            <label>Date Joined</label>
+            <input type="text" defaultValue="July 2023" disabled />
+
+            <div className="save-container">
+              <button className="save-btn">Save Changes</button>
             </div>
-            </div>
+          </div>
         </div>
+      </div>
     </div>
-
-
-    );
+  );
 }
 
-export default EditProfile
+export default EditProfile;
