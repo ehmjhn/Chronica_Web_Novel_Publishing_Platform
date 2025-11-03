@@ -8,7 +8,7 @@ import {
   GoogleAuthProvider,
   updateProfile
 } from "firebase/auth";
-import {addUser} from "./db.js"
+
 import { app } from "./firebase-config";
 import { getUserID, addUser } from "./db";
 export const auth = getAuth(app);
@@ -62,33 +62,35 @@ export const loginUser = (email, password) =>
 
 //google gamit
 export const signInWithGoogle = async () => {
-  signInWithPopup(auth, provider)
-    .then(async (userCredential) => {
-      const user = userCredential.user;
-      const existingUser = await getUserID(user.uid);
-      if (!existingUser) {
-        console.log("wow");
-        const usertoDB = {
-          userID: user.uid,
-          name: user.displayName,
-          viewedStory: {},
-          bookmarkedStory: {}
-        }
-         addUser(usertoDB)
-          .then(() => {
-            console.log("User login and displayName added:", user.displayName);
-            window.location.reload();
-          })
-          .catch((e)=>{
-            console.error(e);
-          }) 
-      }
-      window.location.href = "/home";
+  try {
+    // Wait for the popup to resolve
+    const userCredential = await signInWithPopup(auth, provider);
+    const user = userCredential.user;
 
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
+    // Check if user already exists in Firestore
+    const existingUser = await getUserID(user.uid);
+
+    if (!existingUser) {
+      console.log("New Google user detected, adding to Firestore...");
+      const usertoDB = {
+        userID: user.uid,
+        name: user.displayName,
+        viewedStory: {},
+        bookmarkedStory: {},
+      };
+
+      await addUser(usertoDB, user.uid);
+      console.log("User added:", user.displayName);
+    } else {
+      console.log("User already exists in Firestore.");
+    }
+
+    // Redirect to home
+    window.location.href = "/home";
+  } catch (error) {
+    alert(error.message);
+    console.error("Google Sign-in Error:", error);
+  }
 };
 
 //logout

@@ -4,7 +4,7 @@ import { auth } from "../firebase/auth.js";
 import { ref, push, set, onValue, update } from "firebase/database";
 import { db, database } from "../firebase/firebase-config.js";
 import StorySection from "../components/StorySection.jsx";
-import { getDocs, collection } from "firebase/firestore";
+import { getDocs, collection, setDoc,doc } from "firebase/firestore";
 
 //pang users natong firestore database
 //USER(FIRESTORE)
@@ -19,41 +19,39 @@ export const getUserList = async (users) => {
          id: doc.id,
       }));
       getUserList(users)
-      console.log(filteredData);
+
    } catch (e) {
       console.error(e);
    }
 };
 
 //search for userID in collection
-export const getUserID = async (user) => {
+export const getUserID = async (uid) => {
    try {
       const data = await getDocs(userCollectionRef);
-      const filteredData = data.docs.map((doc) => ({
+      const users = data.docs.map((doc) => ({
          ...doc.data(),
          id: doc.id,
       }));
-      const userExists = filteredData.some((users) => { users.id === user })
-      if (!userExists) {
-         console.log("User not Found");
-         return false;
-      }
-      else {
-         console.log("User found.");
-         return true;
-      }
 
+      const userExists = users.some((user) => user.id === uid);
+      console.log(userExists ? "User found" : "User not found");
+
+      return userExists;
    } catch (e) {
-      console.error(e);
+      console.error("Error checking user ID:", e);
+      return false;
    }
 }
 
-export const addUser = async (user) => {
+export const addUser = async (user, userUID) => {
    try {
-      const docRef = await addDoc(userCollectionRef, user);
-      console.log("Document written with ID: ", docRef.id);
+      console.log("Attempting to add user:", userUID);
+      const userDocRef = doc(db, "users", userUID);
+      await setDoc(userDocRef, user);
+      console.log("User added with ID:", userUID);
    } catch (e) {
-      console.error("Error adding document: ", e);
+      console.error("Error adding document:", e);
    }
 };
 
