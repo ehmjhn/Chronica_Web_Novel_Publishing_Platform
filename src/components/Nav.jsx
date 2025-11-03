@@ -1,34 +1,36 @@
 import "./components.css";
 import Mythryl from '../assets/Mythryl.png'
-import { NavLink} from "react-router";
+import { NavLink } from "react-router";
 import { logout, subscribeAuthChanges } from '../firebase/auth';
 import { useEffect, useState } from "react";
+import { getUserID } from "../firebase/db";
 
 function Nav() {
 
   const [user, setUser] = useState(null);
-  const [image, setImage] = useState(null)  
+  const [image, setImage] = useState(null)
   useEffect(() => {
 
     const unsubscribe = subscribeAuthChanges((currentUser) => {
       if (currentUser) {
         setUser(currentUser.displayName); // yung || , kapag nag log sya manually hindi by google, temporary email nalang muna lalabas
         setImage(currentUser.photoURL);
+        getUserID(currentUser.getIdToken)
       } else {
         setUser(null);
         setImage(null);
       }
     });
 
-      return () => unsubscribe(); 
+    return () => unsubscribe();
 
-    }, []);
-    
-    function handleLogout(){
-        logout();
-        window.location.href = '/login'
-    }
-  
+  }, []);
+
+  function handleLogout() {
+    logout();
+    window.location.href = '/login'
+  }
+
   return (
 
     <>
