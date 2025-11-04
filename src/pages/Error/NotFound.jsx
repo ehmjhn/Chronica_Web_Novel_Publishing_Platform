@@ -1,19 +1,17 @@
 import './not-found.css'
-
+import ERRORICON from "../../assets/error404icon.png";
 // ako rito bawal iba ok -jz OK. try ko toh  ayaw lumabas omai
-function NotFound (){
-
-    return (
-      <>
-        <div className="box">
-          <div className="main-container">
-            <h1>Oops!</h1>
-            <img src="https://i.imgur.com/9GLgWoW.png" alt="Error" />
-            <h2>SORRY, THE PAGE YOU ARE LOOKING FOR DOES NOT EXIST!</h2>
-          </div>
-        </div>
-      </>
-    );
+// ayaw -danielle
+function NotFound() {
+  return (
+    <div className="errorcontainer">
+      <h2>ERROR 404 PAGE</h2>
+      <img className="erroricon" src={ERRORICON} alt="Error Icon" />
+      <p>uh-oh Nothing here...</p>
+        <button className="back-button">GO BACK TO HOME</button>
+      
+    </div>
+  );
 }
 
-export default NotFound
+export default NotFound;
