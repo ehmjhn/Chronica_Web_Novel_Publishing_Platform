@@ -1,3 +1,4 @@
+/*
 .main-container h1, .main-container h2{
     text-align: center;
 }
@@ -39,4 +40,72 @@
     align-items: center;
     height: calc(100vh - (70px + 50px));
     background-color: rgb(117, 0, 0);
+
 }
+*/
+
+
+.errorcontainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+.errorcontainer h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  letter-spacing: 1px;
+}
+
+
+.erroricon {
+  width: 600px;
+  max-width: 80%;
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+
+
+.errorcontainer p {
+  color: #ffffff;
+  font-size: 30px;
+  margin-bottom: 20px;
+  margin-top: 15px;
+}
+
+
+.back-button {
+  background-color: #DAA520;
+  color: #0E0F20;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(59, 91, 219, 0.2);
+}
+
+.back-button:hover {
+  background-color: #2f48b0;
+  transform: scale(1.05);
+  color: #fff;
+}
+
+
+body {
+  background: linear-gradient(135deg, #10101C, #2C2941);
+}
+
+
+
+
