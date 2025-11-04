@@ -250,7 +250,6 @@
 }
 
 /* READ CHAPTER */
-/* READ CHAPTER */
 .read-bg {
   background-color: #0b0c1d;
   color: #e2e2e2;
@@ -377,20 +376,63 @@
 }
 
 .chapter-content {
-  width: 90%;
-  background-color: #1f2135;
-  padding: 2rem;
+  width: 100%;
+  background-color: #252740;;
+  padding: 20px;
   border-radius: 15px;
   margin-top: 1.5rem;
-  line-height: 1.8;
-  text-align: justify;
+  box-sizing: border-box;
+
+  min-height: 300px;
+  font-family: "Georgia", serif;
 }
 
-.chapter-content p {
-  color: #e0e0e0;
+.chapter-content .ql-toolbar {
+  background-color: #f4f4f4;
+  border-radius: 10px 10px 0 0;
+  border: none;
+}
+
+.chapter-content .ql-toolbar button,
+.chapter-content .ql-toolbar .ql-picker-label {
+  color: #333333;
+}
+
+.chapter-content .ql-toolbar button:hover,
+.chapter-content .ql-toolbar .ql-picker-label:hover {
+  color: #000000;
+}
+
+.chapter-content .ql-toolbar .ql-picker-options {
+  background-color: #f4f4f4;
+  color: #333333;
+}
+
+.chapter-content .ql-editor {
+  background-color: #252740;
+  color: #fff;
+  min-height: 300px;
   font-size: 1rem;
+  line-height: 1.8;
+  text-align: justify;
+  border-radius: 0 0 15px 15px;
+  box-sizing: border-box;
+}
+
+.chapter-content .ql-editor p {
+  margin: 0 0 1em 0;
   white-space: pre-line;
 }
+
+.chapter-content .ql-editor.ql-blank::before {
+  color: #999999;
+  opacity: 0.7;
+}
+
+.chapter-content .ql-editor:focus {
+  outline: none;
+}
+
 
 .chapter-footer {
   width: 90%;

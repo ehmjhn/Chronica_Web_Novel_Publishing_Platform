@@ -66,7 +66,7 @@ function ChapterList() {
             <NavLink to='/update-story'>Series Details</NavLink>
             <NavLink to='/update-chapter-list'>Chapter List</NavLink>
         </div>
-          <div className="chapter-header">
+          <div className="chapt-header">
             <h2>CHAPTER LIST TABLE ({chapters.length})</h2>
             <div className="chapter-controls">
               <select

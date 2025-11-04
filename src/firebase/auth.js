@@ -6,11 +6,11 @@ import {
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
-  updateProfile
+  updateProfile 
 } from "firebase/auth";
 
 import { app } from "./firebase-config";
-import { getUserID, addUser } from "./db";
+
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 
@@ -104,8 +104,6 @@ export const logout = () =>
 
 
 //reusable na onAuthStateChanged
-export const subscribeAuthChanges = (callback) => {
+export const subscribeAuthChanges = (callback) =>{
   return onAuthStateChanged(auth, callback)
-}
-
-
+} 
