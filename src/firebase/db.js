@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/auth.js";
-import { ref, push, set, onValue, update } from "firebase/database";
+import { ref, push, set, onValue, update, get } from "firebase/database";
 import { db, database } from "../firebase/firebase-config.js";
 import StorySection from "../components/StorySection.jsx";
-import { getDocs, collection, setDoc,doc } from "firebase/firestore";
+import { getDocs, collection, setDoc, doc, snapshotEqual } from "firebase/firestore";
 
 //pang users natong firestore database
 //USER(FIRESTORE)
@@ -26,33 +26,29 @@ export const getUserList = async (users) => {
 };
 
 //search for userID in collection
-export const getUserID = async (uid) => {
+export async function getUserID(uid) {
+   const usersRef = ref(database, "users");
    try {
-      const data = await getDocs(userCollectionRef);
-      const users = data.docs.map((doc) => ({
-         ...doc.data(),
-         id: doc.id,
-      }));
+      const snapshot = await get(usersRef);
+      const data = snapshot.val();
 
-      const userExists = users.some((user) => user.id === uid);
-      console.log(userExists ? "User found" : "User not found");
+      if (!data) return false;
 
-      return userExists;
-   } catch (e) {
-      console.error("Error checking user ID:", e);
+      const exists = Object.values(data).some((item) => item.userID === uid);
+      return exists;
+   } catch (error) {
+      console.error("Error checking user:", error);
       return false;
    }
 }
 
-export const addUser = async (user, userUID) => {
-   try {
-      console.log("Attempting to add user:", userUID);
-      const userDocRef = doc(db, "users", userUID);
-      await setDoc(userDocRef, user);
-      console.log("User added with ID:", userUID);
-   } catch (e) {
-      console.error("Error adding document:", e);
-   }
+export const addUser = async (user) => {
+   console.log("adduser called with: ", user);
+   await push(ref(database, "users"), user).then(() => {
+      console.log("New user has been added.")
+   }).catch((error) => {
+      console.error(error);
+   });
 };
 
 //REALTIME DATABASE
@@ -66,7 +62,7 @@ export function insertComic(
    profilePic,
    isCompleted
 ) {
-   const comicRef = ref(database, "comics/"); // <- changed to "comics"
+   const comicRef = ref(database, "comics"); // <- changed to "comics"
    const newRef = push(comicRef);
    try {
       set(newRef, {
@@ -91,7 +87,7 @@ export function insertComic(
 
 // Read comics
 export function readComic(setComicList) {
-   const comicRef = ref(database, "comics/"); // <- changed to "comics"
+   const comicRef = ref(database, "comics"); // <- changed to "comics"
    onValue(comicRef, (snapshot) => {
       const data = snapshot.val() || {};
       const comics = Object.keys(data).map((key) => {

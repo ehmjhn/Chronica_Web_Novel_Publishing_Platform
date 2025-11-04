@@ -1,55 +1,58 @@
 import './home.css';
 import JZ from '../../assets/jz.png';
 
-import { useEffect, useState} from 'react';
-import { readComic, getUserList} from '../../firebase/db.js';
+import { useEffect, useState } from 'react';
+import { readComic, getUserList, getUserID, addUser } from '../../firebase/db.js';
 
 import Carousel from '../../components/Carousel.jsx';
 import StorySection from '../../components/StorySection.jsx';
+import { database } from '../../firebase/firebase-config.js';
+import { add } from '@dnd-kit/utilities';
 
 function Home() {
-  const [featuredStories, setFeaturedStories] = useState([]); 
+  const [featuredStories, setFeaturedStories] = useState([]);
   const [latestStories, setLatestStories] = useState([]);
   const [popularWorks, setPopularWorks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userList, setUserList] = useState([])
 
-    useEffect(() => {
-      const fetchUsers = async () =>{
-          const users = await getUserList()
-          setUserList(users)
-      }
-      fetchUsers()
-      readComic((comics)=>{
-        if (!comics) return;
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const users = await getUserList()
+      setUserList(users)
+    }
+    fetchUsers()
+    console.log(database)
+    readComic((comics) => {
+      if (!comics) return;
 
-        const featured = comics.filter(comic => comic.isFeatured === true)
+      const featured = comics.filter(comic => comic.isFeatured === true)
 
-        const popular = comics.sort((a,b)=> b.views - a.views)
+      const popular = comics.sort((a, b) => b.views - a.views)
 
-        const today = new Date();
-        const latest = comics.filter((comic) => {
-          if (!comic.createdAt) return false;
-          const createdDate = new Date(comic.createdAt);
-          const diffDays = (today - createdDate) / (1000 * 60 * 60 * 24);
-          return diffDays <= 30; 
-        });
-
-        latest.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-        setFeaturedStories(featured)
-        setLatestStories(latest)
-        setPopularWorks(popular)
+      const today = new Date();
+      const latest = comics.filter((comic) => {
+        if (!comic.createdAt) return false;
+        const createdDate = new Date(comic.createdAt);
+        const diffDays = (today - createdDate) / (1000 * 60 * 60 * 24);
+        return diffDays <= 30;
       });
 
-      setLoading(false)
-  
-    },[]);
-    
+      latest.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      setFeaturedStories(featured)
+      setLatestStories(latest)
+      setPopularWorks(popular)
+    });
+
+    setLoading(false)
+
+  }, []);
+
 
   const carouselSlides = [
     {
-      image: JZ, 
+      image: JZ,
       title: 'Featured Story',
       description: 'Discover amazing stories from talented authors',
       author: 'Author Name',
@@ -94,26 +97,26 @@ function Home() {
   }
 
   return (
-    <div className="homepage"> 
+    <div className="homepage">
       <Carousel slides={carouselSlides} />
 
       <div className="main-content">
-        <StorySection 
-          title="Featured Stories" 
-          stories={featuredStories} 
+        <StorySection
+          title="Featured Stories"
+          stories={featuredStories}
           viewAllPath="/home/featured-stories"
           showFeaturedBadge={true}
         />
 
-        <StorySection 
-          title="Latest Release" 
-          stories={latestStories} 
+        <StorySection
+          title="Latest Release"
+          stories={latestStories}
           viewAllPath="/home/latest-releases"
         />
 
-        <StorySection 
-          title="Popular Works" 
-          stories={popularWorks} 
+        <StorySection
+          title="Popular Works"
+          stories={popularWorks}
           viewAllPath="/home/popular-works"
         />
       </div>

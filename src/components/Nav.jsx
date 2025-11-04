@@ -15,7 +15,7 @@ function Nav() {
       if (currentUser) {
         setUser(currentUser.displayName);
         setImage(currentUser.photoURL);
-        getUserID(currentUser.getIdToken)
+        getUserID(currentUser.uid)
       } else {
         setUser(null);
         setImage(null);
