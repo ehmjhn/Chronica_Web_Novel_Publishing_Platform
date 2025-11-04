@@ -6,11 +6,11 @@ import {
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
-  updateProfile
+  updateProfile 
 } from "firebase/auth";
 import {addUser} from "./db.js"
 import { app } from "./firebase-config";
-import { getUserID, addUser } from "./db";
+
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 
@@ -61,30 +61,10 @@ export const loginUser = (email, password) =>
 
 
 //google gamit
-export const signInWithGoogle = async () => {
+export const signInWithGoogle = () => {
   signInWithPopup(auth, provider)
-    .then(async (userCredential) => {
-      const user = userCredential.user;
-      const existingUser = await getUserID(user.uid);
-      if (!existingUser) {
-        console.log("wow");
-        const usertoDB = {
-          userID: user.uid,
-          name: user.displayName,
-          viewedStory: {},
-          bookmarkedStory: {}
-        }
-         addUser(usertoDB)
-          .then(() => {
-            console.log("User login and displayName added:", user.displayName);
-            window.location.reload();
-          })
-          .catch((e)=>{
-            console.error(e);
-          }) 
-      }
+    .then(() => {
       window.location.href = "/home";
-
     })
     .catch((error) => {
       alert(error.message);
@@ -100,8 +80,6 @@ export const logout = () =>
 
 
 //reusable na onAuthStateChanged
-export const subscribeAuthChanges = (callback) => {
+export const subscribeAuthChanges = (callback) =>{
   return onAuthStateChanged(auth, callback)
-}
-
-
+} 

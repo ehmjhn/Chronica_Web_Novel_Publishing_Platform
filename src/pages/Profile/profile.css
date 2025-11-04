@@ -495,7 +495,6 @@
   border-color: #ffd700;
 }
 
-/* --- Series list --- */
 .author-page .author-series-list {
   display: flex;
   gap: 15px;
@@ -547,7 +546,6 @@
   margin: 2px 0;
 }
 
-/* --- About --- */
 .author-page .author-about {
   margin-top: 40px;
   width: 100%;
@@ -572,7 +570,6 @@
   color: #ccc;
 }
 
-/* --- Socials --- */
 .author-page .author-socials {
   margin-top: 30px;
 }
@@ -594,7 +591,6 @@
   color: #ffd700;
 }
 
-/* --- Back Button --- */
 .author-page .author-back-btn {
   position: absolute;
   top: 20px;
@@ -622,7 +618,6 @@
   font-size: 12px;
 }
 
-/* --- Pagination buttons --- */
 .author-page .pagination {
   margin-top: 20px;
   display: flex;

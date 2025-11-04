@@ -39,7 +39,7 @@ function ViewChapter() {
 
       <div className="chapter-section">
         <div className="chapter-list-container">
-          <div className="chapter-header">
+          <div className="chapt-header">
             <h2>CHAPTER LIST TABLE {`(${chapters.length})`}</h2>
             <div className="chapter-controls">
               <select

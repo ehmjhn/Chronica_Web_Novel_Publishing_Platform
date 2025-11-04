@@ -216,7 +216,7 @@ html {
   }
 }
 
-/* LATEST RELEASES */
+/* LATEST RELEASES, POPULAR WORKS, FEATURED SERIES */
 .latest-content {
   display: flex;
   flex-direction: column;
@@ -225,6 +225,7 @@ html {
   min-height: calc(100vh - (130px + 40px));
   background: linear-gradient(to top right, #0e0f20 40%, #0e0f2021); 
   color: white;
+  animation: fadeInPage 0.3s ease-in;
 }
 
 .latest-page {

@@ -186,11 +186,11 @@ function MySeries() {
                 <h3 className="series-title">{s.title}</h3>
                 <span className="series-genre">{s.genre}</span>
                 <p className="series-desc">{s.desc}</p>
-                <p className="series-meta">
+                <span className="series-meta">
                   <i className="fa-solid fa-eye"></i> {s.views} | {" "}
                   <i className="fa-solid fa-book"></i> {s.chapters} Chapters | {" "}
                   <i className="fa-solid fa-heart"></i> {s.favorites} Favorites 
-                </p>
+                </span>
 
                 <div className="series-buttons">
                   <NavLink to='/create-chapter' className="btn-yellow">

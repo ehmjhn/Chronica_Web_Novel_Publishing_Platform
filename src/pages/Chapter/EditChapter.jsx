@@ -2,6 +2,9 @@ import './chapter.css';
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router';
 
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css"; 
+
 function EditChapter() {
     // mock data
     const mockChapter = {
@@ -79,11 +82,13 @@ function EditChapter() {
                     />
 
                     <label htmlFor="chapter-content">Chapter Content</label>
-                    <textarea
-                        id="chapter-content"
+                    <ReactQuill
+                        className="chapter-content"
                         value={chapterContent}
-                        onChange={(e) => setChapterContent(e.target.value)}
-                    ></textarea>
+                        onChange={setChapterContent}
+                        theme="snow"
+                        placeholder="Write your chapter here..."
+                    />
 
                     {/* Publish Options */}
                     <div className="publish-options">

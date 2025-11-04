@@ -3,34 +3,32 @@ import LOGO from '../assets/CHRONICA.png'
 import { NavLink} from "react-router";
 import { logout, subscribeAuthChanges } from '../firebase/auth';
 import { useEffect, useState } from "react";
-import { getUserID } from "../firebase/db";
 
 function Nav() {
 
   const [user, setUser] = useState(null);
-  const [image, setImage] = useState(null)
+  const [image, setImage] = useState(null)  
   useEffect(() => {
 
     const unsubscribe = subscribeAuthChanges((currentUser) => {
       if (currentUser) {
         setUser(currentUser.displayName);
         setImage(currentUser.photoURL);
-        getUserID(currentUser.getIdToken)
       } else {
         setUser(null);
         setImage(null);
       }
     });
 
-    return () => unsubscribe();
+      return () => unsubscribe(); 
 
-  }, []);
-
-  function handleLogout() {
-    logout();
-    window.location.href = '/login'
-  }
-
+    }, []);
+    
+    function handleLogout(){
+        logout();
+        window.location.href = '/login'
+    }
+  
   return (
 
     <>

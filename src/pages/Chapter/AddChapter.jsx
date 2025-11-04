@@ -2,6 +2,9 @@ import './chapter.css';
 import { useState } from 'react';
 import { NavLink } from 'react-router';
 
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css"; 
+
 function AddChapter() {
     // date time
     const now = new Date();
@@ -9,6 +12,7 @@ function AddChapter() {
     const currentTime = now.toTimeString().slice(0, 5); 
 
     const [publishOption, setPublishOption] = useState('immediate');
+    const [content, setContent] = useState("");
     const [date, setDate] = useState(today);
     const [time, setTime] = useState(currentTime);
 
@@ -54,7 +58,13 @@ function AddChapter() {
                     <input id="chapter-title" type="text" placeholder="Enter chapter title..." />
 
                     <label htmlFor="chapter-content">Chapter Content</label>
-                    <textarea id="chapter-content" placeholder="Write your chapter here..."></textarea>
+                    <ReactQuill
+                        className='chapter-content'
+                        value={content}
+                        onChange={setContent}
+                        theme="snow"
+                        placeholder="Write your chapter here..."
+                    />
 
                     {/* Publish Options */}
                     <div className="publish-options">

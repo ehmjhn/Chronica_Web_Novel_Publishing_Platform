@@ -26,6 +26,7 @@
   background-position: center;
   border: 2px solid rgb(142, 102, 0);
   box-shadow: 0 0 20px rgba(255, 217, 0, 0.5);
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 .storyview-wrapper {
@@ -177,6 +178,7 @@
   width: 85%;
   margin: 0 auto;
   border: 1px solid rgb(93, 67, 0);
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 .storyview-author h2,
@@ -248,16 +250,17 @@
   border-radius: 10px;
   border: 1px solid rgb(142, 102, 0);
   box-shadow: 0 0 5px rgba(255, 217, 0, 0.5);
+  animation: fadeIn 0.5s ease-in-out;
 }
 
-.chapter-header {
+.chapt-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
 }
 
-.chapter-header h2 {
+.chapt-header h2 {
   font-size: 1.2rem;
   color: #fff;
   margin: 0;
@@ -435,6 +438,7 @@
   backdrop-filter: blur(4px);
   color: #fff;
   transition: box-shadow 0.3s ease;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 .reviews-container:hover {
@@ -804,14 +808,13 @@
   line-height: 1.5;
 }
 
-.series-meta {
+.series-page .series-meta {
   font-size: 13px;
   color: #aaa;
   margin: 12px 0;
-  display: flex;
-  gap: 12px;
+  display: inline-block;
 }
-.series-meta i {
+.series-page .series-meta i {
   color: #f7b500;
 }
 

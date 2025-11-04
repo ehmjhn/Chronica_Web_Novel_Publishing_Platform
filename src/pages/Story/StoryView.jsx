@@ -48,9 +48,9 @@ function StoryView() {
                   </div>
 
                   <div className="storyview-buttons">
-                    <button className="btn read">Read</button>
+                    <button className="btn read"><i className="fa-solid fa-book"></i>Read</button>
                     <button className="btn download">
-                      Ano to Add Bookmark saglit lang
+                      <i className="fa-solid fa-bookmark"></i>Bookmark
                     </button>
                   </div>
                 </div>
