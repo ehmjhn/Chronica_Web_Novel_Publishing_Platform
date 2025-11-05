@@ -1,21 +1,25 @@
-import './auth.css';
+import './reset.css';
 import { NavLink } from 'react-router';
-import { FaEye } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { FiLock } from "react-icons/fi";
 import { useState } from 'react';
+import resetbgimg from '../assets/chronicaimg.png';
 
 function ResetPassword() {
   const [npass, setnShow] = useState(false);
   const [cpass, setcShow] = useState(false);
 
+  const toggleNewPassword = () => setnShow(prev => !prev);
+  const toggleConfirmPassword = () => setcShow(prev => !prev);
+
   return (
     <div className="form-container">
       <div className="reset-card">
+        {/* Left Side - Form */}
         <div className="reset-form">
           <FiLock className="lock-icon" />
-
-          <h2>Reset Your Password</h2>
+          <h2>RESET YOUR PASSWORD</h2>
           <p>We strongly suggest using a strong password for your security.</p>
 
           <div className="pass-container">
@@ -23,41 +27,40 @@ function ResetPassword() {
             <div className="password-input-container">
               <input
                 type={npass ? "text" : "password"}
-                placeholder="New Password"
+                placeholder="New password"
               />
-              <FaEye
-                className="show-icon"
-                onClick={() => setnShow(!npass)}
-              />
+              <span className="icon-toggle" onClick={toggleNewPassword}>
+                {npass ? <FaEyeSlash className="show-icon" /> : <FaEye className="show-icon" />}
+              </span>
             </div>
 
             {/* Confirm Password */}
             <div className="password-input-container">
               <input
                 type={cpass ? "text" : "password"}
-                placeholder="Confirm Password"
+                placeholder="Confirm password"
               />
-              <FaEye
-                className="show-icon"
-                onClick={() => setcShow(!cpass)}
-              />
+              <span className="icon-toggle" onClick={toggleConfirmPassword}>
+                {cpass ? <FaEyeSlash className="show-icon" /> : <FaEye className="show-icon" />}
+              </span>
             </div>
           </div>
 
           <button type="submit" className="submit-npassword-btn">
-            Change Password
+            Change password
           </button>
 
           <div className="back-to-login">
             <NavLink to="/login">
-              <IoIosArrowRoundBack className="back-icon" />Back to Login
+              <IoIosArrowRoundBack className="back-icon" /> Back to login
             </NavLink>
           </div>
         </div>
 
+        {/* Right Side - Image */}
         <div className="reset-img">
           <img
-            src="https://img.freepik.com/premium-photo/password-reset-concept-computer-screen-with-reset-password-interface-user-account-security-vector-illustration_655090-951487.jpg"
+            src={resetbgimg}
             alt="Reset Password Illustration"
           />
         </div>
@@ -66,4 +69,6 @@ function ResetPassword() {
   );
 }
 
+
 export default ResetPassword;
+
