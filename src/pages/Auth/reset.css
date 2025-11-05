@@ -1,1 +1,189 @@
 
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #0c0c0c;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+
+.reset-card {
+  display: flex;
+  background: #0d0d16;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+  width: 850px;
+  max-width: 95%;
+}
+
+
+.reset-form {
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 30px;
+  text-align: center;
+  color: #fff;
+}
+
+.lock-icon {
+  font-size: 50px;
+  color: #f4b400;
+  margin-bottom: 5px;
+}
+
+
+.reset-form h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+
+.reset-form p {
+  font-size: 13px;
+  color: #b5b5b5;
+  margin-bottom: px;
+  max-width: 280px;
+}
+
+
+.pass-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+
+.password-input-container {
+  position: relative;
+  width: 350px;
+  background: #21212D;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  transition: all 0.3s ease;
+}
+
+.password-input-container input {
+  width: 100%;
+  padding: 12px 42px 12px 15px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font-size: 0.9rem;
+  letter-spacing: 0.3px;
+}
+
+.password-input-container input:focus {
+  background-color: #4C4C68;
+  border-radius: 10px;
+}
+
+.icon-toggle {
+  position: absolute;
+  right: 20px;
+  top: 55%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #bbb;
+  font-size: 16px;
+}
+
+.icon-toggle:hover {
+  color: #f5b300;
+}
+
+/* Submit button */
+.submit-npassword-btn {
+  width: 90%;
+  margin-top: 20px;
+  padding: 12px;
+  background-color: #f5b300;
+  border: none;
+  border-radius: 25px;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-npassword-btn:hover {
+  background-color: #ffcc33;
+}
+
+
+.back-to-login {
+  margin-top: 20px;
+}
+
+.back-to-login a {
+  color: #f5b300;
+  text-decoration: none;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.3s;
+}
+
+.back-to-login a:hover {
+  color: #ffcc33;
+}
+
+.back-icon {
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+
+.reset-img {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reset-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+@media (max-width: 768px) {
+  .reset-card {
+    flex-direction: column;
+    width: 90%;
+  }
+
+  .reset-form {
+    padding: 30px 20px;
+  }
+
+  .password-input-container,
+  .submit-npassword-btn {
+    width: 100%;
+  }
+}
+
+
