@@ -9,8 +9,8 @@ function StoryReviews() {
   const { id } = useParams();
   const [story, setStory] = useState(null);
   const [reviews, setReviews] = useState([]);
-  const [users, setUsers] = useState([]) 
-  const [currentUser, setCurrentUser] = useState(null) 
+  const [users, setUsers] = useState([])
+  const [currentUser, setCurrentUser] = useState()
 
   // New review form states
   const [rating, setRating] = useState(0);
@@ -31,24 +31,25 @@ function StoryReviews() {
         });
 
         retrieveUsers((usersData) => {
-          console.log(usersData); 
-          setUsers(usersData);     
+          console.log(usersData);
+          setUsers(usersData);
         });
       }
     });
 
-    const unsubscribe = subscribeAuthChanges((currentUser)=>{
-      getUserProfile(currentUser.uid).then((userData) => {
-        if (userData) setCurrentUser(userData);
-      });
-    })
-
-    return ()=> unsubscribe()
+    const unsubscribe = subscribeAuthChanges((user) => {
+      if (user) {
+        setCurrentUser(user);
+      } else {
+        setCurrentUser(null);
+      }
+    });
+    return () => unsubscribe()
 
   }, [id]);
 
   // Handle adding a new review
-  const userReview = reviews.find(r => r.userId === currentUser?.id);
+  const userReview = reviews.find(r => r.userId === currentUser.uid);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -59,20 +60,16 @@ function StoryReviews() {
 
     const newReview = {
       storyId: story.id,
-      userId: currentUser.id,
+      userId: currentUser.uid,
       topic: reviewTopic,
       message: reviewText,
       rating: rating,
       createdAt: new Date().toISOString(),
       likes: 0
     };
-
-    addReview(newReview, (id) => {
-      setReviews(prev => [...prev, { ...newReview, id }]);
-      setRating(0);
-      setReviewTopic('');
-      setReviewText('');
-    });
+    console.log(currentUser.uid)
+    console.log(currentUser)
+    addReview(newReview, story.id);
   };
 
   // Rating summary
@@ -90,7 +87,7 @@ function StoryReviews() {
       ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
       : 0;
 
-  if (!story) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>;
+  if (!story) return <div className="homepage"><div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>Loading...</div></div>;
 
   return (
     <div className="storyview-page">
@@ -130,7 +127,7 @@ function StoryReviews() {
             <div className="review-item">
               <div>
                 <strong>{currentUser.name}</strong>{" "}
-                <span>{new Date(userReview.createdAt).toLocaleString()}</span>
+                <span>{new Date(userReview.date).toLocaleString()}</span>
               </div>
               <div>
                 <strong>Review Topic:</strong> {userReview.topic}

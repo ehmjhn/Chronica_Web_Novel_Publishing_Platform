@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 function Nav() {
 
   const [user, setUser] = useState(null);
-
+  
   useEffect(() => {
 
     const unsubscribe = subscribeAuthChanges((currentUser) => {

@@ -9,7 +9,8 @@ export const getUserProfile = (userId) => {
   return get(ref(database, `users/${userId}`))
     .then((snapshot) => {
       if (snapshot.exists()) {
-        return snapshot.val(); 
+        console.log(snapshot.val())
+        return snapshot.val();
       } else {
         console.log("No user data available");
         return null;
@@ -32,10 +33,10 @@ export const retrieveUsers = (callback) => {
       id,
       ...value
     }));
-    callback(user); 
+    callback(user);
   });
 
-  return unsubscribe; 
+  return unsubscribe;
 };
 
 // retrieve stories
@@ -48,10 +49,10 @@ export const readComic = (callback) => {
       id,
       ...value
     }));
-    callback(comics); 
+    callback(comics);
   });
 
-  return unsubscribe; 
+  return unsubscribe;
 };
 
 // retrieve chapters
@@ -60,11 +61,11 @@ export const retrieveChapter = (callback) => {
 
   const unsubscribe = onValue(chapRef, (snapshot) => {
     const data = snapshot.val()
-    const chapters = Object.entries(data).map(([id, value])=>({
+    const chapters = Object.entries(data).map(([id, value]) => ({
       id,
       ...value
     }));
-    callback(chapters); 
+    callback(chapters);
   });
 
   return unsubscribe;
@@ -74,9 +75,9 @@ export const retrieveChapter = (callback) => {
 export const retrieveReviews = (callback) => {
   const revRef = ref(database, `reviews/`)
 
-  const unsubscribe = onValue(revRef, (snapshot)=>{
+  const unsubscribe = onValue(revRef, (snapshot) => {
     const data = snapshot.val()
-    const reviews = Object.entries(data).map(([id, value])=>({
+    const reviews = Object.entries(data).map(([id, value]) => ({
       id,
       ...value
     }));
@@ -88,12 +89,14 @@ export const retrieveReviews = (callback) => {
 
 // add review
 export const addReview = (reviewData, callback) => {
-  if (!reviewData || !reviewData.id) {
+  if (!reviewData) {
+    console.log(reviewData)
+    console.log(reviewData.storyId)
     console.error("Review data must have an 'id' property");
     return;
   }
-
-  const reviewRef = ref(database, `reviews/${reviewData.id}`);
+  
+  const reviewRef = ref(database, `reviews/${reviewData.userId}`);
 
   try {
     set(reviewRef, {
@@ -106,8 +109,7 @@ export const addReview = (reviewData, callback) => {
       date: reviewData.date || new Date().toISOString(),
       likes: reviewData.likes || 0
     });
-
-    if (callback) callback(reviewData.id); // return the review id
+ // return the review id
   } catch (error) {
     console.error("Error adding review:", error);
   }
