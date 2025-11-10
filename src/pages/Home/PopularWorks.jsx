@@ -9,13 +9,14 @@ function PopularWorks() {
     const [popularComics, setPopular] = useState([])
 
     useEffect(()=>{
-        readComic((comics)=>{
+        const unsubscribe = readComic((comics) => {
             if (!comics) return;
 
-            const popular = comics.sort((a, b)=> b.views - a.views);
-
-            setPopular(popular)
+            const sorted = [...comics].sort((a, b) => b.views - a.views);
+            setPopular(sorted);
         });
+
+        return () => unsubscribe();
     },[])
 
     return (

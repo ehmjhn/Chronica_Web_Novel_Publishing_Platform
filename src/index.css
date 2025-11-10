@@ -39,3 +39,21 @@ main {
   background-size: cover;
 }
 
+
+input[type="date"],
+input[type="time"] {
+  color: white; 
+  background-color: #000; 
+  border: 1px solid #fff;
+  border-radius: 4px;
+  padding-right: 2rem; 
+  -webkit-appearance: none; 
+  -moz-appearance: none; 
+  appearance: none; 
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1); 
+  cursor: pointer;
+}

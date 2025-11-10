@@ -1,7 +1,7 @@
 /* ADD CHAPTER */
 .page-background {
     width: 100%;
-    background: linear-gradient(to top, #0b0c16 60%, #0b0c1655);
+    background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062); 
     color: #f0f0f0;
     padding: 30px;
     gap: 30px;
@@ -46,14 +46,14 @@
 
 .series-card {
     display: flex;
-    flex-direction: row;
-    background-color: #252740;
+    align-items: flex-start;
     padding: 1rem;
     border-radius: 12px;
     margin-top: 1rem;
     gap: 1rem;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
 }
 
 .series-card:hover {
@@ -62,22 +62,26 @@
 }
 
 .series-image {
-    width: 150px;
-    height: 250px;
-    border-radius: 10px;
-    border: 1px solid #444;
-    overflow: hidden; 
-    transition: transform 0.3s ease;
     flex-shrink: 0; 
-    background-color: #1f2135; 
+    width: 120px;  
+    height: 160px;
+    overflow: hidden;
+    border-radius: 10px;
+    background-color: #1c1e30;
 }
 
 .series-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; 
     border-radius: 10px;
-    transition: transform 0.3s ease;
+}
+
+.series-details {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .series-image:hover img {
@@ -270,7 +274,6 @@
   align-items: flex-start;
   gap: 1.8rem;
   width: 90%;
-  max-width: 950px;
   background-color: #1f2135;
   border: 1px solid goldenrod;
   border-radius: 15px;
@@ -376,7 +379,7 @@
 }
 
 .chapter-content {
-  width: 100%;
+  width: 90%;
   background-color: #252740;;
   padding: 20px;
   border-radius: 15px;

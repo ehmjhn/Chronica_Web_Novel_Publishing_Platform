@@ -1,117 +1,159 @@
-import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase/auth.js";
-import { ref, push, set, onValue, update, get } from "firebase/database";
-import { db, database } from "../firebase/firebase-config.js";
-import StorySection from "../components/StorySection.jsx";
-import { getDocs, collection, setDoc, doc, snapshotEqual } from "firebase/firestore";
+// db.js
+import { getDatabase, get, ref, set, push, onValue, update } from "firebase/database";
+import { app } from "./firebase-config.js";
 
-//pang users natong firestore database
-//USER(FIRESTORE)
+export const database = getDatabase(app);
 
-//getUserAccs
-const userCollectionRef = collection(db, "users");
-export const getUserList = async (users) => {
-   try {
-      const data = await getDocs(userCollectionRef);
-      const filteredData = data.docs.map((doc) => ({
-         ...doc.data(),
-         id: doc.id,
-      }));
-      getUserList(users)
-
-   } catch (e) {
-      console.error(e);
-   }
+//retrieve your profile
+export const getUserProfile = (userId) => {
+  return get(ref(database, `users/${userId}`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        return snapshot.val(); 
+      } else {
+        console.log("No user data available");
+        return null;
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching user profile:", error);
+      return null;
+    });
 };
 
-//search for userID in collection
-export async function getUserID(uid) {
-   const usersRef = ref(database, "users");
-   try {
-      const snapshot = await get(usersRef);
-      const data = snapshot.val();
+//retrieve users
+export const retrieveUsers = (callback) => {
+  const userRef = ref(database, `users/`);
 
-      if (!data) return false;
+  const unsubscribe = onValue(userRef, (snapshot) => {
+    const data = snapshot.val();
+    console.log(data)
+    const user = Object.entries(data).map(([id, value]) => ({
+      id,
+      ...value
+    }));
+    callback(user); 
+  });
 
-      const exists = Object.values(data).some((item) => item.userID === uid);
-      return exists;
-   } catch (error) {
-      console.error("Error checking user:", error);
-      return false;
-   }
-}
-
-export const addUser = async (user) => {
-   console.log("adduser called with: ", user);
-   await push(ref(database, "users"), user).then(() => {
-      console.log("New user has been added.")
-   }).catch((error) => {
-      console.error(error);
-   });
+  return unsubscribe; 
 };
 
-//REALTIME DATABASE
-export function insertComic(
-   title,
-   author,
-   userID,
-   likes,
-   rate,
-   genre,
-   profilePic,
-   isCompleted
-) {
-   const comicRef = ref(database, "comics"); // <- changed to "comics"
-   const newRef = push(comicRef);
-   try {
-      set(newRef, {
-         title: title,
-         author: {
-            name: author,
-            profilePic: profilePic,
-            uid: userID,
-         },
-         userID: userID,
-         likes: likes,
-         rate: rate,
-         genre: genre,
-         isCompleted: isCompleted,
-         createdAt: new Date().toISOString(),
-         updatedAt: new Date().toISOString(),
-      });
-   } catch (e) {
-      console.error(e);
-   }
+// retrieve stories
+export const readComic = (callback) => {
+  const comicRef = ref(database, "stories/");
+
+  const unsubscribe = onValue(comicRef, (snapshot) => {
+    const data = snapshot.val() || {};
+    const comics = Object.entries(data).map(([id, value]) => ({
+      id,
+      ...value
+    }));
+    callback(comics); 
+  });
+
+  return unsubscribe; 
+};
+
+// retrieve chapters
+export const retrieveChapter = (callback) => {
+  const chapRef = ref(database, `chapters/`)
+
+  const unsubscribe = onValue(chapRef, (snapshot) => {
+    const data = snapshot.val()
+    const chapters = Object.entries(data).map(([id, value])=>({
+      id,
+      ...value
+    }));
+    callback(chapters); 
+  });
+
+  return unsubscribe;
+};
+
+//retrieve review
+export const retrieveReviews = (callback) => {
+  const revRef = ref(database, `reviews/`)
+
+  const unsubscribe = onValue(revRef, (snapshot)=>{
+    const data = snapshot.val()
+    const reviews = Object.entries(data).map(([id, value])=>({
+      id,
+      ...value
+    }));
+    callback(reviews)
+  });
+
+  return unsubscribe
 }
 
-// Read comics
-export function readComic(setComicList) {
-   const comicRef = ref(database, "comics"); // <- changed to "comics"
-   onValue(comicRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      const comics = Object.keys(data).map((key) => {
-         const comic = data[key];
-         return {
-            id: key,
-            title: comic.title || "Untitled",
-            author: comic.author?.name || "Unknown",
-            profilePic: comic.author?.profilePic || "",
-            userID: comic.userID || "",
-            coverImage: comic.coverImage || "",
-            views: comic.views || 0,
-            bookmarks: comic.bookmarks || 0,
-            rate: comic.rate || 0,
-            isFeatured: comic.isFeatured || false,
-            isCompleted: comic.isCompleted || false,
-            genre: comic.genre || [],
-            totalChapters: comic.totalChapters || 0,
-            createdAt: comic.createdAt || "",
-            updatedAt: comic.updatedAt || "",
-            latestChapter: comic.latestChapter || null,
-         };
-      });
-      console.log(comics);
-      setComicList(comics);
-   });
-}
+// add review
+export const addReview = (reviewData, callback) => {
+  if (!reviewData || !reviewData.id) {
+    console.error("Review data must have an 'id' property");
+    return;
+  }
+
+  const reviewRef = ref(database, `reviews/${reviewData.id}`);
+
+  try {
+    set(reviewRef, {
+      storyId: reviewData.storyId,
+      userId: reviewData.userId,
+      user: reviewData.user || "",
+      topic: reviewData.topic || "",
+      text: reviewData.text || "",
+      score: reviewData.score || 0,
+      date: reviewData.date || new Date().toISOString(),
+      likes: reviewData.likes || 0
+    });
+
+    if (callback) callback(reviewData.id); // return the review id
+  } catch (error) {
+    console.error("Error adding review:", error);
+  }
+};
+
+// update user profile
+export const updateUserProfile = (uid, newData) => {
+  const userRef = ref(database, `users/${uid}`);
+  try {
+    return update(userRef, newData);
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+  }
+};
+
+// Add comic
+export const insertComic = (
+  title,
+  author,
+  userID,
+  likes,
+  rate,
+  genre,
+  profilePic,
+  isCompleted
+) => {
+  const comicRef = ref(database, "stories/");
+  const newRef = push(comicRef);
+  try {
+    set(newRef, {
+      title,
+      author: {
+        name: author,
+        profilePic,
+        uid: userID,
+      },
+      userID,
+      likes,
+      rate,
+      genre,
+      isCompleted,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Error inserting comic:", error);
+  }
+};
+

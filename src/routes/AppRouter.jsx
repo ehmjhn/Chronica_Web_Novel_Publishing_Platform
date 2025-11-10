@@ -11,7 +11,7 @@ import GuestRoute from "./GuestRoute";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
-import ResetPassword from "../pages/Auth/ResetPassword";
+import SetPassword from "../pages/Auth/SetPassword";
 
 // Home and Info Pages
 import Home from "../pages/Home/Home";
@@ -51,116 +51,49 @@ function AppRouter() {
       <Routes>
 
         {/* MAIN LAYOUT */}
-        <Route element={<MainLayout />}>
+      <Route element={<MainLayout />}>
 
-          {/* NOT PROTECTED */}
-          <Route index element={<Home />} />
-          <Route path="home">
-            <Route index element={<Home />} />
-            <Route path="featured-stories" element={<FeaturedStories />} />
-            <Route path="latest-releases" element={<LatestRelease />} />
-            <Route path="popular-works" element={<PopularWorks />} />
-          </Route>
+        {/* Public pages */}
+        <Route index element={<Home />} />
+        <Route path="home" element={<Home />} />
+        <Route path="home/featured-stories" element={<FeaturedStories />} />
+        <Route path="home/latest-releases" element={<LatestRelease />} />
+        <Route path="home/popular-works" element={<PopularWorks />} />
 
-          <Route path="about-us" element={<About />} />
-          <Route path="story-details" element={<StoryDetails />} />
-          <Route path="story-details/:id" element={<StoryDetails />} />
-          <Route path="story-chapter-list/:id" element={<ViewChapter />} />
-          <Route path="story-reviews/:id" element={<StoryReviews />} />
-          <Route path="search-discovery" element={<SearchDiscovery/>}/>
-          <Route path="read-chapter" element={<ReadChapter/>}/>
+        <Route path="about-us" element={<About />} />
+        <Route path="story-details" element={<StoryDetails />} />
+        <Route path="story-details/:id" element={<StoryDetails />} />
+        <Route path="story-chapter-list/:id" element={<ViewChapter />} />
+        <Route path="story-reviews/:id" element={<StoryReviews />} />
+        <Route path="search-discovery" element={<SearchDiscovery />} />
+        <Route path="read-chapter/:id" element={<ReadChapter />} />
 
-          {/* PROTECTED */}
-          <Route path="notification" element={
-            <ProtectedRoute>
-              <Notification />
-            </ProtectedRoute>
-          } />
+        {/* Protected pages */}
+        <Route path="notification" element={<ProtectedRoute><Notification /></ProtectedRoute>} />
+        <Route path="profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
+        <Route path="edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="author-profile" element={<ProtectedRoute><AuthorProfile /></ProtectedRoute>} />
+        <Route path="create-chapter" element={<ProtectedRoute><AddChapter /></ProtectedRoute>} />
+        <Route path="bookmark" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
+        <Route path="my-series" element={<ProtectedRoute><MySeries /></ProtectedRoute>} />
+        <Route path="create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
+        <Route path="update-story" element={<ProtectedRoute><EditStory /></ProtectedRoute>} />
+        <Route path="update-chapter-list" element={<ProtectedRoute><ChapterList /></ProtectedRoute>} />
+        <Route path="edit-chapter" element={<ProtectedRoute><EditChapter /></ProtectedRoute>} />
 
-          <Route path="profile" element={
-            <ProtectedRoute>
-              <ProfileSettings />
-            </ProtectedRoute>
-          } />
-          <Route path="edit-profile" element={
-            <ProtectedRoute>
-              <EditProfile />
-            </ProtectedRoute>
-          } />
-          <Route path="author-profile" element={
-            <ProtectedRoute>
-              <AuthorProfile />
-            </ProtectedRoute>
-          } />
-          <Route path="create-chapter" element={
-            <ProtectedRoute> 
-              <AddChapter />
-            </ProtectedRoute> 
-          } />
+      </Route>
 
-          <Route path="bookmark" element={
-            <ProtectedRoute>
-              <Bookmark />
-            </ProtectedRoute>
-          } />
+      {/* AUTH LAYOUT (Guest Only) */}
+      <Route element={<GuestRoute><AuthLayout /></GuestRoute>}>
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="set-password" element={<SetPassword />} />
+      </Route>
 
-          <Route path="my-series" element={
-            <ProtectedRoute>
-              <MySeries />
-            </ProtectedRoute>
-          } />
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
 
-          <Route path="create-story" element={
-            <ProtectedRoute>
-              <CreateStory />
-            </ProtectedRoute>
-          } />
-
-          <Route path="update-story" element={
-            <ProtectedRoute>
-              <EditStory/>
-            </ProtectedRoute>
-          } />
-
-          <Route path="update-chapter-list" element={
-            <ProtectedRoute>
-              <ChapterList/>
-            </ProtectedRoute>
-          } />
-
-          <Route path="edit-chapter" element={
-            <ProtectedRoute>
-              <EditChapter/>
-            </ProtectedRoute>
-          } />
-
-        </Route>
-
-        {/* AUTH LAYOUT */}
-        <Route element={<AuthLayout />}>
-          <Route path="login" element={
-            <GuestRoute>
-              <Login />
-            </GuestRoute>
-          } />
-          <Route path="register" element={
-            <GuestRoute>
-              <Register />
-            </GuestRoute>
-          } />
-          <Route path="forgot-password" element={
-            <GuestRoute>
-              <ForgotPassword />
-            </GuestRoute>
-          } />
-          <Route path="reset-password" element={
-            <GuestRoute>
-              <ResetPassword />
-            </GuestRoute>
-          } />
-        </Route>
-
-        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

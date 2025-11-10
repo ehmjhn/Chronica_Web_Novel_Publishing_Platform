@@ -7,34 +7,27 @@ import { useEffect, useState } from "react";
 function Nav() {
 
   const [user, setUser] = useState(null);
-  const [image, setImage] = useState(null)  
+
   useEffect(() => {
 
     const unsubscribe = subscribeAuthChanges((currentUser) => {
       if (currentUser) {
-        setUser(currentUser.displayName);
-        setImage(currentUser.photoURL);
-<<<<<<< HEAD
-        getUserID(currentUser.uid)
-=======
->>>>>>> 5994072573036fc562528118d421f73c41d1638e
+        setUser(currentUser);
       } else {
         setUser(null);
-        setImage(null);
       }
     });
-
-      return () => unsubscribe(); 
-
-    }, []);
     
-    function handleLogout(){
-        logout();
-        window.location.href = '/login'
-    }
+    return () => unsubscribe(); 
+    
+  }, []);
+
+  function handleLogout(){
+      logout();
+      window.location.href = '/login'
+  }
   
   return (
-
     <>
       <nav>
         <div className="title">
@@ -51,11 +44,13 @@ function Nav() {
             className="search-bar"
             aria-label="Search"
           />
-          <NavLink to='/notification'><i className="fa-solid fa-bell"></i></NavLink>
+          <NavLink to="/notification">
+            <i className="fa-solid fa-bell"></i>
+          </NavLink>
         </div>
 
         <div className="account-wrapper">
-          {!user ? (
+          {!user || (!user.emailVerified && !user.providerData?.some(p => p.providerId === "google.com")) ?  (
             <>
               <div className="account">
                 <i
@@ -74,27 +69,24 @@ function Nav() {
           ) : (
             <>
               <div className="account">
-                {image == null ? (
-                  <>
-                    <i
-                      style={{ fontSize: "30px" }}
-                      className="fa-solid fa-circle-user"
-                    ></i>
-                  </>
+                {user.photoURL == null ? (
+                  <i
+                    style={{ fontSize: "30px" }}
+                    className="fa-solid fa-circle-user"
+                  ></i>
                 ) : (
-                  <>
-                    <img src={image} alt="" />
-                  </>
+                  <img src={user.photoURL} alt="User profile" />
                 )}
                 <i className="fa-solid fa-caret-down"></i>
               </div>
 
               <div className="nav-settings">
-                <h2>{user}</h2>
+                <h2>{user.displayName}</h2>
                 <NavLink to="/profile">Account Settings</NavLink>
                 <NavLink to="/author-profile">Profile Page</NavLink>
                 <NavLink to="/bookmark">Reading List</NavLink>
                 <NavLink to="/my-series">My Series</NavLink>
+                {/* Add type="button" to avoid accidental form submission */}
                 <NavLink to="" onClick={handleLogout}>
                   Log Out
                 </NavLink>
@@ -105,7 +97,6 @@ function Nav() {
       </nav>
 
       <div className="nav2">
-        {/* Conditional Render: if Homepage is accesed */}
         <div className="nav2-left">
           <NavLink to="/home/featured-stories" className="dropbtn">
             Featured Stories
@@ -123,40 +114,39 @@ function Nav() {
             </button>
             <div className="dropdown-content">
               <div className="genre-grid">
-                {/* baka i-map ko to */}
-                <NavLink href="#">Action</NavLink>
-                <NavLink href="#">Romance</NavLink>
-                <NavLink href="#">Fantasy</NavLink>
-                <NavLink href="#">Drama</NavLink>
-                <NavLink href="#">Comedy</NavLink>
-                <NavLink href="#">Adventure</NavLink>
-                <NavLink href="#">Mystery</NavLink>
-                <NavLink href="#">Sci-Fi</NavLink>
-                <NavLink href="#">Slice of Life</NavLink>
-                <NavLink href="#">Horror</NavLink>
-                <NavLink href="#">Thriller</NavLink>
-                <NavLink href="#">Historical</NavLink>
-                <NavLink href="#">Supernatural</NavLink>
-                <NavLink href="#">Sports</NavLink>
-                <NavLink href="#">Psychological</NavLink>
+                {/* FIX: NavLink should use "to" instead of "href" */}
+                <NavLink to="#">Action</NavLink>
+                <NavLink to="#">Romance</NavLink>
+                <NavLink to="#">Fantasy</NavLink>
+                <NavLink to="#">Drama</NavLink>
+                <NavLink to="#">Comedy</NavLink>
+                <NavLink to="#">Adventure</NavLink>
+                <NavLink to="#">Mystery</NavLink>
+                <NavLink to="#">Sci-Fi</NavLink>
+                <NavLink to="#">Slice of Life</NavLink>
+                <NavLink to="#">Horror</NavLink>
+                <NavLink to="#">Thriller</NavLink>
+                <NavLink to="#">Historical</NavLink>
+                <NavLink to="#">Supernatural</NavLink>
+                <NavLink to="#">Sports</NavLink>
+                <NavLink to="#">Psychological</NavLink>
               </div>
             </div>
           </div>
+
           <NavLink to="/about-us" className="dropbtn">
             About
           </NavLink>
         </div>
 
         <div className="nav2-right">
-          <NavLink to='/search-discovery' className="nav2-btn">
+          <NavLink to="/search-discovery" className="nav2-btn">
             <i className="fa-brands fa-readme"></i> Read Story
           </NavLink>
-          <NavLink to='/create-story' className="nav2-btn">
+          <NavLink to="/create-story" className="nav2-btn">
             <i className="fa-solid fa-feather"></i> Write Story
           </NavLink>
         </div>
-
-        {/* Conditional Render:  */}
       </div>
     </>
   );

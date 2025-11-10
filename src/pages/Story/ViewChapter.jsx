@@ -1,28 +1,28 @@
-import { useState } from "react";
-import StoryView from "./StoryView";
 import "./story.css";
-
-//mock database
-const chapters = [
-  { id: 1, title: "Chapter 1: Title", date: "Date Released", order: 1 },
-  { id: 2, title: "Chapter 2: Title", date: "Date Released", order: 2 },
-  { id: 3, title: "Chapter 3: Title", date: "Date Released", order: 3 },
-  { id: 4, title: "Chapter 4: Title", date: "Date Released", order: 4 },
-  { id: 5, title: "Chapter 5: Title", date: "Date Released", order: 5 },
-  { id: 6, title: "Chapter 6: Title", date: "Date Released", order: 6 },
-  { id: 7, title: "Chapter 7: Title", date: "Date Released", order: 7 },
-  { id: 8, title: "Chapter 8: Title", date: "Date Released", order: 8 },
-  { id: 9, title: "Chapter 9: Title", date: "Date Released", order: 9 },
-  { id: 10, title: "Chapter 10: Title", date: "Date Released", order: 10 },
-  { id: 11, title: "Chapter 11: Title", date: "Date Released", order: 11 },
-  { id: 12, title: "Chapter 12: Title", date: "Date Released", order: 12 },
-  { id: 13, title: "Chapter 13: Title", date: "Date Released", order: 13 },
-];
+import StoryView from "./StoryView";
+import { useEffect, useState } from "react";
+import { NavLink, useParams } from "react-router";
+import { retrieveChapter } from "../../firebase/db";
 
 function ViewChapter() {
   const [limit, setLimit] = useState(10); 
   const [orderAsc, setOrderAsc] = useState(true);
   const [page, setPage] = useState(1);
+
+  const {id} = useParams()
+  const [chapters, setChapters] = useState([])
+
+  useEffect(()=>{
+
+    retrieveChapter((chaps)=>{
+      if(!chaps) return;
+
+      const storyChaps = chaps.filter(c => c.storyId === id)
+      setChapters(storyChaps || [])
+      console.log(storyChaps)
+    })
+
+  }, [])
 
   const sortedChapters = [...chapters].sort((a, b) =>
     orderAsc ? b.order - a.order : a.order - b.order
@@ -62,11 +62,11 @@ function ViewChapter() {
             </div>
           </div>
 
-          {paginatedChapters.map((chapter) => (
-            <div key={chapter.id} className="chapter-item">
-              <span>{chapter.title}</span>
-              <span className="chapter-date">{chapter.date}</span>
-            </div>
+          {paginatedChapters.map((chapter, k) => (
+            <NavLink to={`/read-chapter/${chapter.id}`} key={k} className="chapter-item">
+              <span>{chapter.chapterTitle}</span>
+              <span className="chapter-date">{chapter.publishDate}</span>
+            </NavLink>
           ))}
 
           <div className="chapter-pagination">

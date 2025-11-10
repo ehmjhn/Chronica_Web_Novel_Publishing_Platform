@@ -7,14 +7,20 @@ import { registerUser } from "../../firebase/auth";
 
 function Registration() {
 
+    const [fullname, setFullname] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPass, setConfirmPass] = useState('');
+    const [npass, setnShow] = useState(false);
+    const [cpass, setcShow] = useState(false);
+
+    const toggleNewPassword = () => setnShow(prev => !prev);
+    const toggleConfirmPassword = () => setcShow(prev => !prev);
 
     function handleRegister() {
         
-        if(!email || !password || !confirmPass || !username){
+        if(!email || !password || !confirmPass || !username || !fullname){
             alert('Please fill up all fields.')
             return;
         }
@@ -24,7 +30,7 @@ function Registration() {
             return;
         }
 
-        registerUser(email, password, username)
+        registerUser(email, password, username, fullname)
     }
 
   return (
@@ -39,49 +45,71 @@ function Registration() {
           <p className='title-text'>CREATE ACCOUNT </p>
           <div className="reg-input-icons">
             <div className="reg-input-field-ul">
+              <i className="fa fa-user icon"></i>
+              <input
+                className="reg-input-field"
+                type="text"
+                placeholder="Enter your Full Name"
+                onChange={(e) => setFullname(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="reg-input-icons">
+            <div className="reg-input-field-ul">
+              <i className="fa fa-pen-nib icon"></i>
               <input
                 className="reg-input-field"
                 type="text"
                 placeholder="Enter your Username"
                 onChange={(e) => setUsername(e.target.value)}
               />
-              <i className="fa fa-user"></i>
             </div>
           </div>
 
           <div className="reg-input-icons">
             <div className="reg-input-field-ul">
+              <i className="fa fa-envelope icon"></i>
               <input
                 className="reg-input-field"
                 type="email"
                 placeholder="Enter your email address"
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <i className="fa fa-envelope icon"></i>
             </div>
           </div>
 
           <div className="reg-input-icons">
             <div className="reg-input-field-ul">
+              <i className="fa fa-key icon"></i>
               <input
                 className="reg-input-field"
-                type="password"
+                type={npass ? "text" : "password"} 
                 placeholder="Must at least 8 characters"
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <i className="fa fa-key icon"></i>
+              <i
+                className={`fas ${npass ? "fa-eye-slash" : "fa-eye"} eye-icon`}
+                onClick={toggleNewPassword}
+                style={{ cursor: "pointer" }}
+              ></i>
             </div>
           </div>
 
           <div className="reg-input-icons">
             <div className="reg-input-field-ul">
+              <i className="fa fa-check-circle icon"></i>
               <input
                 className="reg-input-field"
-                type="password"
+                type={cpass ? "text" : "password"} 
                 placeholder="Re-enter your password"
                 onChange={(e) => setConfirmPass(e.target.value)}
               />
-              <i className="fa fa-check-circle icon"></i>
+              <i
+                className={`fas ${cpass ? "fa-eye-slash" : "fa-eye"} eye-icon`}
+                onClick={toggleConfirmPassword}
+                style={{ cursor: "pointer" }}
+              ></i>
             </div>
           </div>
 

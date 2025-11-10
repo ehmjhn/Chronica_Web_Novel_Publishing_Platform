@@ -7,6 +7,7 @@ import { loginUser, signInWithGoogle } from "../../firebase/auth";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [pass, setShowPass] = useState(false);
 
   function handleLogin() {
     loginUser(email, password);
@@ -47,10 +48,15 @@ function Login() {
                 <i className="fas fa-lock input-icon"></i>
                 <input
                   className="input-field"
-                  type="password"
+                  type={pass ? "text" : "password"} 
                   placeholder="Password"
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <i
+                  className={`fas ${pass ? "fa-eye-slash" : "fa-eye"} eye-icon`}
+                  onClick={() => setShowPass(!pass)}
+                  style={{ cursor: "pointer" }}
+                ></i>
               </div>
             </div>
 

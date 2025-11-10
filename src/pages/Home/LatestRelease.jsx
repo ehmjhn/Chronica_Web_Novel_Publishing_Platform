@@ -9,18 +9,23 @@ function LatestStories() {
   const [latestComics, setLatest] = useState([]);
 
   useEffect(() => {
-    readComic((Comics) => {
-      const today = new Date();
-      const latest = Comics.filter((comic) => {
-        if (!comic.createdAt) return false;
-        const createdDate = new Date(comic.createdAt);
-        const diffDays = (today - createdDate) / (1000 * 60 * 60 * 24);
-        return diffDays <= 30; 
-      });
 
-      latest.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      setLatest(latest);
+    const unsubscribe = readComic((comics) => {
+        if (!comics) return;
+
+        const today = new Date();
+        const latest = comics.filter((comic) => {
+          if (!comic.createdAt) return false;
+          const createdDate = new Date(comic.createdAt);
+          const diffDays = (today - createdDate) / (1000 * 60 * 60 * 24);
+          return diffDays <= 30; 
+        });
+
+        latest.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setLatest(latest);
     });
+
+    return () => unsubscribe();
   }, [])
 
   return (

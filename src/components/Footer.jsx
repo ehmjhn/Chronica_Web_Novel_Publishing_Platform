@@ -5,7 +5,7 @@ function Footer (){
     return(
         <>
             <div className="above-footer">
-                <div className="above-footer">
+                <div className="above-info">
 
                     <div className="footer-column about-box">
                     <h3>About Chronica</h3>
@@ -55,7 +55,7 @@ function Footer (){
 
             <footer>
                 <p className="footer-brand">Chronica</p>
-                <p>© 2025 ISIP KAYO PANGALAN NATIN AS A GROUP PLSS. All Rights Reserved.</p>
+                <p>© 2025 Paranoic Software Solutions. All Rights Reserved.</p>
                 <div className="footer-links">
                     <a href="/privacy">Privacy Policy</a>
                     <a href="/terms">Terms of Service</a>

@@ -1,190 +1,213 @@
 import './story.css';
 import { useState, useEffect } from "react";
 import { useParams } from 'react-router';
-import { readComic } from '../../firebase/db';
+import { readComic, retrieveReviews, addReview, getUserProfile, retrieveUsers } from '../../firebase/db';
+import { subscribeAuthChanges } from '../../firebase/auth';
 import StoryView from './StoryView';
 
 function StoryReviews() {
-  const [rating, setRating] = useState(0);
-  const [reviewTopic, setReviewTopic] = useState("");
-  const [reviewText, setReviewText] = useState("");
-  const [reviews, setReviews] = useState([]);
   const { id } = useParams();
-  const [viewStory, setView] = useState([]);
+  const [story, setStory] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [users, setUsers] = useState([]) 
+  const [currentUser, setCurrentUser] = useState(null) 
 
-  // sample data
+  // New review form states
+  const [rating, setRating] = useState(0);
+  const [reviewTopic, setReviewTopic] = useState('');
+  const [reviewText, setReviewText] = useState('');
+
+  // Fetch story and reviews
   useEffect(() => {
-    readComic(setView);
 
-    const dummyReviews = [
-      {
-        id: 1,
-        user: "John Doe",
-        date: "2025-10-30",
-        topic: "Great Story!",
-        text: "Really loved the pacing and plot twists. Waiting for more!",
-        score: 5,
-        likes: 12,
-      },
-      {
-        id: 2,
-        user: "Luna Sky",
-        date: "2025-10-25",
-        topic: "Nice Character Development",
-        text: "Characters felt realistic and relatable!",
-        score: 4,
-        likes: 5,
-      },
-      {
-        id: 3,
-        user: "Alex Moon",
-        date: "2025-10-22",
-        topic: "Could be better",
-        text: "Story started strong but pacing slowed a bit in the middle.",
-        score: 3,
-        likes: 2,
-      },
-    ];
-    setReviews(dummyReviews);
-  }, []);
+    readComic((stories) => {
+      const currentStory = stories.find((s) => s.id === id);
+      setStory(currentStory);
 
-  // handle adding a new review
+      if (currentStory) {
+        retrieveReviews((allReviews) => {
+          const storyReview = allReviews.filter((r) => r.storyId === currentStory.id);
+          setReviews(storyReview);
+        });
+
+        retrieveUsers((usersData) => {
+          console.log(usersData); 
+          setUsers(usersData);     
+        });
+      }
+    });
+
+    const unsubscribe = subscribeAuthChanges((currentUser)=>{
+      getUserProfile(currentUser.uid).then((userData) => {
+        if (userData) setCurrentUser(userData);
+      });
+    })
+
+    return ()=> unsubscribe()
+
+  }, [id]);
+
+  // Handle adding a new review
+  const userReview = reviews.find(r => r.userId === currentUser?.id);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!reviewTopic || !reviewText) return;
+    if (userReview) return alert("You have already reviewed this story.");
+
+    if (!rating || !reviewTopic || !reviewText)
+      return alert("Please fill all fields");
 
     const newReview = {
-      id: Date.now(),
-      user: "Anonymous",
-      date: new Date().toLocaleDateString(),
+      storyId: story.id,
+      userId: currentUser.id,
       topic: reviewTopic,
-      text: reviewText,
-      score: rating,
-      likes: 0,
+      message: reviewText,
+      rating: rating,
+      createdAt: new Date().toISOString(),
+      likes: 0
     };
 
-    setReviews([newReview, ...reviews]);
-    setReviewTopic("");
-    setReviewText("");
-    setRating(0);
+    addReview(newReview, (id) => {
+      setReviews(prev => [...prev, { ...newReview, id }]);
+      setRating(0);
+      setReviewTopic('');
+      setReviewText('');
+    });
   };
 
-  // calculate bar stats
+  // Rating summary
   const totalReviews = reviews.length;
   const starCounts = [5, 4, 3, 2, 1].map((star) =>
-    reviews.filter((r) => r.score === star).length
+    reviews.filter((r) => r.rating === star).length
   );
   const starPercentages = starCounts.map((count) =>
     totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0
   );
 
-  // compute average
+  // Average rating
   const avgRating =
     totalReviews > 0
-      ? (
-          reviews.reduce((sum, r) => sum + r.score, 0) / totalReviews
-        ).toFixed(1)
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
       : 0;
 
+  if (!story) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>;
+
   return (
-    <>
-      {viewStory
-        .filter((story) => story.id === id)
-        .map((story) => (
-          <div key={story.id} className="storyview-page">
-            
-            <StoryView />
+    <div className="storyview-page">
+      <StoryView />
 
-            <div className="reviews-container">
-              <h2>
-                Reviews ({totalReviews}) — {" "}
+      <div className="reviews-container">
+        <h2>
+          Reviews ({totalReviews}) —{" "}
+          <span style={{ color: "#f5c518" }}>
+            {avgRating} <i className="fa-solid fa-star"></i>
+          </span>
+        </h2>
+
+        {/* Rating Summary */}
+        <div className="rating-summary">
+          {[5, 4, 3, 2, 1].map((star, i) => (
+            <div key={star} className="rating-row">
+              <span>{star}★:</span>
+              <div className="bar-container">
+                <div
+                  className="bar"
+                  style={{ width: `${starPercentages[i]}%` }}
+                ></div>
+              </div>
+              <span>
+                {starPercentages[i]}% ({starCounts[i]})
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Write a Review */}
+        <div className="write-review">
+          <h3>Write a Review</h3>
+
+          {userReview ? (
+            <div className="review-item">
+              <div>
+                <strong>{currentUser.name}</strong>{" "}
+                <span>{new Date(userReview.createdAt).toLocaleString()}</span>
+              </div>
+              <div>
+                <strong>Review Topic:</strong> {userReview.topic}
+              </div>
+              <p>{userReview.message}</p>
+              <div>
+                Rating:{" "}
                 <span style={{ color: "#f5c518" }}>
-                  {avgRating} <i className="fa-solid fa-star"></i>
+                  {userReview.rating} <i className="fa-solid fa-star"></i>
                 </span>
-              </h2>
-
-              {/* Rating Summary */}
-              <div className="rating-summary">
-                {[5, 4, 3, 2, 1].map((star, i) => (
-                  <div key={star} className="rating-row">
-                    <span>{star}★:</span>
-                    <div className="bar-container">
-                      <div
-                        className="bar"
-                        style={{ width: `${starPercentages[i]}%` }}
-                      ></div>
-                    </div>
-                    <span>
-                      {starPercentages[i]}% ({starCounts[i]})
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Write a Review */}
-              <div className="write-review">
-                <h3>Write a Review</h3>
-                <form onSubmit={handleSubmit}>
-                  <label>Your Rating: ({rating})</label>
-                  <div className="stars">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <span
-                        key={star}
-                        className={`star ${star <= rating ? "active" : ""}`}
-                        onClick={() => setRating(star)}
-                      >
-                        <i className="fa-solid fa-star"></i>
-                      </span>
-                    ))}
-                  </div>
-
-                  <input
-                    type="text"
-                    placeholder="Review Topic"
-                    value={reviewTopic}
-                    onChange={(e) => setReviewTopic(e.target.value)}
-                  />
-
-                  <textarea
-                    placeholder="Your Review"
-                    value={reviewText}
-                    onChange={(e) => setReviewText(e.target.value)}
-                  />
-
-                  <button type="submit">
-                    <i className="fa-solid fa-paper-plane"></i> Submit
-                  </button>
-                </form>
-              </div>
-
-              <hr />
-
-              {/* Reviews List */}
-              <div className="review-list">
-                {reviews.map((review) => (
-                  <div key={review.id} className="review-item">
-                    <div>
-                      <strong>{review.user}</strong>{" "}
-                      <span>{review.date}</span>
-                    </div>
-                    <div>
-                      <strong>Review Topic:</strong> {review.topic}
-                    </div>
-                    <p>{review.text}</p>
-                    <div>
-                      Rating:{" "}
-                      <span style={{ color: "#f5c518" }}>
-                        {review.score} <i className="fa-solid fa-star"></i>
-                      </span>{" "}
-                      | <i className="fa-solid fa-heart"></i> {review.likes} likes
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
-          </div>
-        ))}
-    </>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <label>Your Rating:</label>
+              <div className="stars">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    className={`star ${star <= rating ? "active" : ""}`}
+                    onClick={() => setRating(star)}
+                  >
+                    <i className="fa-solid fa-star"></i>
+                  </span>
+                ))}
+              </div>
+
+              <input
+                type="text"
+                placeholder="Review Topic"
+                value={reviewTopic}
+                onChange={(e) => setReviewTopic(e.target.value)}
+              />
+
+              <textarea
+                placeholder="Your Review"
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+              />
+
+              <button type="submit">
+                <i className="fa-solid fa-paper-plane"></i> Submit
+              </button>
+            </form>
+          )}
+        </div>
+
+        <hr />
+
+        {/* Reviews List */}
+        <div className="review-list">
+          {reviews.map((review) => {
+            const reviewer = users.find(u => u.id === review.userId);
+
+            return (
+              <div key={review.id} className="review-item">
+                <div>
+                  <strong>{reviewer?.displayName}</strong>{" "}
+                  <span>{new Date(review.createdAt).toLocaleString()}</span>
+                </div>
+                <div>
+                  <strong>Review Topic:</strong> {review.topic}
+                </div>
+                <p>{review.message}</p>
+                <div>
+                  Rating:{" "}
+                  <span style={{ color: "#f5c518" }}>
+                    {review.rating} <i className="fa-solid fa-star"></i>
+                  </span>{" "}
+                  | <i className="fa-solid fa-heart"></i> {review.likes} likes
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 }
 

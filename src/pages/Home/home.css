@@ -6,7 +6,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(to top, #0e0f20 40%, #0e0f2021); 
+  background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062); 
 }
 
 .main-content {
@@ -140,81 +140,6 @@
   margin-bottom: 0;
 }
 
-@media (max-width: 1024px) {
-  .main-content {
-    padding: 30px 20px;
-  }
-  
-  .hero-section {
-    padding: 50px 20px;
-  }
-  
-  .hero-section h1 {
-    font-size: 36px;
-  }
-  
-  .hero-section p {
-    font-size: 16px;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    padding: 25px 15px;
-  }
-  
-  .hero-section {
-    padding: 40px 15px;
-  }
-  
-  .hero-section h1 {
-    font-size: 28px;
-  }
-  
-  .hero-section p {
-    font-size: 15px;
-  }
-  
-  .hero-cta {
-    padding: 12px 24px;
-    font-size: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-content {
-    padding: 20px 10px;
-  }
-  
-  .hero-section {
-    padding: 30px 15px;
-  }
-  
-  .hero-section h1 {
-    font-size: 24px;
-  }
-  
-  .hero-section p {
-    font-size: 14px;
-  }
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-.homepage {
-  animation: fadeInPage 0.3s ease-in;
-}
-
-@keyframes fadeInPage {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
 
 /* LATEST RELEASES, POPULAR WORKS, FEATURED SERIES */
 .latest-content {
@@ -223,7 +148,7 @@ html {
   gap: 20px;
   padding: 20px 50px;
   min-height: calc(100vh - (130px + 40px));
-  background: linear-gradient(to top right, #0e0f20 40%, #0e0f2021); 
+  background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062); 
   color: white;
   animation: fadeInPage 0.3s ease-in;
 }
@@ -240,19 +165,4 @@ html {
   font-size: 14px;
   text-align: center;
   width: 100%;
-}
-
-@media (max-width: 1024px) {
-  .latest-content {
-    padding-inline: 30px;
-  }
-}
-
-@media (max-width: 768px) {
-  .latest-page {
-    justify-content: center;
-  }
-  .latest-content {
-    padding-inline: 20px;
-  }
 }

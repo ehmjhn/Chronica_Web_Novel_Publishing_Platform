@@ -15,7 +15,7 @@ function ProtectedRoute ({children}){
         return ()=> unsubscribe();
     },[])
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>;
 
     if (!user) return <Navigate to='/login' replace/>; //ginagamit si replace para d makabalik sa prev activity/page
 

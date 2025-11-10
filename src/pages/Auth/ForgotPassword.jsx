@@ -1,10 +1,22 @@
 import './auth.css'
 import { NavLink } from 'react-router';
+import { forgotPass } from '../../firebase/auth';
 import { IoMdMail } from "react-icons/io";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { FiAlertCircle } from "react-icons/fi";
+import { useState } from 'react';
 
 function ForgotPassword (){
+
+    const [email, setEmail] = useState()
+
+    function handleResetPass(){
+        if(!email){
+            alert("Please enter an email")
+            return;
+        }
+        forgotPass(email)
+    }
     
     return(
         <div className="form-container">
@@ -17,12 +29,12 @@ function ForgotPassword (){
 
                     <div className="email-container">
                         <IoMdMail className="email-icon" />
-                        <input type="email" placeholder="Email" />
+                        <input type="email" placeholder="Email" onChange={(e)=>setEmail(e.target.value)}/>
                     </div>
                     {/* /* dito lalabas kung valid yung email o hindi */}
                     <p className="process-status"></p>
 
-                    <button type="submit" className="submit-email-btn">Submit</button>
+                    <button type="submit" className="submit-email-btn" onClick={handleResetPass}>Submit</button>
 
                     <div className="back-to-login">
                         <NavLink to="/login"><IoIosArrowRoundBack className="back-icon" />Back to login</NavLink>

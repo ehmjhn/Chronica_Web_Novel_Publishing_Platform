@@ -8,13 +8,17 @@ function FeaturedStories() {
 const [featuredComics, setFeatured] = useState([]);
 
   useEffect(() => {
-    readComic((comics)=>{
-        if (!comics) return;
 
-        const featured = comics.filter(comic => comic.isFeatured === true)
+    const unsubscribe = readComic((comics) => {
+      if (!comics) return;
 
-        setFeatured(featured)
-    }); 
+      const featured = comics.filter(comic => comic.isFeatured === true)
+      setFeatured(featured)
+      
+    });
+
+    return () => unsubscribe();
+
   }, []);
 
   return (

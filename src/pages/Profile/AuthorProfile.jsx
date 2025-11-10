@@ -1,22 +1,44 @@
-import { useState } from "react";
 import './profile.css';
+import { useState, useEffect } from "react";
+import { subscribeAuthChanges } from '../../firebase/auth';
+import { getUserProfile } from '../../firebase/db';
 import { NavLink } from "react-router";
 
 function AuthorProfile({ author }) {
-  // sample data
+  
+  const [userData, setUserData] = useState()
+  const [loading, setIsLoading] = useState(true)
+
+  const [activeTab, setActiveTab] = useState("popular");
+  const [currentPage, setCurrentPage] = useState(1);
+  const SERIES_PER_PAGE = 5;
+  
+  useEffect(() => {
+    const unsubscribe = subscribeAuthChanges((currentUser) => {
+      if (currentUser) {
+
+        getUserProfile(currentUser.uid)
+        .then((data)=>{
+          setUserData(data)
+          setIsLoading(false)
+        })
+
+      } else {
+        setUserData(null)
+        setIsLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+  
+  console.log(userData)
+
+  if(loading) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>
+
+  // sample data for series
   if (!author) {
     author = {
-      handle: "@xXJhaezer_67Xx",
-      avatar: "https://via.placeholder.com/100",
-      followers: 67,
-      following: 69,
-      bio: "Just a small author with big dreams — weaving emotions through words and creating stories that live beyond the page.",
-      joined: "2025-02-28",
-      socials: {
-        instagram: "https://instagram.com",
-        facebook: "https://facebook.com",
-        tiktok: "https://tiktok.com",
-      },
       series: Array.from({ length: 15 }, (_, i) => ({
         id: i + 1,
         title: `Series ${i + 1}`,
@@ -26,11 +48,6 @@ function AuthorProfile({ author }) {
       })),
     };
   }
-
-  // state
-  const [activeTab, setActiveTab] = useState("popular");
-  const [currentPage, setCurrentPage] = useState(1);
-  const SERIES_PER_PAGE = 5;
 
   // filter stories
   const sortedSeries = [...author.series].sort((a, b) =>
@@ -51,12 +68,12 @@ function AuthorProfile({ author }) {
         <div className="author-header-section">
           <div className="author-header-left">
             <div className="author-pic">
-              <img src={author.avatar} alt={author.handle} />
+              <img src={author.avatar} alt={userData?.displayName} />
             </div>
             <div className="author-info">
-              <h2 className="author-handle">{author.handle}</h2>
+              <h2 className="author-handle">{userData?.displayName}</h2>
               <p className="author-stats">
-                {author.series.length} Public Series &nbsp;•&nbsp; {author.followers} Followers &nbsp;•&nbsp; {author.following} Following
+                {userData?.totalSeries} Public Series &nbsp;•&nbsp; {userData?.followersCount} Followers &nbsp;•&nbsp; {userData?.followingCount} Following
               </p>
             </div>
           </div>
@@ -107,25 +124,21 @@ function AuthorProfile({ author }) {
         )}
 
         {/* About */}
-        {author.bio && (
-          <div className="author-about">
-            <h3>About</h3>
-            <p>{author.bio}</p>
-            <p className="author-joined"><strong>Joined:</strong> {new Date(author.joined).toLocaleDateString()}</p>
-          </div>
-        )}
+        <div className="author-about">
+          <h3>About Me</h3>
+          <p>{userData?.bio || "--"}</p>
+          <p className="author-joined"><strong>Joined:</strong> {userData?.joinedDate || "--"}</p>
+        </div>
 
         {/* Socials */}
-        {author.socials && (
-          <div className="author-socials">
-            <h3>Socials</h3>
-            <div className="author-social-icons">
-              {author.socials.instagram && <a href={author.socials.instagram}><i className="fab fa-instagram"></i></a>}
-              {author.socials.facebook && <a href={author.socials.facebook}><i className="fab fa-facebook"></i></a>}
-              {author.socials.tiktok && <a href={author.socials.tiktok}><i className="fab fa-tiktok"></i></a>}
-            </div>
+        <div className="author-socials">
+          <h3>Socials</h3>
+          <div className="author-social-icons">
+            <a href=''><i className="fab fa-instagram"></i></a>
+            <a href=''><i className="fab fa-facebook"></i></a>
+            <a href=''><i className="fab fa-tiktok"></i></a>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

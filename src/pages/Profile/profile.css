@@ -12,7 +12,7 @@
 /* EDIT PROFILE */
 .edit-profile-wrapper {
   font-family: "Poppins", sans-serif;
-  background: linear-gradient(to top, #0a0a0f 40%, #1a1a1d00);
+  background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062); 
   color: #fff;
   display: flex;
   justify-content: center;
@@ -44,9 +44,10 @@
 
 .edit-profile-wrapper .profile-image {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  width:100%;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
 }
 
 .edit-profile-wrapper .image-circle {
@@ -107,6 +108,16 @@
   color: #fff;
 }
 
+.edit-profile-wrapper .upload-btn {
+  margin-top: 10px;
+  background: #ffcc33;
+}
+
+.edit-profile-wrapper .upload-btn:hover {
+  background: #000000;
+  color: #fff;
+}
+
 .edit-profile-wrapper .edit-right {
   width: 70%;
   padding: 40px 50px;
@@ -135,7 +146,8 @@
 }
 
 .edit-profile-wrapper .edit-info input,
-.edit-profile-wrapper .edit-info textarea {
+.edit-profile-wrapper .edit-info textarea,
+.edit-profile-wrapper .edit-info select {
   width: 100%;
   background: #111;
   border: 1px solid #2e2e2e;
@@ -147,7 +159,8 @@
 }
 
 .edit-profile-wrapper .edit-info input:focus,
-.edit-profile-wrapper .edit-info textarea:focus {
+.edit-profile-wrapper .edit-info textarea:focus,
+.edit-profile-wrapper .edit-info select:focus {
   border-color: #ffcc33;
 }
 
@@ -156,6 +169,10 @@
   resize: vertical;
   line-height: 1.5;
   margin-bottom: 10px;
+}
+
+.edit-profile-wrapper .edit-info select {
+  cursor: pointer;
 }
 
 .edit-profile-wrapper .social-icons {
@@ -177,6 +194,9 @@
 .edit-profile-wrapper .save-container {
   text-align: right;
   margin-top: 25px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .edit-profile-wrapper .save-btn {
@@ -195,11 +215,28 @@
   background-color: #000;
 }
 
+.edit-profile-wrapper .cancel-btn {
+  background: #444;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.edit-profile-wrapper .cancel-btn:hover {
+  background: #222;
+  color: #ffcc33;
+}
+
 
 /* PROFILE SETTINGS */
 .profile-wrapper {
   font-family: "Poppins", sans-serif;
-  background: linear-gradient(to top, #0a0a0f 40%, #1a1a1d00);
+  background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062); 
   color: #fff;
   display: flex;
   justify-content: center;
@@ -233,6 +270,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
 }
 
 .profile-wrapper .image-circle {
@@ -380,7 +418,7 @@
 /* AUTHOR */
 .author-profile-wrapper {
   padding: 40px;
-  background: linear-gradient(to top, #0e0f20 40%, #0e0f2021); 
+  background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062); 
   width: 100%;
   display: flex;
   justify-content: center;

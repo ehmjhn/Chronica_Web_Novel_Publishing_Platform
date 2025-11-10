@@ -11,7 +11,7 @@
 
 /* BOOKMARK */
 .bookmark-wrap {
-  background: linear-gradient(to top, #0e0f20 40%, #0e0f2021); 
+  background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062); 
   width: 100%;
   display: flex;
   justify-content: center;
@@ -232,7 +232,7 @@
 /* SEARCH DISCOVERY */
 .discoverypage{
   width: 100%;
-  background: linear-gradient(to top, #0b0c16 60%, #0b0c1655);
+  background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062); 
   color: #f0f0f0;
   padding: 30px;
   gap: 30px;
@@ -371,7 +371,7 @@
 /* NOTIFICATION */
 .notifacation{
    width: 100%;
-   background: linear-gradient(to top, #121217 60%, #12121788); 
+   background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062);  
    color: #f0f0f0;
    padding: 30px;
    gap: 30px;
