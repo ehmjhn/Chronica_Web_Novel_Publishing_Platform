@@ -88,29 +88,24 @@ export const retrieveReviews = (callback) => {
 
 // add review
 export const addReview = (reviewData, callback) => {
-  if (!reviewData || !reviewData.id) {
-    console.error("Review data must have an 'id' property");
-    return;
-  }
+  const reviewRef = push(ref(database, 'reviews/')); 
+  const id = reviewRef.key;
 
-  const reviewRef = ref(database, `reviews/${reviewData.id}`);
-
-  try {
-    set(reviewRef, {
-      storyId: reviewData.storyId,
-      userId: reviewData.userId,
-      user: reviewData.user || "",
-      topic: reviewData.topic || "",
-      text: reviewData.text || "",
-      score: reviewData.score || 0,
-      date: reviewData.date || new Date().toISOString(),
-      likes: reviewData.likes || 0
-    });
-
-    if (callback) callback(reviewData.id); // return the review id
-  } catch (error) {
+  set(reviewRef, {
+    storyId: reviewData.storyId,
+    userId: reviewData.userId,
+    topic: reviewData.topic || "",
+    message: reviewData.message || "",
+    rating: reviewData.rating || 0,
+    createdAt: reviewData.createdAt || new Date().toISOString(),
+    likes: reviewData.likes || 0
+  })
+  .then(() => {
+    if (callback) callback(id); 
+  })
+  .catch((error) => {
     console.error("Error adding review:", error);
-  }
+  });
 };
 
 // update user profile
