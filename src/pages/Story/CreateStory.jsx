@@ -76,7 +76,6 @@ export default function CreateSeries() {
   }
 
   function handleCreateSeries() {
-    console.log(selectedGenres)
     insertStory(title, user.uid, selectedGenres, status, synopsis, copyright, selectedTags)
   }
 

@@ -1,5 +1,5 @@
 // db.js
-import { getDatabase, get, ref, set, push, onValue, update, remove} from "firebase/database";
+import { getDatabase, get, ref, set, push, onValue, update, remove } from "firebase/database";
 
 import { app } from "./firebase-config.js";
 
@@ -127,7 +127,7 @@ export const updateUserProfile = (uid, newData) => {
 };
 
 // Add comic
-export const insertStory = (
+export const insertStory = async (
   title,
   authorId,
   genre,
@@ -137,7 +137,9 @@ export const insertStory = (
   tags
 ) => {
   const comicRef = ref(database, "stories/");
+  const userRef = ref(database, `users/${authorId}/createdSeries`)
   const newRef = push(comicRef);
+  const key = newRef.key
   const comicJSON = {
     title: title,
     authorId: authorId,
@@ -153,10 +155,15 @@ export const insertStory = (
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   }
+  const user = await get(userRef)
+  const stories = user.val()|| [];
+  const isCreated = stories.includes(key)
+  const updated = isCreated ?
+    stories.filter(id => id !== key) : [...stories, key]
   try {
-    set(newRef, comicJSON
-      
+    await set(newRef, comicJSON
     );
+    await set(userRef, updated)
   } catch (error) {
     console.error("Error inserting comic:", error);
   }
@@ -261,5 +268,5 @@ export async function checkIfFollowed(userId, followedId) {
     console.error(error);
     throw error;
   }
-} 
+}
 
