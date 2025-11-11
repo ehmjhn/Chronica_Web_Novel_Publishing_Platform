@@ -116,7 +116,7 @@ export const signInWithGoogle = () => {
             followingCount: 0,
             totalSeries: 0,
             bookmarkedStories: {},
-            viewedStory: {},
+            viewedStory: {}
           };
 
           set(userRef, userData).catch((err) => console.error(err));
