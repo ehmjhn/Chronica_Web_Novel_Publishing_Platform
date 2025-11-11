@@ -1,26 +1,29 @@
 import { useParams } from 'react-router';
-import { useEffect,useState } from 'react';
-import { readComic, getUserProfile } from '../../firebase/db';
+import { useEffect, useState } from 'react';
+import { readComic, getUserProfile, addFollowerList, deleteFollowerList, checkIfFollowed } from '../../firebase/db';
 import './story.css'
 import StoryView from './StoryView';
+import { subscribeAuthChanges } from '../../firebase/auth';
 
 function StoryDetails() {
 
-  const {id} = useParams(); //story id
+  const { id } = useParams(); //story id
   const [viewStory, setView] = useState([]);
   const [author, setAuthor] = useState()
+  const [authorId, setAuthorId] = useState()
   const [loading, setIsLoading] = useState(true);
-
+  const [user, setCurrentUser] = useState(null)
+  const [isFollowed, setIsFollowed] = useState()
   useEffect(() => {
     const unsubscribeStories = readComic((stories) => {
       setView(stories);
 
       const story = stories.find((s) => s.id === id);
-
+      setAuthorId(story.authorId)
       if (story) {
         getUserProfile(story.authorId).then((userData) => {
           setAuthor(userData);
-          console.log("Author data:", userData); 
+          console.log("Author data:", userData);
         });
       }
       setIsLoading(false)
@@ -28,8 +31,34 @@ function StoryDetails() {
 
     return () => unsubscribeStories();
   }, [id]);
+  useEffect(() => {
+    const unsubscribe = subscribeAuthChanges((currentUser) => {
+      setCurrentUser(currentUser)
+    })
+    return () => unsubscribe()
+  })
+  useEffect(() => {
+    if (user && authorId) {
+      (async () => {
+        setIsFollowed(checkIfFollowed(user.uid, authorId))
+      })()
+    }
 
-  if (loading) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>;
+  }, [user, authorId])
+
+
+  if (loading) return <div className="homepage"><div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>Loading...</div></div>;
+
+  async function handleAddFollow() {
+    await addFollowerList(user.uid, authorId)
+    setIsFollowed(true)
+
+  }
+  async function handledeleteFollow() {
+    await deleteFollowerList(user.uid, authorId)
+    setIsFollowed(false)
+  }
+
 
   return (
     <>
@@ -39,7 +68,7 @@ function StoryDetails() {
 
           return (
             <div className="storyview-page">
-              <StoryView key={k}/>
+              <StoryView key={k} />
 
               {/* AUTHOR SECTION */}
               <div className="storyview-author">
@@ -51,7 +80,10 @@ function StoryDetails() {
                     </div>
                     <p className="handle">{author?.displayName}</p>
                     <p>Followers: {author?.followersCount} • Following: {author?.followingCount}</p>
-                    <button className="btn follow">+ Follow</button>
+
+                    {isFollowed ? <button className="btn follow" onClick={handledeleteFollow}>Following</button> :
+                      <button className="btn follow" onClick={handleAddFollow}>+ Follow</button>}
+
                   </div>
 
                   {/* Possible tanggalin */}
@@ -104,7 +136,7 @@ function StoryDetails() {
             </div>
           );
         })}
-      
+
     </>
   );
 }
