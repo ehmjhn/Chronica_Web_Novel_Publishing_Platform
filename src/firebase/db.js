@@ -1,5 +1,5 @@
 // db.js
-import { getDatabase, get, ref, set, push, onValue, update, remove} from "firebase/database";
+import { getDatabase, get, ref, set, push, onValue, update } from "firebase/database";
 import { app } from "./firebase-config.js";
 
 export const database = getDatabase(app);
@@ -9,8 +9,7 @@ export const getUserProfile = (userId) => {
   return get(ref(database, `users/${userId}`))
     .then((snapshot) => {
       if (snapshot.exists()) {
-        console.log(snapshot.val())
-        return snapshot.val();
+        return snapshot.val(); 
       } else {
         console.log("No user data available");
         return null;
@@ -33,10 +32,10 @@ export const retrieveUsers = (callback) => {
       id,
       ...value
     }));
-    callback(user);
+    callback(user); 
   });
 
-  return unsubscribe;
+  return unsubscribe; 
 };
 
 // retrieve stories
@@ -49,10 +48,10 @@ export const readComic = (callback) => {
       id,
       ...value
     }));
-    callback(comics);
+    callback(comics); 
   });
 
-  return unsubscribe;
+  return unsubscribe; 
 };
 
 // retrieve chapters
@@ -61,11 +60,11 @@ export const retrieveChapter = (callback) => {
 
   const unsubscribe = onValue(chapRef, (snapshot) => {
     const data = snapshot.val()
-    const chapters = Object.entries(data).map(([id, value]) => ({
+    const chapters = Object.entries(data).map(([id, value])=>({
       id,
       ...value
     }));
-    callback(chapters);
+    callback(chapters); 
   });
 
   return unsubscribe;
@@ -75,9 +74,9 @@ export const retrieveChapter = (callback) => {
 export const retrieveReviews = (callback) => {
   const revRef = ref(database, `reviews/`)
 
-  const unsubscribe = onValue(revRef, (snapshot) => {
+  const unsubscribe = onValue(revRef, (snapshot)=>{
     const data = snapshot.val()
-    const reviews = Object.entries(data).map(([id, value]) => ({
+    const reviews = Object.entries(data).map(([id, value])=>({
       id,
       ...value
     }));
@@ -88,31 +87,24 @@ export const retrieveReviews = (callback) => {
 }
 
 // add review
-export const addReview = (reviewData, callback) => {
-  if (!reviewData) {
-    console.log(reviewData)
-    console.log(reviewData.storyId)
-    console.error("Review data must have an 'id' property");
-    return;
-  }
+export const addReview = (reviewData) => {
+  const reviewRef = push(ref(database, 'reviews/'));
 
-  const reviewRef = ref(database, `reviews/${reviewData.userId}`);
-
-  try {
-    set(reviewRef, {
-      storyId: reviewData.storyId,
-      userId: reviewData.userId,
-      user: reviewData.user || "",
-      topic: reviewData.topic || "",
-      text: reviewData.text || "",
-      score: reviewData.score || 0,
-      createdAt: reviewData.date || new Date().toISOString(),
-      likes: reviewData.likes || 0
-    });
-    // return the review id
-  } catch (error) {
+  set(reviewRef, {
+    storyId: reviewData.storyId,
+    userId: reviewData.userId,
+    topic: reviewData.topic || "",
+    message: reviewData.message || "",
+    rating: reviewData.rating || 0,
+    createdAt: reviewData.createdAt,
+    likes: 0
+  })
+  .then(() => {
+    console.log("Review added successfully!");
+  })
+  .catch((error) => {
     console.error("Error adding review:", error);
-  };
+  });
 };
 
 // update user profile
@@ -123,6 +115,31 @@ export const updateUserProfile = (uid, newData) => {
   } catch (error) {
     console.error("Error updating user profile:", error);
   }
+};
+
+//update review
+export const updateReview = (reviewId, updatedData) => {
+  const reviewRef = ref(database, `reviews/${reviewId}`);
+
+  update(reviewRef, updatedData)
+    .then(() => console.log("Review updated successfully!"))
+    .catch((error) => console.error("Error updating review:", error));
+};
+
+//update bookmark
+export const updateBookmark = (userId, storyId, callback) => {
+  get(ref(database, `users/${userId}/bookmarkedStories`))
+    .then(snapshot => {
+      const bookmarks = snapshot.val() || [];
+      const updated = bookmarks.includes(storyId)
+        ? bookmarks.filter(id => id !== storyId) 
+        : [...bookmarks, storyId];               
+
+      set(ref(database, `users/${userId}/bookmarkedStories`), updated)
+        .then(() => callback && callback(updated))
+        .catch(err => console.error(err));
+    })
+    .catch(err => console.error(err));
 };
 
 // Add comic
@@ -158,133 +175,4 @@ export const insertComic = (
     console.error("Error inserting comic:", error);
   }
 };
-
-
-export async function addbookmarkedStories(userId, storyId) {
-  try {
-    const userRef = ref(database, `users/${userId}/bookmarkedStories/${storyId}`);
-    const snapshot = await get(userRef);
-
-    if (snapshot.exists()) {
-      return false; 
-    } else {
-      await set(userRef, { storyId });
-      console.log("Added to bookmark.")
-      return true; 
-    }
-  } catch (error) {
-    console.error(error);
-    throw error; 
-  }
-}
-
-export async function checkBookmark(userId, storyId) {
-  try {
-    const userRef = ref(database, `users/${userId}/bookmarkedStories/${storyId}`);
-    const snapshot = await get(userRef);
-
-    if (snapshot.exists()) {
-      return true;
-    } else {
-      return false;
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
-
-export async function deleteBookmark(userId, storyId) {
-  try {
-    const userRef = ref(database, `users/${userId}/bookmarkedStories/${storyId}`);
-    const snapshot = await get(userRef);
-
-    if (snapshot.exists()) {
-      await remove(userRef, storyId)
-      console.log("removed from bookmark.")
-      return false;
-    } else {
-      console.log("Already deleted to bookmark.")
-      return true;
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
-
-export async function addFollowerList(userId, followedId){
-  try {
-    
-    
-    const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
-    const userFollowerRef = ref(database, `users/${userId}/followingCount`)
-    const userFollowSnapshot = await get(userFollowerRef)
-    const userSnapshot = await get(userRef);
-    let followingValue = userFollowSnapshot.val()
-    const followedRef = ref(database, `users/${followedId}/followersCount`)
-    const followedUserSnapshot = await get(followedRef)
-    let followerValue = followedUserSnapshot.val()
-    
-
-    if (userSnapshot.exists()) {
-      console.log("you already followed this user.")
-    } 
-    else{
-      followingValue +=1;
-      followerValue +=1;
-      await set(followedRef, followerValue)
-      await set(userFollowerRef, followingValue)
-      await set(userRef, followedId)
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
-
-export async function deleteFollowerList(userId,followedId){
-  try {
-    const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
-    const userFollowerRef = ref(database, `users/${userId}/followingCount`)
-    const userFollowSnapshot = await get(userFollowerRef)
-    const userSnapshot = await get(userRef);
-    let followingValue = userFollowSnapshot.val()
-    const followedRef = ref(database, `users/${followedId}/followersCount`)
-    const followedUserSnapshot = await get(followedRef)
-    let followerValue = followedUserSnapshot.val()
-
-
-    if (userSnapshot.exists()) {
-      await remove(userRef,followedId)
-      followingValue -= 1;
-      followerValue -= 1;
-      await set(followedRef, followerValue)
-      await set(userFollowerRef, followingValue)
-    }
-    else {
-      console.log("already unfollowed this user.")
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
-export async function checkIfFollowed(userId, followedId) {
-  try {
-    const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
-    const userSnapshot = get(userRef)
-
-
-    if (userSnapshot.exists()) {
-      return true
-    }
-    else {
-      return false
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
 
