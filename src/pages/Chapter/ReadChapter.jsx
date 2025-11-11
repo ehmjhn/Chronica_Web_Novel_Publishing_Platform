@@ -70,6 +70,11 @@ function ReadChapter() {
 
   return (
     <div className="page-background">
+      <div className="subnav-control">
+        <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
+        <NavLink to={`/story-chapter-list/${story?.id}`}>Chapter List</NavLink> /
+        <i>{chapter.chapterTitle}</i>
+      </div>
       <div className="read-bg">
         {/* Series Header */}
         <div className="chapter-header">

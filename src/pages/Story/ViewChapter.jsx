@@ -11,6 +11,7 @@ function ViewChapter() {
 
   const {id} = useParams()
   const [chapters, setChapters] = useState([])
+  const [loading, setIsLoading] = useState(true)
 
   useEffect(()=>{
 
@@ -20,6 +21,7 @@ function ViewChapter() {
       const storyChaps = chaps.filter(c => c.storyId === id)
       setChapters(storyChaps || [])
       console.log(storyChaps)
+      setIsLoading(false)
     })
 
   }, [])
@@ -32,6 +34,8 @@ function ViewChapter() {
   const paginatedChapters = sortedChapters.slice(startIndex, startIndex + limit);
 
   const totalPages = Math.ceil(chapters.length / limit);
+
+  if (loading) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>;
 
   return (
     <div className="storyview-page">

@@ -49,10 +49,7 @@ export const registerUser = (email, password, displayName, fullname) => {
         joinedDate: new Date().toISOString().split("T")[0],
         profilePic: user.photoURL || "",
         followersCount: 0,
-        followingCount: 0,
-        totalSeries: 0,
-        bookmarkedStories: {},
-        viewedStory: {}
+        followingCount: 0
       };
 
       return set(ref(database, `users/${user.uid}`), userData).then(() => user);
@@ -113,10 +110,7 @@ export const signInWithGoogle = () => {
             joinedDate: new Date().toISOString().split("T")[0],
             profilePic: user.photoURL || "",
             followersCount: 0,
-            followingCount: 0,
-            totalSeries: 0,
-            bookmarkedStories: {},
-            viewedStory: {}
+            followingCount: 0
           };
 
           set(userRef, userData).catch((err) => console.error(err));

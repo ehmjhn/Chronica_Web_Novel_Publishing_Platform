@@ -44,7 +44,7 @@ function ProfileSettings() {
         <div className="profile-left">
           <div className="profile-image">
             <div className="image-circle">
-              <img src="your-profile-pic.jpg" alt="Profile" />
+              <img src={userData?.profilePic} alt={userData?.displayName} />
             </div>
             <h2>{userData?.name || "--"}</h2>
             <p>{userData?.displayName || "--"}</p>
@@ -59,7 +59,7 @@ function ProfileSettings() {
           </div>
 
           <div className="profile-nav">
-            <button className="signout-btn" onClick={()=> logout()}>Sign Out</button>
+            <button className="signout-btn" onClick={()=> logout()}>Log Out</button>
           </div>
         </div>
 
