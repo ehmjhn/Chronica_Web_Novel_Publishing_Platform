@@ -160,5 +160,131 @@ export const insertComic = (
 };
 
 
+export async function addbookmarkedStories(userId, storyId) {
+  try {
+    const userRef = ref(database, `users/${userId}/bookmarkedStories/${storyId}`);
+    const snapshot = await get(userRef);
 
+    if (snapshot.exists()) {
+      return false; 
+    } else {
+      await set(userRef, { storyId });
+      console.log("Added to bookmark.")
+      return true; 
+    }
+  } catch (error) {
+    console.error(error);
+    throw error; 
+  }
+}
+
+export async function checkBookmark(userId, storyId) {
+  try {
+    const userRef = ref(database, `users/${userId}/bookmarkedStories/${storyId}`);
+    const snapshot = await get(userRef);
+
+    if (snapshot.exists()) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function deleteBookmark(userId, storyId) {
+  try {
+    const userRef = ref(database, `users/${userId}/bookmarkedStories/${storyId}`);
+    const snapshot = await get(userRef);
+
+    if (snapshot.exists()) {
+      await remove(userRef, storyId)
+      console.log("removed from bookmark.")
+      return false;
+    } else {
+      console.log("Already deleted to bookmark.")
+      return true;
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function addFollowerList(userId, followedId){
+  try {
+    
+    
+    const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
+    const userFollowerRef = ref(database, `users/${userId}/followingCount`)
+    const userFollowSnapshot = await get(userFollowerRef)
+    const userSnapshot = await get(userRef);
+    let followingValue = userFollowSnapshot.val()
+    const followedRef = ref(database, `users/${followedId}/followersCount`)
+    const followedUserSnapshot = await get(followedRef)
+    let followerValue = followedUserSnapshot.val()
+    
+
+    if (userSnapshot.exists()) {
+      console.log("you already followed this user.")
+    } 
+    else{
+      followingValue +=1;
+      followerValue +=1;
+      await set(followedRef, followerValue)
+      await set(userFollowerRef, followingValue)
+      await set(userRef, followedId)
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function deleteFollowerList(userId,followedId){
+  try {
+    const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
+    const userFollowerRef = ref(database, `users/${userId}/followingCount`)
+    const userFollowSnapshot = await get(userFollowerRef)
+    const userSnapshot = await get(userRef);
+    let followingValue = userFollowSnapshot.val()
+    const followedRef = ref(database, `users/${followedId}/followersCount`)
+    const followedUserSnapshot = await get(followedRef)
+    let followerValue = followedUserSnapshot.val()
+
+
+    if (userSnapshot.exists()) {
+      await remove(userRef,followedId)
+      followingValue -= 1;
+      followerValue -= 1;
+      await set(followedRef, followerValue)
+      await set(userFollowerRef, followingValue)
+    }
+    else {
+      console.log("already unfollowed this user.")
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+export async function checkIfFollowed(userId, followedId) {
+  try {
+    const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
+    const userSnapshot = get(userRef)
+
+
+    if (userSnapshot.exists()) {
+      return true
+    }
+    else {
+      return false
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
 
