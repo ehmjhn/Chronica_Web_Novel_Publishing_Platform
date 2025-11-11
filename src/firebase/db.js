@@ -1,5 +1,6 @@
 // db.js
 import { getDatabase, get, ref, set, push, onValue, update, remove} from "firebase/database";
+
 import { app } from "./firebase-config.js";
 
 export const database = getDatabase(app);
@@ -159,64 +160,35 @@ export const insertComic = (
   }
 };
 
+export const updateReview = (reviewId, updatedData) => {
+  const reviewRef = ref(database, `reviews/${reviewId}`);
 
-export async function addbookmarkedStories(userId, storyId) {
+  update(reviewRef, updatedData)
+    .then(() => console.log("Review updated successfully!"))
+    .catch((error) => console.error("Error updating review:", error));
+};
+
+//update bookmark
+export const updateBookmark = (userId, storyId, callback) => {
+  get(ref(database, `users/${userId}/bookmarkedStories`))
+    .then(snapshot => {
+      const bookmarks = snapshot.val() || [];
+      const isBookmarked = bookmarks.includes(storyId)
+      const updated = isBookmarked
+        ? bookmarks.filter(id => id !== storyId)
+        : [...bookmarks, storyId];
+
+      set(ref(database, `users/${userId}/bookmarkedStories`), updated)
+        .then(() => callback && callback(updated))
+        .catch(err => console.error(err));
+    })
+    .catch(err => console.error(err));
+};
+
+export async function addFollowerList(userId, followedId) {
   try {
-    const userRef = ref(database, `users/${userId}/bookmarkedStories/${storyId}`);
-    const snapshot = await get(userRef);
 
-    if (snapshot.exists()) {
-      return false; 
-    } else {
-      await set(userRef, { storyId });
-      console.log("Added to bookmark.")
-      return true; 
-    }
-  } catch (error) {
-    console.error(error);
-    throw error; 
-  }
-}
 
-export async function checkBookmark(userId, storyId) {
-  try {
-    const userRef = ref(database, `users/${userId}/bookmarkedStories/${storyId}`);
-    const snapshot = await get(userRef);
-
-    if (snapshot.exists()) {
-      return true;
-    } else {
-      return false;
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
-
-export async function deleteBookmark(userId, storyId) {
-  try {
-    const userRef = ref(database, `users/${userId}/bookmarkedStories/${storyId}`);
-    const snapshot = await get(userRef);
-
-    if (snapshot.exists()) {
-      await remove(userRef, storyId)
-      console.log("removed from bookmark.")
-      return false;
-    } else {
-      console.log("Already deleted to bookmark.")
-      return true;
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
-
-export async function addFollowerList(userId, followedId){
-  try {
-    
-    
     const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
     const userFollowerRef = ref(database, `users/${userId}/followingCount`)
     const userFollowSnapshot = await get(userFollowerRef)
@@ -225,14 +197,14 @@ export async function addFollowerList(userId, followedId){
     const followedRef = ref(database, `users/${followedId}/followersCount`)
     const followedUserSnapshot = await get(followedRef)
     let followerValue = followedUserSnapshot.val()
-    
+
 
     if (userSnapshot.exists()) {
       console.log("you already followed this user.")
-    } 
-    else{
-      followingValue +=1;
-      followerValue +=1;
+    }
+    else {
+      followingValue += 1;
+      followerValue += 1;
       await set(followedRef, followerValue)
       await set(userFollowerRef, followingValue)
       await set(userRef, followedId)
@@ -243,7 +215,7 @@ export async function addFollowerList(userId, followedId){
   }
 }
 
-export async function deleteFollowerList(userId,followedId){
+export async function deleteFollowerList(userId, followedId) {
   try {
     const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
     const userFollowerRef = ref(database, `users/${userId}/followingCount`)
@@ -256,7 +228,7 @@ export async function deleteFollowerList(userId,followedId){
 
 
     if (userSnapshot.exists()) {
-      await remove(userRef,followedId)
+      await remove(userRef, followedId)
       followingValue -= 1;
       followerValue -= 1;
       await set(followedRef, followerValue)
