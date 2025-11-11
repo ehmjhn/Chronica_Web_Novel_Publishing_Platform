@@ -2,6 +2,7 @@
 import { getDatabase, get, ref, set, push, onValue, update, remove } from "firebase/database";
 
 import { app } from "./firebase-config.js";
+import { TbDatabaseMinus } from "react-icons/tb";
 
 export const database = getDatabase(app);
 
@@ -138,6 +139,7 @@ export const insertStory = async (
 ) => {
   const comicRef = ref(database, "stories/");
   const userRef = ref(database, `users/${authorId}/createdSeries`)
+  const userTotalRef = ref(database, `users/${authorId}/totalSeries`)
   const newRef = push(comicRef);
   const key = newRef.key
   const comicJSON = {
@@ -156,14 +158,18 @@ export const insertStory = async (
     updatedAt: new Date().toISOString()
   }
   const user = await get(userRef)
-  const stories = user.val()|| [];
+  let totalSeries = (await get(userTotalRef)).val()
+  const stories = user.val() || [];
   const isCreated = stories.includes(key)
   const updated = isCreated ?
     stories.filter(id => id !== key) : [...stories, key]
   try {
+    totalSeries += 1;
     await set(newRef, comicJSON
     );
     await set(userRef, updated)
+    await set(userTotalRef, totalSeries)
+    return key;
   } catch (error) {
     console.error("Error inserting comic:", error);
   }

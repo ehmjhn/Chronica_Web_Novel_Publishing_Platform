@@ -14,6 +14,7 @@ function StoryDetails() {
   const [loading, setIsLoading] = useState(true);
   const [user, setCurrentUser] = useState(null)
   const [isFollowed, setIsFollowed] = useState()
+
   useEffect(() => {
     const unsubscribeStories = readComic((stories) => {
       setView(stories);
@@ -40,7 +41,9 @@ function StoryDetails() {
   useEffect(() => {
     if (user && authorId) {
       (async () => {
-        setIsFollowed(checkIfFollowed(user.uid, authorId))
+        console.log(checkIfFollowed(user.uid, authorId))
+        const result = await checkIfFollowed(user.uid, authorId)
+        setIsFollowed(result)
       })()
     }
 
@@ -57,6 +60,11 @@ function StoryDetails() {
   async function handledeleteFollow() {
     await deleteFollowerList(user.uid, authorId)
     setIsFollowed(false)
+  }
+
+  function test() {
+    console.log(user.uid)
+    console.log(authorId)
   }
 
 
@@ -81,8 +89,8 @@ function StoryDetails() {
                     <p className="handle">{author?.displayName}</p>
                     <p>Followers: {author?.followersCount} • Following: {author?.followingCount}</p>
 
-                    {isFollowed ? <button className="btn follow" onClick={handledeleteFollow}>Following</button> :
-                      <button className="btn follow" onClick={handleAddFollow}>+ Follow</button>}
+                    {user.uid === authorId ? (<h1></h1>) : (isFollowed ? <button className="btn follow" onClick={handledeleteFollow}>Following</button> :
+                      <button className="btn follow" onClick={handleAddFollow}>+ Follow</button>)}
 
                   </div>
 

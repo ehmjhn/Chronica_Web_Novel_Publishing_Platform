@@ -91,9 +91,9 @@ function AuthorProfile() {
                 <div className="author-series-details">
                   <h3 className="author-series-title">{series.title}</h3>
                   <p className="author-series-date">
-                    Published: {new Date(series.date).toLocaleDateString()}
+                    Published: {new Date(series.createdAt).toLocaleDateString()}
                   </p>
-                  <p className="author-series-views">♡ {(series.likes || 0).toLocaleString()}</p>
+                  <p className="author-series-views">♡ {(series.id || 0).toLocaleString()}</p>
                 </div>
               </div>
             ))

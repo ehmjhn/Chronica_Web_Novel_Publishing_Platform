@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink } from "react-router";
 import { insertStory } from "../../firebase/db";
 import { subscribeAuthChanges } from "../../firebase/auth";
+import { CgStack } from "react-icons/cg";
 
 export default function CreateSeries() {
   const [user, setCurrentUser] = useState()
@@ -75,10 +76,14 @@ export default function CreateSeries() {
     e.preventDefault();
   }
 
-  function handleCreateSeries() {
-    insertStory(title, user.uid, selectedGenres, status, synopsis, copyright, selectedTags)
+  async function handleCreateSeries() {
+    if (!title || !synopsis || !status || selectedGenres.length === 0 || selectedTags.length === 0) {
+      console.log("ILAGAY MO LAHAT NG FIELDS")
+      return
+    }
+    const id = await insertStory(title, user?.uid, selectedGenres, status, synopsis, copyright, selectedTags)
+    window.location.href = `/story-details/${id}`
   }
-
   return (
     <div className="storyview-page">
       <div className="subnav-control">
@@ -138,18 +143,19 @@ export default function CreateSeries() {
           </div>
 
           <div className="create-form-section create-form-flex">
-            <div>
-              <label className="create-form-label">Main Genre</label>
+            
+            <div className="create-form-section">
+              <label className="create-form-label">Genres (max 7)</label>
               <select
-                value={mainGenre}
-                onChange={(e) => setMainGenre(e.target.value)}
+                onChange={(e) => handleAddGenre(e.target.value)}
+                value=""
+                disabled={selectedGenres.length >= 7}
               >
                 <option value="">Select</option>
                 {genreOptions.map((genre, index) => (
                   <option key={index}>{genre}</option>
                 ))}
               </select>
-            </div>
 
             <div>
               <label className="create-form-label">Story Status</label>
@@ -174,19 +180,19 @@ export default function CreateSeries() {
             </div>
           </div>
 
-          <div className="create-form-section">
-            <label className="create-form-label">Other Genres (max 7)</label>
-            <select
-              onChange={(e) => handleAddGenre(e.target.value)}
-              value=""
-              disabled={selectedGenres.length >= 7}
-            >
-              <option value="">Select</option>
-              {genreOptions.map((genre, index) => (
-                <option key={index}>{genre}</option>
-              ))}
-            </select>
-
+          
+            <div>
+              <label className="create-form-label">Content Warning</label>
+              <select
+                value={mainGenre}
+                onChange={(e) => setMainGenre(e.target.value)}
+              >
+                <option value="">Select</option>
+                {genreOptions.map((genre, index) => (
+                  <option key={index}>{genre}</option>
+                ))}
+              </select>
+            </div>
             <div className="create-form-chip-list">
               {selectedGenres.map((genre, index) => (
                 <span key={index} className="create-form-chip">
