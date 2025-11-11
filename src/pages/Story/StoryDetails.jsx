@@ -12,7 +12,7 @@ function StoryDetails() {
   const [author, setAuthor] = useState()
   const [authorId, setAuthorId] = useState()
   const [loading, setIsLoading] = useState(true);
-  const [user, setCurrentUser] = useState(null)
+  const [user, setCurrentUser] = useState(0)
   const [isFollowed, setIsFollowed] = useState()
 
   useEffect(() => {
@@ -87,7 +87,7 @@ function StoryDetails() {
                       <img src={author?.profileURL} alt="WOW" />
                     </div>
                     <p className="handle">{author?.displayName}</p>
-                    <p>Followers: {author?.followersCount} • Following: {author?.followingCount}</p>
+                    <p>Followers: {isFollowed ? author?.followersCount + 1 : author?.followersCount} • Following: {author?.followingCount}</p>
 
                     {user.uid === authorId ? (<h1></h1>) : (isFollowed ? <button className="btn follow" onClick={handledeleteFollow}>Following</button> :
                       <button className="btn follow" onClick={handleAddFollow}>+ Follow</button>)}
