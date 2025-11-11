@@ -38,7 +38,7 @@ function StoryView() {
     return () => unsubscribe()
   }, [id]);
 
-  
+
   async function handleaddBookmark() {
     await addbookmarkedStories(user.uid, id)
     setResult(true)
@@ -86,7 +86,7 @@ function StoryView() {
               <NavLink to={`/read-chapter/${firstChapter.id}`} className="btn read"><i className="fa-solid fa-book"></i>Read</NavLink>
 
               {result ? <button className="btn download" onClick={handleRemoveBookmark}>
-                <i className="fa-solid fa-bookmark"></i>Bookmarked
+                <i class="fa-solid fa-circle-check"></i> Bookmarked
               </button> : <button className="btn download" onClick={handleaddBookmark}>
                 <i className="fa-solid fa-bookmark"></i> Bookmark
               </button>}
