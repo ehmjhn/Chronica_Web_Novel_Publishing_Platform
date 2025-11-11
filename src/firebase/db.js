@@ -127,34 +127,36 @@ export const updateUserProfile = (uid, newData) => {
 };
 
 // Add comic
-export const insertComic = (
+export const insertStory = (
   title,
-  author,
-  userID,
-  likes,
-  rate,
+  authorId,
   genre,
-  profilePic,
-  isCompleted
+  status,
+  synopsis,
+  contentWarning,
+  tags
 ) => {
   const comicRef = ref(database, "stories/");
   const newRef = push(comicRef);
+  const comicJSON = {
+    title: title,
+    authorId: authorId,
+    likes: 0,
+    rate: 0,
+    contentWarning: contentWarning,
+    isFeatured: false,
+    tags: tags,
+    synopsis: synopsis,
+    genre: genre,
+    status: status,
+    totalChapters: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
   try {
-    set(newRef, {
-      title,
-      author: {
-        name: author,
-        profilePic,
-        uid: userID,
-      },
-      userID,
-      likes,
-      rate,
-      genre,
-      isCompleted,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    set(newRef, comicJSON
+      
+    );
   } catch (error) {
     console.error("Error inserting comic:", error);
   }
@@ -245,18 +247,19 @@ export async function deleteFollowerList(userId, followedId) {
 export async function checkIfFollowed(userId, followedId) {
   try {
     const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
-    const userSnapshot = get(userRef)
+    const userSnapshot = await get(userRef)
 
-
-    if (userSnapshot.exists()) {
-      return true
+    if (!userSnapshot.val()) {
+      console.log(userSnapshot.val())
+      return false
     }
     else {
-      return false
+      console.log(userSnapshot.val())
+      return true
     }
   } catch (error) {
     console.error(error);
     throw error;
   }
-}
+} 
 
