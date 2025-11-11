@@ -1,36 +1,60 @@
-import { NavLink, useParams } from 'react-router';
-import {useState,useEffect} from 'react';
-import { readComic, retrieveChapter } from '../../firebase/db';
+import { NavLink, useFormAction, useParams } from 'react-router';
+import { useState, useEffect } from 'react';
+import { readComic, retrieveChapter, addbookmarkedStories, checkBookmark, deleteBookmark } from '../../firebase/db';
+import { subscribeAuthChanges } from '../../firebase/auth';
 import './story.css';
 
 function StoryView() {
 
-    const {id} = useParams(); //story id
-    const [story, setStory] = useState(null);
-    const [firstChapter, setChapter] = useState([]);
+  const { id } = useParams(); //story id
+  const [story, setStory] = useState(null);
+  const [firstChapter, setChapter] = useState([]);
+  const [user, setCurrentUser] = useState(null)
+  const [result, setResult] = useState()
+  useEffect(() => {
+    readComic((stories) => {
+      const story = stories.find(s => s.id === id)
+      setStory(story)
+
+      if (story) {
+        retrieveChapter((chaps) => {
+          const storyChaps = chaps
+            .filter(c => c.storyId === id)
+            .sort((a, b) => a.order - b.order);
+
+          if (storyChaps.length > 0) {
+            const latestChapter = storyChaps[0];
+            setChapter(latestChapter);
+          }
+
+        })
+      }
+
+    });
+
+    const unsubscribe = subscribeAuthChanges((currentUser) => {
+      setCurrentUser(currentUser)
+    })
+    return () => unsubscribe()
+  }, [id]);
 
   
-    useEffect(() => {
-      readComic((stories) => {
-        const story = stories.find(s=> s.id === id)
-        setStory(story)
+  async function handleaddBookmark() {
+    await addbookmarkedStories(user.uid, id)
+    setResult(true)
+  }
+  async function handleRemoveBookmark() {
+    await deleteBookmark(user.uid, id)
+    setResult(false)
+  }
+  useEffect(() => {
+    if (user && id) {
+      (async () => {
+        setResult(checkBookmark(user.uid, id))
+      })()
+    }
 
-        if(story){
-          retrieveChapter((chaps)=>{
-            const storyChaps = chaps
-              .filter(c=> c.storyId === id)
-              .sort((a, b) => a.order - b.order);
-
-            if(storyChaps.length > 0){
-              const latestChapter = storyChaps[0]; 
-              setChapter(latestChapter);
-            }
-          })
-        }
-
-      });
-  
-    }, [id]);  
+  }, [user, id])
 
   return (
     <>
@@ -60,9 +84,12 @@ function StoryView() {
 
             <div className="storyview-buttons">
               <NavLink to={`/read-chapter/${firstChapter.id}`} className="btn read"><i className="fa-solid fa-book"></i>Read</NavLink>
-              <button className="btn download">
-                <i className="fa-solid fa-bookmark"></i>Bookmark
-              </button>
+
+              {result ? <button className="btn download" onClick={handleRemoveBookmark}>
+                <i className="fa-solid fa-bookmark"></i>Bookmarked
+              </button> : <button className="btn download" onClick={handleaddBookmark}>
+                <i className="fa-solid fa-bookmark"></i> Bookmark
+              </button>}
             </div>
           </div>
         </div>
