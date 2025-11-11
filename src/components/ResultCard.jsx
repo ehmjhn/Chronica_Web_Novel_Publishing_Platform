@@ -1,10 +1,24 @@
 import "./components.css";
 import { NavLink } from "react-router-dom";
 
-function ResultCard({ id, title, cover, rate, status, genres, tags, summary, views, chapters, favorites, isBookmark = false, onRemove }) {
+function ResultCard({
+  id,
+  title,
+  cover,
+  rate,
+  status,
+  genres = [],
+  tags = [],
+  summary,
+  views,
+  chapters,
+  likes,
+  isBookmark = false,
+  onRemove 
+}) {
 
   return (
-    <NavLink to={`/story/${id}`} className="result-link">
+    <NavLink to={`/story-details/${id}`} className="result-link">
       <div className="result-card">
         <img src={cover} alt={title} className="result-cover" />
 
@@ -13,7 +27,7 @@ function ResultCard({ id, title, cover, rate, status, genres, tags, summary, vie
 
           <div className="result-meta">
             <span className="result-status"><i className="fa-solid fa-book-open"></i> {status}</span>
-            <span className="result-rate"><i className="fa-solid fa-star"></i> {rate.toFixed(1)}</span>
+            <span className="result-rate"><i className="fa-solid fa-star"></i> {rate?.toFixed(1)}</span>
           </div>
 
           <p className="result-summary">{summary}</p>
@@ -27,15 +41,22 @@ function ResultCard({ id, title, cover, rate, status, genres, tags, summary, vie
           <div className="result-stats">
             <span><i className="fa-solid fa-eye"></i> {views}</span>
             <span><i className="fa-solid fa-list"></i> {chapters} ch</span>
-            <span><i className="fa-solid fa-heart"></i> {favorites}</span>
+            <span><i className="fa-solid fa-heart"></i> {likes}</span>
           </div>
         </div>
-        {isBookmark && (
-            <div className="result-actions">
-            <button className="remove-btn" onClick={() => onRemove?.(id)}>
-                <i className="fa-solid fa-trash"></i> Remove
+
+        {isBookmark && onRemove && (
+          <div className="result-actions">
+            <button
+              className="remove-btn"
+              onClick={(e) => {
+                e.preventDefault(); // prevent navigating to story when removing
+                onRemove(id);
+              }}
+            >
+              <i className="fa-solid fa-trash"></i> Remove
             </button>
-            </div>
+          </div>
         )}
       </div>
     </NavLink>

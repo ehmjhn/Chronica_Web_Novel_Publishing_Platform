@@ -1,61 +1,103 @@
 import './reader.css';
+import { useState, useEffect } from 'react';
 import ResultCard from '../../components/ResultCard';
-import JZ from '../../assets/jz.png';
-import React from 'react';
+import { getUserProfile, readComic, retrieveChapter, updateBookmark } from '../../firebase/db';
+import { subscribeAuthChanges } from '../../firebase/auth';
 
 function Bookmark() {
-  const bookmarks = [
-    {
-      id: 1,
-      title: "The Lost Kingdom",
-      cover: JZ,
-      rate: 9.5,
-      status: "Ongoing",
-      summary: "A hero ventures into a forgotten world filled with mystery and betrayal.",
-      genres: ["Fantasy", "Adventure"],
-      tags: ["Magic", "Revenge"],
-      views: 1200,
-      favorites: 85,
-      chapters: 25
-    },
-    {
-      id: 2,
-      title: "Digital Heart",
-      cover: "https://placehold.co/120x150",
-      rate: 8.9,
-      status: "Completed",
-      summary: "An AI discovers emotions while exploring the human world.",
-      genres: ["Sci-Fi", "Romance"],
-      tags: ["AI", "Drama"],
-      views: 2500,
-      favorites: 134,
-      chapters: 32
-    }
-  ];
+  const [bookmarks, setBookmarks] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [search, setSearch] = useState(''); 
+
+  useEffect(() => {
+    const unsubscribeAuth = subscribeAuthChanges(async (user) => {
+      setCurrentUser(user);
+
+      if (!user) {
+        setBookmarks([]);
+        return;
+      }
+
+      const profile = await getUserProfile(user.uid);
+      if (!profile?.bookmarkedStories?.length) {
+        setBookmarks([]);
+        return;
+      }
+
+      readComic(async (allStories) => {
+        retrieveChapter((chaptersData) => {
+          const bookmarkedStories = allStories
+            .filter(story => profile.bookmarkedStories.includes(story.id))
+            .map(story => {
+              const storyChapters = Object.values(chaptersData).filter(c => c.storyId === story.id);
+              return {
+                ...story,
+                chapters: storyChapters.length,
+                views: story.views || 0,
+                likes: story.likes || 0,
+                genres: story.genres || [],
+                tags: story.tags || []
+              };
+            });
+
+          setBookmarks(bookmarkedStories);
+        });
+      });
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
 
   const handleRemoveBook = (id) => {
-    console.log("Removed bookmark with ID:", id);
+    if (!currentUser) return;
+    updateBookmark(currentUser.uid, id, () => {
+      setBookmarks(prev => prev.filter(b => b.id !== id));
+    });
   };
+
+  // filter bookmarks search
+  const filteredBookmarks = bookmarks.filter(book =>
+    book.title.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // pagination
+  const totalPages = Math.ceil(filteredBookmarks.length / limit);
+  const paginatedBookmarks = filteredBookmarks.slice((currentPage - 1) * limit, currentPage * limit);
 
   return (
     <div className="bookmark-wrap">
       <div className="bookmark-cont">
         <div className="bookmark-settings">
-          <h2>Bookmarked Series</h2>
-          <input type="text" placeholder="Search..." />
-          <select name="limit" id="limit">
-            {
-                [10,25,50,75,100].map((i)=>{
-                    return(<option value={i}>{i}</option>);
-                })
-            }
+          <h2>Bookmarked Series ({bookmarks.length})</h2>
+          <input
+            type="text"
+            placeholder="Search title"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+          <select
+            name="limit"
+            id="limit"
+            value={limit}
+            onChange={(e) => {
+              setLimit(Number(e.target.value));
+              setCurrentPage(1); 
+            }}
+          >
+            {[10, 25, 50, 75, 100].map(i => <option key={i} value={i}>{i}</option>)}
           </select>
         </div>
 
         <hr />
 
         <div className="results-grid">
-          {bookmarks.map((book) => (
+          {paginatedBookmarks.length === 0 && <p>No bookmarks found.</p>}
+          {paginatedBookmarks.map(book => (
             <ResultCard
               key={book.id}
               {...book}
@@ -67,9 +109,13 @@ function Bookmark() {
 
         <hr />
         <div className="bookmark-pagination">
-          <h3>1/1</h3>
-          <button>Previous</button>
-          <button>Next</button>
+          <h3>{currentPage}/{totalPages || 1}</h3>
+          <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+            Previous
+          </button>
+          <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}>
+            Next
+          </button>
         </div>
       </div>
     </div>

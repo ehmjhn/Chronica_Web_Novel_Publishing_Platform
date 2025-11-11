@@ -80,7 +80,7 @@ function EditProfile() {
         <div className="edit-left">
           <div className="profile-image">
             <div className="image-circle">
-              <img src={userData?.profileImage || "https://via.placeholder.com/150"} alt="Profile" />
+              <img src={userData?.profilePic || "https://via.placeholder.com/150"} alt="Profile" />
             </div>
             <h2>{userData?.name || "--"}</h2>
             <p>{userData?.displayName || "--"}</p>
