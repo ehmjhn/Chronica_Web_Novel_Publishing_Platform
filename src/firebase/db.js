@@ -4,7 +4,7 @@ import { app } from "./firebase-config.js";
 
 export const database = getDatabase(app);
 
-//retrieve your profile
+//get current user profile
 export const getUserProfile = (userId) => {
   return get(ref(database, `users/${userId}`))
     .then((snapshot) => {
@@ -20,6 +20,24 @@ export const getUserProfile = (userId) => {
       console.error("Error fetching user profile:", error);
       return null;
     });
+};
+
+//get current user stories
+export const getUserStories = (userId, callback) => {
+  const myStoryRef = ref(database, `stories/`);
+
+  const unsubscribe = onValue(myStoryRef, (snapshot) => {
+    const data = snapshot.val() || {};
+
+    const myStories = Object.entries(data)
+      .filter(s => s[1].authorId === userId)
+      .map(([id, story]) => ({
+        id,
+        ...story
+      }));
+    callback(myStories);
+  });
+  return unsubscribe;
 };
 
 //retrieve users
@@ -157,10 +175,10 @@ export const insertStory = async (
   coverImage
 ) => {
   const comicRef = ref(database, "stories/");
-  const userRef = ref(database, `users/${authorId}/createdSeries`)
-  const userTotalRef = ref(database, `users/${authorId}/totalSeries`)
+  const userTotalRef = ref(database, `users/${authorId}/totalSeries`);
   const newRef = push(comicRef);
-  const key = newRef.key
+  const key = newRef.key;
+
   const comicJSON = {
     title: title,
     coverImage: coverImage || "https://placehold.net/300x200",
@@ -169,7 +187,7 @@ export const insertStory = async (
     rate: 0,
     copyright: copyright,
     contentWarning: contentWarning,
-    isFeatured: false,
+    isFeatured: Math.random() < 0.5, // randomizer na t or f
     tags: tags,
     synopsis: synopsis,
     genre: genre,
@@ -178,24 +196,22 @@ export const insertStory = async (
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     views: 0
-  }
-  const user = await get(userRef)
-  let totalSeries = (await get(userTotalRef)).val()
-  const stories = user.val() || [];
-  const isCreated = stories.includes(key)
-  const updated = isCreated ?
-    stories.filter(id => id !== key) : [...stories, key]
+  };
+
   try {
+
+    let totalSeries = (await get(userTotalRef)).val() || 0;
     totalSeries += 1;
-    await set(newRef, comicJSON
-    );
-    await set(userRef, updated)
-    await set(userTotalRef, totalSeries)
+
+    await set(newRef, comicJSON);
+    await set(userTotalRef, totalSeries);
+
     return key;
   } catch (error) {
     console.error("Error inserting comic:", error);
   }
 };
+
 
 //update review
 export const updateReview = (reviewId, updatedData) => {

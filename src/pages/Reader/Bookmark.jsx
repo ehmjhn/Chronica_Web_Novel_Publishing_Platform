@@ -96,7 +96,7 @@ function Bookmark() {
         <hr />
 
         <div className="results-grid">
-          {paginatedBookmarks.length === 0 && <p>No bookmarks found.</p>}
+          {paginatedBookmarks.length === 0 && <p style={{color: "white"}}>No bookmarks available.</p>}
           {paginatedBookmarks.map(book => (
             <ResultCard
               key={book.id}

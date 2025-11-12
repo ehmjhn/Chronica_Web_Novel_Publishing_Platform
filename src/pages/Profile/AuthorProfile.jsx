@@ -2,38 +2,43 @@ import './profile.css';
 import { useState, useEffect } from "react";
 import { subscribeAuthChanges } from '../../firebase/auth';
 import { getUserProfile } from '../../firebase/db';
+import { getUserStories } from '../../firebase/db'; 
 
 function AuthorProfile() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [seriesList, setSeriesList] = useState([]);
 
   const [activeTab, setActiveTab] = useState("popular");
   const [currentPage, setCurrentPage] = useState(1);
   const SERIES_PER_PAGE = 5;
 
   useEffect(() => {
-    const unsubscribe = subscribeAuthChanges((currentUser) => {
+    const unsubscribeAuth = subscribeAuthChanges((currentUser) => {
       if (currentUser) {
         getUserProfile(currentUser.uid).then((data) => {
           setUserData(data);
-          setLoading(false);
+
+          getUserStories(currentUser.uid, (stories) => {
+            setSeriesList(stories);
+            setLoading(false);
+          });
         });
       } else {
         setUserData(null);
+        setSeriesList([]);
         setLoading(false);
       }
     });
 
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, []);
 
   if (loading) return <div className="homepage"><div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>Loading...</div></div>;
   if (!userData) return <div>No user data found.</div>;
 
-  const seriesList = Object.values(userData.createdSeries || {});
-
   const sortedSeries = [...seriesList].sort((a, b) =>
-    activeTab === "popular" ? (b.likes || 0) - (a.likes || 0) : new Date(b.date) - new Date(a.date)
+    activeTab === "popular" ? (b.likes || 0) - (a.likes || 0) : new Date(b.createdAt) - new Date(a.createdAt)
   );
 
   const totalPages = Math.ceil(sortedSeries.length / SERIES_PER_PAGE);
@@ -93,7 +98,7 @@ function AuthorProfile() {
                   <p className="author-series-date">
                     Published: {new Date(series.createdAt).toLocaleDateString()}
                   </p>
-                  <p className="author-series-views">♡ {(series.id || 0).toLocaleString()}</p>
+                  <p className="author-series-views"><i className="fa fa-eye icon"></i> {(series.views || 0).toLocaleString()}</p>
                 </div>
               </div>
             ))
@@ -101,7 +106,7 @@ function AuthorProfile() {
         </div>
 
         {totalPages > 1 && (
-          <div style={{ marginTop: "15px", textAlign: "center", display: 'flex', justifyContent: 'center', gap: '10px' }}>
+          <div style={{ marginTop: "15px", textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '10px' }}>
             <button className="author-btn" onClick={handlePrev} disabled={currentPage === 1}>Prev</button>
             <span style={{ alignSelf: 'center' }}>Page {currentPage} of {totalPages}</span>
             <button className="author-btn" onClick={handleNext} disabled={currentPage === totalPages}>Next</button>
