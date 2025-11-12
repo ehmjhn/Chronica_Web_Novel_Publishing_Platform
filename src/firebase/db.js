@@ -129,6 +129,36 @@ export const retrieveTags = (callback) => {
   return unsubscribe;
 };
 
+// add following
+export async function addFollowerList(userId, followedId) {
+  try {
+
+    const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
+    const userFollowerRef = ref(database, `users/${userId}/followingCount`)
+    const userFollowSnapshot = await get(userFollowerRef)
+    const userSnapshot = await get(userRef);
+    let followingValue = userFollowSnapshot.val()
+    const followedRef = ref(database, `users/${followedId}/followersCount`)
+    const followedUserSnapshot = await get(followedRef)
+    let followerValue = followedUserSnapshot.val()
+
+
+    if (userSnapshot.exists()) {
+      console.log("you already followed this user.")
+    }
+    else {
+      followingValue += 1;
+      followerValue += 1;
+      await set(followedRef, followerValue)
+      await set(userFollowerRef, followingValue)
+      await set(userRef, followedId)
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 // add review
 export const addReview = (reviewData) => {
   const reviewRef = push(ref(database, 'reviews/'));
@@ -149,17 +179,6 @@ export const addReview = (reviewData) => {
   .catch((error) => {
     console.error("Error adding review:", error);
   });
-};
-
-
-// update user profile
-export const updateUserProfile = (uid, newData) => {
-  const userRef = ref(database, `users/${uid}`);
-  try {
-    return update(userRef, newData);
-  } catch (error) {
-    console.error("Error updating user profile:", error);
-  }
 };
 
 // Add comic
@@ -212,6 +231,72 @@ export const insertStory = async (
   }
 };
 
+// update user profile
+export const updateUserProfile = (uid, newData) => {
+  const userRef = ref(database, `users/${uid}`);
+  try {
+    return update(userRef, newData);
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+  }
+};
+
+// update story like
+export const updateStoryLikes = async (storyId, userId, liked) => {
+  try {
+    const storyRef = ref(database, `stories/${storyId}`);
+    const userRef = ref(database, `users/${userId}`);
+
+    const storySnap = await get(storyRef);
+    const userSnap = await get(userRef);
+
+    const storyData = storySnap.val() || {};
+    const userData = userSnap.val() || {};
+
+    const likedBy = new Set(storyData.likedBy || []);
+    liked ? likedBy.add(userId) : likedBy.delete(userId);
+
+    const likedStories = new Set(userData.likedStories || []);
+    liked ? likedStories.add(storyId) : likedStories.delete(storyId);
+
+    await set(storyRef, { ...storyData, likedBy: [...likedBy], likes: likedBy.size });
+    await set(userRef, { ...userData, likedStories: [...likedStories] });
+
+    return { likes: likedBy.size, hasLiked: liked };
+  } catch (error) {
+    console.error("Error updating story likes:", error);
+    throw error;
+  }
+};
+
+//update story views
+export const updateStoryViews = async (storyId, userId, authorId) => {
+  try {
+    if (!userId || userId === authorId) return false;
+
+    const userRef = ref(database, `users/${userId}/viewedStories`);
+    const storyRef = ref(database, `stories/${storyId}`);
+
+    const userSnap = await get(userRef);
+    const viewedStories = userSnap.val() || [];
+
+    if (viewedStories.includes(storyId)) return false;
+
+    const newViewedStories = [...viewedStories, storyId];
+    await set(userRef, newViewedStories);
+
+    const storySnap = await get(storyRef);
+    const storyData = storySnap.val() || {};
+    const newViews = (storyData.views || 0) + 1;
+
+    await update(storyRef, { views: newViews });
+
+    return newViews; 
+  } catch (err) {
+    console.error("Error updating story views:", err);
+    return false;
+  }
+};
 
 //update review
 export const updateReview = (reviewId, updatedData) => {
@@ -250,36 +335,6 @@ export const updateBookmark = (userId, storyId, callback) => {
     })
     .catch(err => console.error(err));
 };
-
-//add following
-export async function addFollowerList(userId, followedId) {
-  try {
-
-    const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
-    const userFollowerRef = ref(database, `users/${userId}/followingCount`)
-    const userFollowSnapshot = await get(userFollowerRef)
-    const userSnapshot = await get(userRef);
-    let followingValue = userFollowSnapshot.val()
-    const followedRef = ref(database, `users/${followedId}/followersCount`)
-    const followedUserSnapshot = await get(followedRef)
-    let followerValue = followedUserSnapshot.val()
-
-
-    if (userSnapshot.exists()) {
-      console.log("you already followed this user.")
-    }
-    else {
-      followingValue += 1;
-      followerValue += 1;
-      await set(followedRef, followerValue)
-      await set(userFollowerRef, followingValue)
-      await set(userRef, followedId)
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
 
 //delete following
 export async function deleteFollowerList(userId, followedId) {

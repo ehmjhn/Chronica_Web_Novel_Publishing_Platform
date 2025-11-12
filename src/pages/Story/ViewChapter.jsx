@@ -9,23 +9,20 @@ function ViewChapter() {
   const [orderAsc, setOrderAsc] = useState(true);
   const [page, setPage] = useState(1);
 
-  const {id} = useParams()
-  const [chapters, setChapters] = useState([])
+  const {id} = useParams();
+  const [chapters, setChapters] = useState([]);
 
-  useEffect(()=>{
+  useEffect(() => {
+    retrieveChapter((chaps) => {
+      if (!chaps) return;
 
-    retrieveChapter((chaps)=>{
-      if(!chaps) return;
-
-      const storyChaps = chaps.filter(c => c.storyId === id)
-      setChapters(storyChaps || [])
-      console.log(storyChaps)
-    })
-
-  }, [])
+      const storyChaps = chaps.filter(c => c.storyId === id);
+      setChapters(storyChaps || []);
+    });
+  }, [id]);
 
   const sortedChapters = [...chapters].sort((a, b) =>
-    orderAsc ? b.order - a.order : a.order - b.order
+    orderAsc ? a.order - b.order : b.order - a.order
   );
 
   const startIndex = (page - 1) * limit;
@@ -62,12 +59,15 @@ function ViewChapter() {
             </div>
           </div>
 
-          {paginatedChapters.map((chapter, k) => (
-            <NavLink to={`/read-chapter/${chapter.id}`} key={k} className="chapter-item">
-              <span>{chapter.chapterTitle}</span>
-              <span className="chapter-date">{chapter.publishDate}</span>
-            </NavLink>
-          ))}
+          {chapters.length > 0 ?
+            paginatedChapters.map((chapter, k) => (
+              <NavLink to={`/read-chapter/${chapter.id}`} key={k} className="chapter-item">
+                <span>{chapter.chapterTitle}</span>
+                <span className="chapter-date">{chapter.publishDate}</span>
+              </NavLink>
+            )) :
+            <p style={{margin: "0 auto"}}>No Chapter Available.</p>
+          }
 
           <div className="chapter-pagination">
             <button

@@ -1,6 +1,13 @@
 import { NavLink, useParams } from 'react-router';
 import { useState, useEffect } from 'react';
-import { readComic, retrieveChapter, getUserProfile, updateBookmark } from '../../firebase/db';
+import { 
+  readComic, 
+  retrieveChapter, 
+  getUserProfile, 
+  updateStoryLikes, 
+  updateBookmark, 
+  updateStoryViews 
+} from '../../firebase/db';
 import { subscribeAuthChanges } from '../../firebase/auth';
 import './story.css';
 
@@ -11,29 +18,41 @@ function StoryView() {
   const [firstChapter, setFirstChapter] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
 
   useEffect(() => {
-    const unsubscribeAuth = subscribeAuthChanges(async (user) => {
+    const unsubscribeAuth = subscribeAuthChanges((user) => {
       setCurrentUser(user);
 
       readComic((stories) => {
-        const foundStory = stories.find(story => story.id === id);
+        const foundStory = stories.find(s => s.id === id);
         setStory(foundStory);
 
         if (foundStory) {
+          setLikesCount(foundStory.likes || 0);
+
           retrieveChapter((chaps) => {
             const storyChaps = chaps
               .filter(c => c.storyId === id)
               .sort((a, b) => a.order - b.order);
             setChapters(storyChaps);
-            if (storyChaps.length > 0) setFirstChapter(storyChaps[0]);
+            setFirstChapter(storyChaps[0] || null);
           });
-        }
 
-        if (user && foundStory) {
-          getUserProfile(user.uid).then(profile => {
-            setIsBookmarked(profile?.bookmarkedStories?.includes(foundStory.id) || false);
-          });
+          if (user) {
+            getUserProfile(user.uid).then(profile => {
+              setIsBookmarked(profile?.bookmarkedStories?.includes(foundStory.id) || false);
+              setHasLiked(profile?.likedStories?.includes(foundStory.id) || false);
+
+              // Increment views only if first-time AND NOT the author
+              updateStoryViews(foundStory.id, user.uid, foundStory.authorId).then(newViews => {
+                if (newViews) {
+                  setStory(prev => ({ ...prev, views: newViews }));
+                }
+              });
+            });
+          }
         }
       });
     });
@@ -52,18 +71,36 @@ function StoryView() {
     });
   };
 
+  const handleLike = async () => {
+    if (!currentUser) return alert("Please log in to like this story.");
+
+    const newHasLiked = !hasLiked;
+    setHasLiked(newHasLiked);
+    setLikesCount(prev => newHasLiked ? prev + 1 : prev - 1);
+
+    try {
+      const result = await updateStoryLikes(story.id, currentUser.uid, newHasLiked);
+      setLikesCount(result.likes);
+      setHasLiked(result.hasLiked);
+    } catch (err) {
+      console.error(err);
+      setHasLiked(!newHasLiked);
+      setLikesCount(prev => newHasLiked ? prev - 1 : prev + 1);
+    }
+  };
+
   return (
     <>
       <div className="subnav-control">
         <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
-        <p>Series</p>/
+        <p>Series</p>/ 
         <i>{story?.title}</i>
       </div>
 
       <div className="storyview-hero">
         <div className="storyview-wrapper">
           <img
-            src="https://fantasy-faction.com/wp-content/uploads/2025/01/image-2.jpeg"
+            src={story?.cover || "https://fantasy-faction.com/wp-content/uploads/2025/01/image-2.jpeg"}
             alt="Cover"
             className="storyview-cover"
           />
@@ -72,7 +109,16 @@ function StoryView() {
             <h1>{story?.title}</h1>
             <p className="meta">
               <i className="fa-solid fa-book-open"></i> {story?.status} &nbsp;•&nbsp; 
-              <i className="fa-solid fa-heart"></i> {story?.likes} &nbsp;•&nbsp; 
+              <span
+                onClick={handleLike}
+                style={{
+                  color: hasLiked ? "red" : "gray",
+                  cursor: "pointer",
+                  userSelect: "none"
+                }}
+              >
+                <i className="fa-solid fa-heart"></i> {likesCount}
+              </span> &nbsp;•&nbsp; 
               <i className="fa-solid fa-list"></i> {chapters.length}
             </p>
 
@@ -86,12 +132,15 @@ function StoryView() {
             </div>
 
             <div className="storyview-buttons">
-              <NavLink 
-                to={`/read-chapter/${firstChapter?.id}`} 
-                className="btn read"
-              >
-                <i className="fa-solid fa-book"></i> Read
-              </NavLink>
+              {firstChapter ? 
+                <NavLink 
+                  to={`/read-chapter/${firstChapter.id}`} 
+                  className="btn read"
+                >
+                  <i className="fa-solid fa-book"></i> Read
+                </NavLink> :
+                <button className='btn read' onClick={() => alert("No published chapter available.")}>Read</button>
+              }
 
               <button 
                 className={`btn download ${isBookmarked ? 'bookmarked' : ''}`} 
