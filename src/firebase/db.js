@@ -87,6 +87,30 @@ export const retrieveReviews = (callback) => {
   return unsubscribe
 }
 
+// Retrieve genres
+export const retrieveGenres = (callback) => {
+  const genreRef = ref(database, "genres/");
+
+  const unsubscribe = onValue(genreRef, (snapshot) => {
+    const data = snapshot.val() || [];
+    callback(data); 
+  });
+
+  return unsubscribe;
+};
+
+// Retrieve tags
+export const retrieveTags = (callback) => {
+  const tagRef = ref(database, "tags/");
+
+  const unsubscribe = onValue(tagRef, (snapshot) => {
+    const data = snapshot.val() || [];
+    callback(data); 
+  });
+
+  return unsubscribe;
+};
+
 // add review
 export const addReview = (reviewData) => {
   const reviewRef = push(ref(database, 'reviews/'));
@@ -127,8 +151,10 @@ export const insertStory = async (
   genre,
   status,
   synopsis,
+  copyright,
+  tags,
   contentWarning,
-  tags
+  coverImage
 ) => {
   const comicRef = ref(database, "stories/");
   const userRef = ref(database, `users/${authorId}/createdSeries`)
@@ -137,9 +163,11 @@ export const insertStory = async (
   const key = newRef.key
   const comicJSON = {
     title: title,
+    coverImage: coverImage || "https://placehold.net/300x200",
     authorId: authorId,
     likes: 0,
     rate: 0,
+    copyright: copyright,
     contentWarning: contentWarning,
     isFeatured: false,
     tags: tags,
@@ -148,7 +176,8 @@ export const insertStory = async (
     status: status,
     totalChapters: 0,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    views: 0
   }
   const user = await get(userRef)
   let totalSeries = (await get(userTotalRef)).val()

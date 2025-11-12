@@ -62,12 +62,6 @@ function StoryDetails() {
     setIsFollowed(false)
   }
 
-  function test() {
-    console.log(user.uid)
-    console.log(authorId)
-  }
-
-
   return (
     <>
       {viewStory
@@ -93,16 +87,6 @@ function StoryDetails() {
                       <button className="btn follow" onClick={handleAddFollow}>+ Follow</button>)}
 
                   </div>
-
-                  {/* Possible tanggalin */}
-                  {/* <div className="author-stats">
-                    <h3>Series Stats</h3>
-                    <p>Trending: 1/8</p>
-                    <p>Lifetime: 0 word</p>
-                    <p>Monthly: 1 word</p>
-                    <p>All-time Rank: #1</p>
-                    <p>Ongoing: Parable (1): 9/13</p>
-                  </div> */}
                 </div>
               </div>
 
@@ -140,6 +124,11 @@ function StoryDetails() {
               <div className="storyview-warning">
                 <h2>Content Warning</h2>
                 <span>{story.contentWarning}</span>
+              </div>
+
+              <div className="storyview-warning">
+                <h2>Copyright</h2>
+                <span>{story.copyright}</span>
               </div>
             </div>
           );

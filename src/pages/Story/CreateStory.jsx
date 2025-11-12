@@ -1,47 +1,33 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router";
-import { insertStory } from "../../firebase/db";
+import { insertStory, retrieveGenres, retrieveTags } from "../../firebase/db";
 import { subscribeAuthChanges } from "../../firebase/auth";
-import { CgStack } from "react-icons/cg";
 
 export default function CreateSeries() {
-  const [user, setCurrentUser] = useState()
+  const [user, setCurrentUser] = useState();
+  const [coverImage, setCoverImage] = useState(null);
+  const [title, setTitle] = useState("");
+  const [synopsis, setSynopsis] = useState("");
+  const [contentWarning, setContentWarning] = useState("");
+  const [status, setStatus] = useState("");
+  const [copyright, setCopyright] = useState("All Rights Reserved");
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [genreOptions, setGenreOptions] = useState([]);
+  const [tagOptions, setTagOptions] = useState([]);
+
   useEffect(() => {
     const unsubscribe = subscribeAuthChanges((currentUser) => {
       setCurrentUser(currentUser);
     });
 
-    return () => unsubscribe();
-  })
-  const genreOptions = [
-    "Fantasy",
-    "Romance",
-    "Adventure",
-    "Drama",
-    "Sci-Fi",
-    "Mystery",
-    "Comedy",
-    "Action",
-  ];
+    retrieveGenres((data) => setGenreOptions(data));
+    retrieveTags((data) => setTagOptions(data));
 
-  const tagOptions = [
-    "Magic",
-    "School Life",
-    "Isekai",
-    "Revenge",
-    "Time Travel",
-    "Villainess",
-    "Slice of Life",
-  ];
-
-  const [coverImage, setCoverImage] = useState(null);
-  const [title, setTitle] = useState("");
-  const [synopsis, setSynopsis] = useState("");
-  const [mainGenre, setMainGenre] = useState("");
-  const [status, setStatus] = useState("");
-  const [copyright, setCopyright] = useState("All Rights Reserved");
-  const [selectedGenres, setSelectedGenres] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   function handleImageChange(e) {
     const file = e.target.files[0];
@@ -53,8 +39,7 @@ export default function CreateSeries() {
   }
 
   function handleAddGenre(value) {
-    if (!value || selectedGenres.includes(value) || selectedGenres.length >= 7)
-      return;
+    if (!value || selectedGenres.includes(value) || selectedGenres.length >= 7) return;
     setSelectedGenres([...selectedGenres, value]);
   }
 
@@ -63,8 +48,7 @@ export default function CreateSeries() {
   }
 
   function handleAddTag(value) {
-    if (!value || selectedTags.includes(value) || selectedTags.length >= 7)
-      return;
+    if (!value || selectedTags.includes(value) || selectedTags.length >= 7) return;
     setSelectedTags([...selectedTags, value]);
   }
 
@@ -74,16 +58,20 @@ export default function CreateSeries() {
 
   function handleSubmit(e) {
     e.preventDefault();
+    handleCreateSeries();
   }
 
-  async function handleCreateSeries() {
-    if (!title || !synopsis || !status || selectedGenres.length === 0 || selectedTags.length === 0) {
-      console.log("ILAGAY MO LAHAT NG FIELDS")
-      return
+  function handleCreateSeries() {
+    if (!title || !synopsis || !status || selectedGenres.length === 0 || selectedTags.length === 0 || !contentWarning || !copyright) {
+      console.log("ILAGAY MO LAHAT NG FIELDS");
+      return;
     }
-    const id = await insertStory(title, user?.uid, selectedGenres, status, synopsis, copyright, selectedTags)
-    window.location.href = `/story-details/${id}`
+    insertStory(title, user?.uid, selectedGenres, status, synopsis, copyright, selectedTags, contentWarning, coverImage)
+      .then((id) => {
+        window.location.href = `/story-details/${id}`;
+      });
   }
+
   return (
     <div className="storyview-page">
       <div className="subnav-control">
@@ -99,8 +87,7 @@ export default function CreateSeries() {
           <div className="create-form-section image-section">
             <label className="create-form-label">Image</label>
             <p className="create-form-note">
-              250x350 pixels is recommended. NSFW or suggestive images are not
-              allowed.
+              250x350 pixels is recommended. NSFW or suggestive images are not allowed.
             </p>
 
             <div className="create-form-image-preview">
@@ -127,7 +114,6 @@ export default function CreateSeries() {
             <label className="create-form-label">Title</label>
             <input
               type="text"
-              placeholder="Enter story title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -136,63 +122,24 @@ export default function CreateSeries() {
           <div className="create-form-section">
             <label className="create-form-label">Synopsis</label>
             <textarea
-              placeholder="Enter story synopsis"
               value={synopsis}
               onChange={(e) => setSynopsis(e.target.value)}
             />
           </div>
 
-          <div className="create-form-section create-form-flex">
-            
-            <div className="create-form-section">
-              <label className="create-form-label">Genres (max 7)</label>
-              <select
-                onChange={(e) => handleAddGenre(e.target.value)}
-                value=""
-                disabled={selectedGenres.length >= 7}
-              >
-                <option value="">Select</option>
-                {genreOptions.map((genre, index) => (
-                  <option key={index}>{genre}</option>
-                ))}
-              </select>
+          <div className="create-form-section">
+            <label className="create-form-label">Genres (max 7)</label>
+            <select
+              onChange={(e) => handleAddGenre(e.target.value)}
+              value=""
+              disabled={selectedGenres.length >= 7}
+            >
+              <option value="">Select</option>
+              {genreOptions.map((genre, index) => (
+                <option key={index}>{genre}</option>
+              ))}
+            </select>
 
-            <div>
-              <label className="create-form-label">Story Status</label>
-              <select value={status} onChange={(e) => setStatus(e.target.value)}>
-                <option value="">Select</option>
-                <option>Ongoing</option>
-                <option>Completed</option>
-                <option>Hiatus</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="create-form-label">Copyright</label>
-              <select
-                value={copyright}
-                onChange={(e) => setCopyright(e.target.value)}
-              >
-                <option>All Rights Reserved</option>
-                <option>Public Domain</option>
-                <option>Creative Commons</option>
-              </select>
-            </div>
-          </div>
-
-          
-            <div>
-              <label className="create-form-label">Content Warning</label>
-              <select
-                value={mainGenre}
-                onChange={(e) => setMainGenre(e.target.value)}
-              >
-                <option value="">Select</option>
-                {genreOptions.map((genre, index) => (
-                  <option key={index}>{genre}</option>
-                ))}
-              </select>
-            </div>
             <div className="create-form-chip-list">
               {selectedGenres.map((genre, index) => (
                 <span key={index} className="create-form-chip">
@@ -238,9 +185,43 @@ export default function CreateSeries() {
             </div>
           </div>
 
+          <div className="create-form-section create-form-flex">
+            <div>
+              <label className="create-form-label">Content Warning</label>
+              <select value={contentWarning} onChange={(e) => setContentWarning(e.target.value)}>
+                <option value="">Select</option>
+                <option value="Gore">Gore</option>
+                <option value="Sexual Content">Sexual Content</option>
+                <option value="Strong Language">Strong Language</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="create-form-label">Story Status</label>
+              <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                <option value="">Select</option>
+                <option>Ongoing</option>
+                <option>Completed</option>
+                <option>Hiatus</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="create-form-label">Copyright</label>
+              <select
+                value={copyright}
+                onChange={(e) => setCopyright(e.target.value)}
+              >
+                <option value='All Rights Reserved'>All Rights Reserved</option>
+                <option value='Public Domain'>Public Domain</option>
+                <option value='Creative Commons'>Creative Commons</option>
+              </select>
+            </div>
+          </div>
+
           <div className="create-form-actions">
-            <button type="submit" className="create-form-submit" onClick={handleCreateSeries}>
-              Create Series
+            <button type="submit" className="create-form-submit" onClick={handleSubmit}>
+              Save Changes
             </button>
           </div>
         </form>
