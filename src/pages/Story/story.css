@@ -707,6 +707,27 @@
   color: #fff;
 }
 
+.filter-section select {
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #1e1e1e; 
+  color: #fff; 
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.filter-section select:hover {
+  border-color: #facc15; 
+}
+
+.filter-section select:focus {
+  border-color: #facc15;
+  box-shadow: 0 0 5px rgba(250, 204, 21, 0.5);
+}
+
 .back-btn {
   display: flex;
   align-items: center;
