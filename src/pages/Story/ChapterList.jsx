@@ -1,12 +1,13 @@
 import "./story.css";
 import { useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useParams } from "react-router";
 import { closestCorners, DndContext } from "@dnd-kit/core";
 import SortableChapter from "../../components/SortableChapter";
 import { arrayMove } from "@dnd-kit/sortable";
 
 function ChapterList() {
   //mock data
+  const {id} = useParams()
   const [chapters, setChapters] = useState([
     { id: 1, title: "Chapter 1: Title", date: "Date Released", order: 1 },
     { id: 2, title: "Chapter 2: Title", date: "Date Released", order: 2 },
@@ -63,8 +64,8 @@ function ChapterList() {
       <div className="chapter-section">
         <div className="chapter-list-container">
         <div className="series-chapter-link">
-            <NavLink to='/update-story'>Series Details</NavLink>
-            <NavLink to='/update-chapter-list'>Chapter List</NavLink>
+            <NavLink to={`/update-story/${id}`}>Series Details</NavLink>
+            <NavLink to={`/update-chapter-list/${id}`}>Chapter List</NavLink>
         </div>
           <div className="chapt-header">
             <h2>CHAPTER LIST TABLE ({chapters.length})</h2>

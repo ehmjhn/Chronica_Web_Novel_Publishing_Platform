@@ -3,7 +3,7 @@ import { NavLink } from "react-router";
 import { insertStory, retrieveGenres, retrieveTags } from "../../firebase/db";
 import { subscribeAuthChanges } from "../../firebase/auth";
 
-export default function CreateSeries() {
+function CreateSeries() {
   const [user, setCurrentUser] = useState();
   const [coverImage, setCoverImage] = useState(null);
   const [title, setTitle] = useState("");
@@ -229,3 +229,5 @@ export default function CreateSeries() {
     </div>
   );
 }
+
+export default CreateSeries

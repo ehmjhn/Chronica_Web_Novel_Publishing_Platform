@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import "./story.css";
 import { NavLink } from "react-router";
 import { subscribeAuthChanges } from "../../firebase/auth";
-import { getUserStories } from "../../firebase/db";
+import { getUserStories, deleteStory } from "../../firebase/db";
 
 function MySeries() {
   const [seriesList, setSeriesList] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -13,6 +14,7 @@ function MySeries() {
   useEffect(() => {
     const unsubscribeAuth = subscribeAuthChanges((currentUser) => {
       if (currentUser) {
+        setCurrentUserId(currentUser.uid)
         getUserStories(currentUser.uid, (stories) => {
           setSeriesList(stories);
           setLoading(false);
@@ -47,6 +49,24 @@ function MySeries() {
   const handleLimitChange = (e) => {
     setLimit(Number(e.target.value));
     setCurrentPage(1);
+  };
+
+  const handleDelete = async (storyId) => {
+    if (!currentUserId) return;
+
+    const confirm = window.confirm(
+      "Are you sure you want to delete this series? This action cannot be undone."
+    );
+
+    if (!confirm) return;
+
+    const success = await deleteStory(storyId, currentUserId);
+    if (success) {
+      setSeriesList(seriesList.filter((s) => s.id !== storyId));
+      alert("Series deleted successfully!");
+    } else {
+      alert("Failed to delete series.");
+    }
   };
 
   const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
@@ -107,12 +127,12 @@ function MySeries() {
                   <NavLink to='/create-chapter' className="btn-yellow">
                     <i className="fa-solid fa-plus"></i> Add chapter
                   </NavLink>
-                  <NavLink to='/update-story' className="btn-yellow">
+                  <NavLink to={`/update-story/${s.id}`} className="btn-yellow">
                     <i className="fa-solid fa-pen"></i> Update
                   </NavLink>
                 </div>
               </div>
-              <button className="delete-btn">
+              <button className="delete-btn" onClick={() => handleDelete(s.id)}>
                 <i className="fa-solid fa-trash"></i>
               </button>
             </div>

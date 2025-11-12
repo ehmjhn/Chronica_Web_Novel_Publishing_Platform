@@ -156,8 +156,14 @@
 .latest-page {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.latest-page > * {
+  flex: 1 1 calc(20% - 10px); 
+  max-width: calc(20% - 10px);
+  box-sizing: border-box;
 }
 
 .no-comics {

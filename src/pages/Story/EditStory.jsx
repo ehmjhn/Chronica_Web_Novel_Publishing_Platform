@@ -1,49 +1,61 @@
 import './story.css'
-import { useState } from "react";
-import { NavLink } from 'react-router';
+import { useState, useEffect } from "react";
+import { NavLink, useNavigate, useParams } from 'react-router';
+import { getUserStories, updateStory } from '../../firebase/db.js';
+import { subscribeAuthChanges } from '../../firebase/auth.js';
 
 function EditStory() {
   const genreOptions = [
-    "Fantasy",
-    "Romance",
-    "Adventure",
-    "Drama",
-    "Sci-Fi",
-    "Mystery",
-    "Comedy",
-    "Action",
+    "Fantasy", "Romance", "Adventure", "Drama", "Sci-Fi", "Mystery", "Comedy", "Action",
   ];
 
   const tagOptions = [
-    "Magic",
-    "School Life",
-    "Isekai",
-    "Revenge",
-    "Time Travel",
-    "Villainess",
-    "Slice of Life",
+    "Magic", "School Life", "Isekai", "Revenge", "Time Travel", "Villainess", "Slice of Life",
   ];
 
-  const dummyStory = {
-    coverImage: "https://via.placeholder.com/250x350.png?text=Story+Cover",
-    title: "The Chronicles of Mythryl",
-    synopsis:
-      "In a world where ancient gods have fallen and magic runs wild, a young mage discovers a forgotten prophecy that could reshape the fate of kingdoms.",
-    mainGenre: "Fantasy",
-    status: "Ongoing",
-    copyright: "All Rights Reserved",
-    selectedGenres: ["Adventure", "Action", "Drama"],
-    selectedTags: ["Magic", "Revenge", "Villainess"],
-  };
+  const { id } = useParams(); 
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [storyId, setStoryId] = useState(id);
+  const [coverImage, setCoverImage] = useState("");
+  const [title, setTitle] = useState("");
+  const [synopsis, setSynopsis] = useState("");
+  const [contentWarning, setContentWarning] = useState("");
+  const [status, setStatus] = useState("");
+  const [copyright, setCopyright] = useState("");
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
 
-  const [coverImage, setCoverImage] = useState(dummyStory.coverImage);
-  const [title, setTitle] = useState(dummyStory.title);
-  const [synopsis, setSynopsis] = useState(dummyStory.synopsis);
-  const [mainGenre, setMainGenre] = useState(dummyStory.mainGenre);
-  const [status, setStatus] = useState(dummyStory.status);
-  const [copyright, setCopyright] = useState(dummyStory.copyright);
-  const [selectedGenres, setSelectedGenres] = useState(dummyStory.selectedGenres);
-  const [selectedTags, setSelectedTags] = useState(dummyStory.selectedTags);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = subscribeAuthChanges((user) => {
+      if (user) {
+        setCurrentUserId(user.uid);
+        getUserStories(user.uid, (stories) => {
+          
+          const myStory = stories.find(story => story.id === id);
+          if (myStory) {
+            setStoryId(myStory.id);
+            setCoverImage(myStory.coverImage || "");
+            setTitle(myStory.title || "");
+            setSynopsis(myStory.synopsis || "");
+            setContentWarning(myStory.contentWarning || "");
+            setStatus(myStory.status || "");
+            setCopyright(myStory.copyright || "");
+            setSelectedGenres(myStory.genre || []);
+            setSelectedTags(myStory.tags || []);
+          } else {
+            alert("Story not found or you are not the author.");
+            navigate("/my-series");
+          }
+        });
+      } else {
+        navigate("/login");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [id, navigate]);
 
   function handleImageChange(e) {
     const file = e.target.files[0];
@@ -55,8 +67,7 @@ function EditStory() {
   }
 
   function handleAddGenre(value) {
-    if (!value || selectedGenres.includes(value) || selectedGenres.length >= 7)
-      return;
+    if (!value || selectedGenres.includes(value) || selectedGenres.length >= 7) return;
     setSelectedGenres([...selectedGenres, value]);
   }
 
@@ -65,8 +76,7 @@ function EditStory() {
   }
 
   function handleAddTag(value) {
-    if (!value || selectedTags.includes(value) || selectedTags.length >= 7)
-      return;
+    if (!value || selectedTags.includes(value) || selectedTags.length >= 7) return;
     setSelectedTags([...selectedTags, value]);
   }
 
@@ -74,8 +84,25 @@ function EditStory() {
     setSelectedTags(selectedTags.filter((tag) => tag !== value));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    if (!storyId || !currentUserId) return;
+
+    await updateStory(
+      storyId,
+      title,
+      currentUserId,
+      selectedGenres,
+      status,
+      synopsis,
+      copyright,
+      selectedTags,
+      contentWarning,
+      coverImage
+    );
+
+    alert("Story updated successfully!");
+    navigate("/my-series");
   }
 
   return (
@@ -83,17 +110,18 @@ function EditStory() {
       <div className="subnav-control">
         <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
         <NavLink to='/my-series'>My Series</NavLink> / 
-        <NavLink to='/update-story'>Update Story</NavLink> / 
+        <NavLink to={`/update-story/${storyId}`}>Update Story</NavLink> / 
       </div>
       <div className="create-form-page">
         <div className="series-chapter-link">
-          <NavLink to='/update-story'>Series Details</NavLink>
-          <NavLink to='/update-chapter-list'>Chapter List</NavLink>
+          <NavLink to={`/update-story/${storyId}`}>Series Details</NavLink>
+          <NavLink to={`/update-chapter-list/${storyId}`}>Chapter List</NavLink>
         </div>
 
         <h2 className="create-form-title">Edit Story</h2>
 
         <form onSubmit={handleSubmit} className="create-form-container">
+          {/* Image Section */}
           <div className="create-form-section image-section">
             <label className="create-form-label">Image</label>
             <p className="create-form-note">
@@ -102,52 +130,71 @@ function EditStory() {
 
             <div className="create-form-image-preview">
               {coverImage ? (
-                <img
-                  src={coverImage}
-                  alt="Cover Preview"
-                  className="create-form-cover"
-                />
+                <img src={coverImage} alt="Cover Preview" className="create-form-cover" />
               ) : (
                 <div className="create-form-placeholder">No Image</div>
               )}
             </div>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="create-form-file"
-            />
+            <input type="file" accept="image/*" onChange={handleImageChange} className="create-form-file" />
           </div>
 
+          {/* Title & Synopsis */}
           <div className="create-form-section">
             <label className="create-form-label">Title</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
 
           <div className="create-form-section">
             <label className="create-form-label">Synopsis</label>
-            <textarea
-              value={synopsis}
-              onChange={(e) => setSynopsis(e.target.value)}
-            />
+            <textarea value={synopsis} onChange={(e) => setSynopsis(e.target.value)} />
           </div>
 
+          {/* Genres */}
+          <div className="create-form-section">
+            <label className="create-form-label">Genres (max 7)</label>
+            <select onChange={(e) => handleAddGenre(e.target.value)} value="" disabled={selectedGenres.length >= 7}>
+              <option value="">Select</option>
+              {genreOptions.map((genre, index) => (<option key={index}>{genre}</option>))}
+            </select>
+
+            <div className="create-form-chip-list">
+              {selectedGenres.map((genre, index) => (
+                <span key={index} className="create-form-chip">
+                  {genre}
+                  <button type="button" className="create-form-remove-chip" onClick={() => handleRemoveGenre(genre)}>×</button>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className="create-form-section">
+            <label className="create-form-label">Tags (max 7)</label>
+            <select onChange={(e) => handleAddTag(e.target.value)} value="" disabled={selectedTags.length >= 7}>
+              <option value="">Select</option>
+              {tagOptions.map((tag, index) => (<option key={index}>{tag}</option>))}
+            </select>
+
+            <div className="create-form-chip-list">
+              {selectedTags.map((tag, index) => (
+                <span key={index} className="create-form-chip">
+                  {tag}
+                  <button type="button" className="create-form-remove-chip" onClick={() => handleRemoveTag(tag)}>×</button>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Content Warning, Status, Copyright */}
           <div className="create-form-section create-form-flex">
             <div>
-              <label className="create-form-label">Main Genre</label>
-              <select
-                value={mainGenre}
-                onChange={(e) => setMainGenre(e.target.value)}
-              >
+              <label className="create-form-label">Content Warning</label>
+              <select value={contentWarning} onChange={(e) => setContentWarning(e.target.value)}>
                 <option value="">Select</option>
-                {genreOptions.map((genre, index) => (
-                  <option key={index}>{genre}</option>
-                ))}
+                <option value="Gore">Gore</option>
+                <option value="Sexual Content">Sexual Content</option>
+                <option value="Strong Language">Strong Language</option>
               </select>
             </div>
 
@@ -163,10 +210,7 @@ function EditStory() {
 
             <div>
               <label className="create-form-label">Copyright</label>
-              <select
-                value={copyright}
-                onChange={(e) => setCopyright(e.target.value)}
-              >
+              <select value={copyright} onChange={(e) => setCopyright(e.target.value)}>
                 <option>All Rights Reserved</option>
                 <option>Public Domain</option>
                 <option>Creative Commons</option>
@@ -174,72 +218,13 @@ function EditStory() {
             </div>
           </div>
 
-          <div className="create-form-section">
-            <label className="create-form-label">Other Genres (max 7)</label>
-            <select
-              onChange={(e) => handleAddGenre(e.target.value)}
-              value=""
-              disabled={selectedGenres.length >= 7}
-            >
-              <option value="">Select</option>
-              {genreOptions.map((genre, index) => (
-                <option key={index}>{genre}</option>
-              ))}
-            </select>
-
-            <div className="create-form-chip-list">
-              {selectedGenres.map((genre, index) => (
-                <span key={index} className="create-form-chip">
-                  {genre}
-                  <button
-                    type="button"
-                    className="create-form-remove-chip"
-                    onClick={() => handleRemoveGenre(genre)}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="create-form-section">
-            <label className="create-form-label">Tags (max 7)</label>
-            <select
-              onChange={(e) => handleAddTag(e.target.value)}
-              value=""
-              disabled={selectedTags.length >= 7}
-            >
-              <option value="">Select</option>
-              {tagOptions.map((tag, index) => (
-                <option key={index}>{tag}</option>
-              ))}
-            </select>
-
-            <div className="create-form-chip-list">
-              {selectedTags.map((tag, index) => (
-                <span key={index} className="create-form-chip">
-                  {tag}
-                  <button
-                    type="button"
-                    className="create-form-remove-chip"
-                    onClick={() => handleRemoveTag(tag)}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-
           <div className="create-form-actions">
-            <button type="submit" className="create-form-submit">
-              Save Changes
-            </button>
+            <button type="submit" className="create-form-submit">Save Changes</button>
           </div>
         </form>
       </div>
     </div>
   );
 }
-export default EditStory
+
+export default EditStory;

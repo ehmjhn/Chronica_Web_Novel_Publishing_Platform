@@ -241,6 +241,50 @@ export const updateUserProfile = (uid, newData) => {
   }
 };
 
+// update comic
+export const updateStory = async (
+  storyId,
+  title,
+  genre,
+  status,
+  synopsis,
+  copyright,
+  tags,
+  contentWarning,
+  coverImage
+) => {
+  const storyRef = ref(database, `stories/${storyId}`);
+
+  try {
+    const snapshot = await get(storyRef);
+    if (!snapshot.exists()) {
+      console.error("Story not found.");
+      return null;
+    }
+
+    const existingStory = snapshot.val();
+
+    const updatedStory = {
+      ...existingStory, 
+      title: title,
+      coverImage: coverImage || existingStory.coverImage || "https://placehold.net/300x200",
+      genre: genre,
+      status: status,
+      synopsis: synopsis,
+      copyright: copyright,
+      tags: tags,
+      contentWarning: contentWarning,
+      updatedAt: new Date().toISOString()
+    };
+
+    await set(storyRef, updatedStory);
+    return storyId;
+  } catch (error) {
+    console.error("Error updating story:", error);
+    throw error;
+  }
+};
+
 // update story like
 export const updateStoryLikes = async (storyId, userId, liked) => {
   try {
@@ -334,6 +378,33 @@ export const updateBookmark = (userId, storyId, callback) => {
         .catch(err => console.error(err));
     })
     .catch(err => console.error(err));
+};
+
+// delete story
+export const deleteStory = async (storyId, authorId) => {
+  try {
+    const storyRef = ref(database, `stories/${storyId}`);
+    const snapshot = await get(storyRef);
+
+    if (!snapshot.exists()) {
+      console.error("Story not found.");
+      return false;
+    }
+
+    const storyData = snapshot.val();
+
+    if (storyData.authorId !== authorId) {
+      console.error("Unauthorized: You can only delete your own story.");
+      return false;
+    }
+
+    await remove(storyRef);
+    console.log("Story deleted successfully!");
+    return true;
+  } catch (error) {
+    console.error("Error deleting story:", error);
+    return false;
+  }
 };
 
 //delete following
