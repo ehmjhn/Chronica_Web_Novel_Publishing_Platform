@@ -13,7 +13,7 @@ function EditStory() {
     "Magic", "School Life", "Isekai", "Revenge", "Time Travel", "Villainess", "Slice of Life",
   ];
 
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [currentUserId, setCurrentUserId] = useState(null);
   const [storyId, setStoryId] = useState(id);
   const [coverImage, setCoverImage] = useState("");
@@ -32,7 +32,7 @@ function EditStory() {
       if (user) {
         setCurrentUserId(user.uid);
         getUserStories(user.uid, (stories) => {
-          
+
           const myStory = stories.find(story => story.id === id);
           if (myStory) {
             setStoryId(myStory.id);
@@ -109,8 +109,8 @@ function EditStory() {
     <div className="storyview-page">
       <div className="subnav-control">
         <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
-        <NavLink to='/my-series'>My Series</NavLink> / 
-        <NavLink to={`/update-story/${storyId}`}>Update Story</NavLink> / 
+        <NavLink to='/my-series'>My Series</NavLink> /
+        <NavLink to={`/update-story/${storyId}`}>Update Story</NavLink> /
       </div>
       <div className="create-form-page">
         <div className="series-chapter-link">

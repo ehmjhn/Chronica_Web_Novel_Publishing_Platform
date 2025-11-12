@@ -107,13 +107,15 @@ function MySeries() {
                 src={s.coverImage || "https://via.placeholder.com/120x150"}
                 alt={s.title}
                 className="series-img"
+
+
               />
               <div className="series-info">
                 <h3 className="series-title">{s.title}</h3>
                 <div className="series-genre">
-                  {s.genre?.map((g, i) => (
+                  {Object.values(s.genre).map((g, i) => (
                     <span key={i} className="genre-tag">{g}</span>
-                  ))}
+                  ), console.log(s.genre))}
                 </div>
                 <p className="series-desc">{s.synopsis}</p>
                 <span className="series-meta">
@@ -124,7 +126,7 @@ function MySeries() {
                 </span>
 
                 <div className="series-buttons">
-                  <NavLink to='/create-chapter' className="btn-yellow">
+                  <NavLink to={`/create-chapter/${s.id}`} className="btn-yellow">
                     <i className="fa-solid fa-plus"></i> Add chapter
                   </NavLink>
                   <NavLink to={`/update-story/${s.id}`} className="btn-yellow">

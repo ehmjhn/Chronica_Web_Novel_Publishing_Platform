@@ -51,48 +51,49 @@ function AppRouter() {
       <Routes>
 
         {/* MAIN LAYOUT */}
-      <Route element={<MainLayout />}>
+        <Route element={<MainLayout />}>
 
-        {/* Public pages */}
-        <Route index element={<Home />} />
-        <Route path="home" element={<Home />} />
-        <Route path="home/featured-stories" element={<FeaturedStories />} />
-        <Route path="home/latest-releases" element={<LatestRelease />} />
-        <Route path="home/popular-works" element={<PopularWorks />} />
+          {/* Public pages */}
+          <Route index element={<Home />} />
+          <Route path="home" element={<Home />} />
+          <Route path="home/featured-stories" element={<FeaturedStories />} />
+          <Route path="home/latest-releases" element={<LatestRelease />} />
+          <Route path="home/popular-works" element={<PopularWorks />} />
 
-        <Route path="about-us" element={<About />} />
-        <Route path="story-details" element={<StoryDetails />} />
-        <Route path="story-details/:id" element={<StoryDetails />} />
-        <Route path="story-chapter-list/:id" element={<ViewChapter />} />
-        <Route path="story-reviews/:id" element={<StoryReviews />} />
-        <Route path="search-discovery" element={<SearchDiscovery />} />
-        <Route path="read-chapter/:id" element={<ReadChapter />} />
+          <Route path="about-us" element={<About />} />
+          <Route path="story-details" element={<StoryDetails />} />
+          <Route path="story-details/:id" element={<StoryDetails />} />
+          <Route path="story-chapter-list/:id" element={<ViewChapter />} />
+          <Route path="story-reviews/:id" element={<StoryReviews />} />
+          <Route path="search-discovery" element={<SearchDiscovery />} />
+          <Route path="read-chapter/:id" element={<ReadChapter />} />
 
-        {/* Protected pages */}
-        <Route path="notification" element={<ProtectedRoute><Notification /></ProtectedRoute>} />
-        <Route path="profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
-        <Route path="edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-        <Route path="author-profile" element={<ProtectedRoute><AuthorProfile /></ProtectedRoute>} />
-        <Route path="create-chapter" element={<ProtectedRoute><AddChapter /></ProtectedRoute>} />
-        <Route path="bookmark" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
-        <Route path="my-series" element={<ProtectedRoute><MySeries /></ProtectedRoute>} />
-        <Route path="create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
-        <Route path="update-story/:id" element={<ProtectedRoute><EditStory /></ProtectedRoute>} />
-        <Route path="update-chapter-list/:id" element={<ProtectedRoute><ChapterList /></ProtectedRoute>} />
-        <Route path="edit-chapter" element={<ProtectedRoute><EditChapter /></ProtectedRoute>} />
+          {/* Protected pages */}
+          <Route path="notification" element={<ProtectedRoute><Notification /></ProtectedRoute>} />
+          <Route path="profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
+          <Route path="edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+          <Route path="author-profile" element={<ProtectedRoute><AuthorProfile /></ProtectedRoute>} />
+          <Route path="create-chapter" element={<ProtectedRoute><AddChapter /></ProtectedRoute>} />
+          <Route path="create-chapter/:id" element={<ProtectedRoute><AddChapter /></ProtectedRoute>} />
+          <Route path="bookmark" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
+          <Route path="my-series" element={<ProtectedRoute><MySeries /></ProtectedRoute>} />
+          <Route path="create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
+          <Route path="update-story/:id" element={<ProtectedRoute><EditStory /></ProtectedRoute>} />
+          <Route path="update-chapter-list/:id" element={<ProtectedRoute><ChapterList /></ProtectedRoute>} />
+          <Route path="edit-chapter" element={<ProtectedRoute><EditChapter /></ProtectedRoute>} />
 
-      </Route>
+        </Route>
 
-      {/* AUTH LAYOUT (Guest Only) */}
-      <Route element={<GuestRoute><AuthLayout /></GuestRoute>}>
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="forgot-password" element={<ForgotPassword />} />
-        <Route path="set-password" element={<SetPassword />} />
-      </Route>
+        {/* AUTH LAYOUT (Guest Only) */}
+        <Route element={<GuestRoute><AuthLayout /></GuestRoute>}>
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="set-password" element={<SetPassword />} />
+        </Route>
 
-      {/* 404 */}
-      <Route path="*" element={<NotFound />} />
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
     </BrowserRouter>

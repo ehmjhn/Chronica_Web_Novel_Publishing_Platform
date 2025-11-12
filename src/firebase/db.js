@@ -111,7 +111,7 @@ export const retrieveGenres = (callback) => {
 
   const unsubscribe = onValue(genreRef, (snapshot) => {
     const data = snapshot.val() || [];
-    callback(data); 
+    callback(data);
   });
 
   return unsubscribe;
@@ -123,7 +123,7 @@ export const retrieveTags = (callback) => {
 
   const unsubscribe = onValue(tagRef, (snapshot) => {
     const data = snapshot.val() || [];
-    callback(data); 
+    callback(data);
   });
 
   return unsubscribe;
@@ -172,13 +172,13 @@ export const addReview = (reviewData) => {
     createdAt: reviewData.createdAt,
     likes: 0
   })
-  .then(() => {
-    console.log("Review added successfully!");
-    updateStoryRate(reviewData.storyId);
-  })
-  .catch((error) => {
-    console.error("Error adding review:", error);
-  });
+    .then(() => {
+      console.log("Review added successfully!");
+      updateStoryRate(reviewData.storyId);
+    })
+    .catch((error) => {
+      console.error("Error adding review:", error);
+    });
 };
 
 // Add comic
@@ -265,7 +265,7 @@ export const updateStory = async (
     const existingStory = snapshot.val();
 
     const updatedStory = {
-      ...existingStory, 
+      ...existingStory,
       title: title,
       coverImage: coverImage || existingStory.coverImage || "https://placehold.net/300x200",
       genre: genre,
@@ -335,7 +335,7 @@ export const updateStoryViews = async (storyId, userId, authorId) => {
 
     await update(storyRef, { views: newViews });
 
-    return newViews; 
+    return newViews;
   } catch (err) {
     console.error("Error updating story views:", err);
     return false;
@@ -349,7 +349,7 @@ export const updateReview = (reviewId, updatedData) => {
   update(reviewRef, updatedData)
     .then(() => {
       console.log("Review updated successfully!");
-      updateStoryRate(updatedData.storyId); 
+      updateStoryRate(updatedData.storyId);
     })
     .catch((error) => console.error("Error updating review:", error));
 };
@@ -384,6 +384,7 @@ export const updateBookmark = (userId, storyId, callback) => {
 export const deleteStory = async (storyId, authorId) => {
   try {
     const storyRef = ref(database, `stories/${storyId}`);
+    const storycountRef = ref(database, `users/${authorId}/`)
     const snapshot = await get(storyRef);
 
     if (!snapshot.exists()) {
@@ -456,3 +457,39 @@ export async function checkIfFollowed(userId, followedId) {
   }
 }
 
+export async function addChapter(
+  storyId,
+  content,
+  chapterTitle
+) {
+  const storyRef = ref(database, "chapters/");
+  const storyTotalChaptersRef = ref(database, `stories/${storyId}/totalChapters`);
+  const newRef = push(storyRef);
+  const key = newRef.key
+  let totalChapters = (await get(storyTotalChaptersRef)).val()
+  let order = 0;
+  if (totalChapters === 0) {
+    order = 1;
+  }
+  else {
+    order = totalChapters + 1;
+  }
+  const chapterJSON = {
+    chapterTitle: chapterTitle,
+    storyId: storyId,
+    content: content,
+    publishStatus: "published",
+    publishDate: new Date().toISOString(),
+    updateDate: new Date().toISOString(),
+    order: order
+  };
+  try {
+    console.log(chapterJSON)
+    await set(newRef, chapterJSON)
+    await set(storyTotalChaptersRef, order)
+    return key
+  } catch (error) {
+    console.log(chapterJSON)
+    console.error("Error inserting story:", error);
+  }
+};

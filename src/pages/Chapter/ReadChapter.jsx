@@ -8,10 +8,11 @@ function ReadChapter() {
   const [story, setStory] = useState(null);
   const [chapter, setChapter] = useState(null);
   const [author, setAuthor] = useState(null);
-  const [chapters, setChapters] = useState([]); 
+  const [chapters, setChapters] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(null);
   const [loading, setIsLoading] = useState(true);
-  
+  const [cleanContent, setCleanContent] = useState("")
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,12 +25,11 @@ function ReadChapter() {
       console.log('Current Chapter:', foundChapter);
 
       if (foundChapter) {
-  
+
         const storyChaps = chaps
           .filter((c) => c.storyId === foundChapter.storyId)
-          .sort((a, b) => a.order - b.order); 
+          .sort((a, b) => a.order - b.order);
         setChapters(storyChaps);
-
         const index = storyChaps.findIndex((c) => c.id === foundChapter.id);
         setCurrentIndex(index);
 
@@ -52,7 +52,7 @@ function ReadChapter() {
     });
   }, [id]);
 
-  if (loading) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>;
+  if (loading) return <div className="homepage"><div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>Loading...</div></div>;
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
@@ -67,6 +67,7 @@ function ReadChapter() {
       navigate(`/read-chapter/${nextChapter.id}`);
     }
   };
+
 
   return (
     <div className="page-background">
@@ -118,7 +119,7 @@ function ReadChapter() {
 
         {/* Chapter Content */}
         <div className="chapter-content">
-          <p>{chapter?.content}</p>
+          <p>{(chapter.content).replace('<p>', '').replace('</p>', '')}</p>
         </div>
 
         {/* Footer Navigation */}

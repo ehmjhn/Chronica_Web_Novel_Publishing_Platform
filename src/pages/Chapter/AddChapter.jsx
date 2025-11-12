@@ -1,27 +1,45 @@
 import './chapter.css';
-import { useState } from 'react';
-import { NavLink } from 'react-router';
+import { useEffect, useState } from 'react';
+import { NavLink, useParams } from 'react-router';
 
 import ReactQuill from "react-quill-new";
-import "react-quill-new/dist/quill.snow.css"; 
+import "react-quill-new/dist/quill.snow.css";
+import { addChapter, readComic, retrieveChapter } from '../../firebase/db';
 
 function AddChapter() {
     // date time
+
+    const { id } = useParams();
+    const [story, setStory] = useState(0)
     const now = new Date();
-    const today = now.toISOString().split('T')[0]; 
-    const currentTime = now.toTimeString().slice(0, 5); 
+    const today = now.toISOString().split('T')[0];
+    const currentTime = now.toTimeString().slice(0, 5);
+
+    useEffect(() => {
+        readComic((stories) => {
+            const foundStory = stories.find(s => s.id === id);
+            setStory(foundStory);
+        })
+    }, [])
+
 
     const [publishOption, setPublishOption] = useState('immediate');
     const [content, setContent] = useState("");
+    const [title, setTitle] = useState("")
     const [date, setDate] = useState(today);
     const [time, setTime] = useState(currentTime);
+    async function handleAddChapter() {
+        if (title === "" || content === "") { return alert("No missing fields.") }
+        const key = await addChapter(id, content, title)
 
+        window.location.href = `/read-chapter/${key}`;
+    }
     return (
         <div className="page-background">
             <div className="subnav-control">
-                <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> / 
+                <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
                 <NavLink to='/my-series'>My Series</NavLink> /
-                <NavLink to='/publish-chapter'>New Chapter</NavLink> 
+                <NavLink to='/publish-chapter'>New Chapter</NavLink>
             </div>
             <div className="addchapter-container">
                 {/* Header */}
@@ -38,13 +56,12 @@ function AddChapter() {
                             <img src="" alt="Series cover" />
                         </div>
                         <div className="series-details">
-                            <h3 className="series-title">Series Title</h3>
-                            <p className="series-genre">Genre: (Mapping here)</p>
+                            <h3 className="series-title">{story.title}</h3>
+                            <p className="series-genre">{story.genre?.map((g, i) => (
+                                <span key={i} className="genre-tag">{g}</span>
+                            ),)}</p>
                             <p className="series-description">
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-                                Deserunt repellendus cum voluptates, provident itaque quod esse, 
-                                in expedita recusandae fugiat saepe reprehenderit maiores sapiente 
-                                illum, reiciendis suscipit accusamus? Quasi, necessitatibus.
+                                {story.synopsis}
                             </p>
                         </div>
                     </div>
@@ -55,13 +72,12 @@ function AddChapter() {
                     <h2>New Chapter Details</h2>
 
                     <label htmlFor="chapter-title">Chapter Title</label>
-                    <input id="chapter-title" type="text" placeholder="Enter chapter title..." />
+                    <input id="chapter-title" type="text" onChange={(e) => setTitle(e.target.value)} placeholder="Enter chapter title..." />
 
                     <label htmlFor="chapter-content">Chapter Content</label>
                     <ReactQuill
                         className='chapter-content'
-                        value={content}
-                        onChange={setContent}
+                        onChange={(e) => setContent(e)}
                         theme="snow"
                         placeholder="Write your chapter here..."
                     />
@@ -96,7 +112,7 @@ function AddChapter() {
                     </div>
 
                     <div className="form-actions">
-                        <button className="save-btn">Save Chapter</button>
+                        <button className="save-btn" onClick={handleAddChapter}>Save Chapter</button>
                     </div>
                 </div>
             </div>
