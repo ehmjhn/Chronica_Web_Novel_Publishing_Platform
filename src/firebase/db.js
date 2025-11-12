@@ -1,8 +1,6 @@
 // db.js
 import { getDatabase, get, ref, set, push, onValue, update, remove } from "firebase/database";
-
 import { app } from "./firebase-config.js";
-import { TbDatabaseMinus } from "react-icons/tb";
 
 export const database = getDatabase(app);
 
@@ -90,32 +88,27 @@ export const retrieveReviews = (callback) => {
 }
 
 // add review
-export const addReview = (reviewData, callback) => {
-  if (!reviewData) {
-    console.log(reviewData)
-    console.log(reviewData.storyId)
-    console.error("Review data must have an 'id' property");
-    return;
-  }
+export const addReview = (reviewData) => {
+  const reviewRef = push(ref(database, 'reviews/'));
 
-  const reviewRef = ref(database, `reviews/${reviewData.userId}`);
-
-  try {
-    set(reviewRef, {
-      storyId: reviewData.storyId,
-      userId: reviewData.userId,
-      user: reviewData.user || "",
-      topic: reviewData.topic || "",
-      text: reviewData.text || "",
-      score: reviewData.score || 0,
-      createdAt: reviewData.date || new Date().toISOString(),
-      likes: reviewData.likes || 0
-    });
-    // return the review id
-  } catch (error) {
+  set(reviewRef, {
+    storyId: reviewData.storyId,
+    userId: reviewData.userId,
+    topic: reviewData.topic || "",
+    message: reviewData.message || "",
+    rating: reviewData.rating || 0,
+    createdAt: reviewData.createdAt,
+    likes: 0
+  })
+  .then(() => {
+    console.log("Review added successfully!");
+    updateStoryRate(reviewData.storyId);
+  })
+  .catch((error) => {
     console.error("Error adding review:", error);
-  };
+  });
 };
+
 
 // update user profile
 export const updateUserProfile = (uid, newData) => {
@@ -175,12 +168,25 @@ export const insertStory = async (
   }
 };
 
+//update review
 export const updateReview = (reviewId, updatedData) => {
   const reviewRef = ref(database, `reviews/${reviewId}`);
 
   update(reviewRef, updatedData)
-    .then(() => console.log("Review updated successfully!"))
+    .then(() => {
+      console.log("Review updated successfully!");
+      updateStoryRate(updatedData.storyId); 
+    })
     .catch((error) => console.error("Error updating review:", error));
+};
+
+//update story rate
+export const updateStoryRate = async (storyId) => {
+  const snapshot = await get(ref(database, 'reviews/'));
+  const reviews = Object.values(snapshot.val() || {}).filter(r => r.storyId === storyId);
+  const avg = reviews.length ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
+
+  await update(ref(database, `stories/${storyId}`), { rate: Number(avg.toFixed(1)) });
 };
 
 //update bookmark
@@ -200,9 +206,9 @@ export const updateBookmark = (userId, storyId, callback) => {
     .catch(err => console.error(err));
 };
 
+//add following
 export async function addFollowerList(userId, followedId) {
   try {
-
 
     const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
     const userFollowerRef = ref(database, `users/${userId}/followingCount`)
@@ -230,6 +236,7 @@ export async function addFollowerList(userId, followedId) {
   }
 }
 
+//delete following
 export async function deleteFollowerList(userId, followedId) {
   try {
     const userRef = ref(database, `users/${userId}/followingList/${followedId}`);
@@ -257,6 +264,8 @@ export async function deleteFollowerList(userId, followedId) {
     throw error;
   }
 }
+
+//check if followed
 export async function checkIfFollowed(userId, followedId) {
   try {
     const userRef = ref(database, `users/${userId}/followingList/${followedId}`);

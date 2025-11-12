@@ -9,39 +9,39 @@ function StoryReviews() {
     const { id } = useParams();
     const [story, setStory] = useState(null);
     const [reviews, setReviews] = useState([]);
-    const [allUsers, setAllUsers] = useState([]); 
+    const [allUsers, setAllUsers] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
 
     const [rating, setRating] = useState(0);
     const [reviewTopic, setReviewTopic] = useState('');
     const [reviewText, setReviewText] = useState('');
 
+    // Load story, reviews, users
     useEffect(() => {
         readComic((stories) => {
-            const currentStory = stories.find((s) => s.id === id);
+            const currentStory = stories.find(s => s.id === id);
             setStory(currentStory);
 
             if (currentStory) {
-                retrieveReviews((allReviews) => {
-                    const storyReview = allReviews.filter((r) => r.storyId === currentStory.id);
-                    setReviews(storyReview);
+                retrieveReviews(allReviews => {
+                    const storyReviews = allReviews.filter(r => r.storyId === currentStory.id);
+                    setReviews(storyReviews);
                 });
 
-                retrieveUsers((userData) => {
+                retrieveUsers(userData => {
                     if (userData) setAllUsers(userData);
                 });
             }
         });
 
-        const unsubscribe = subscribeAuthChanges((currentUser) => {
-            setCurrentUser(currentUser);
-        });
-
+        const unsubscribe = subscribeAuthChanges(user => setCurrentUser(user));
         return () => unsubscribe();
     }, [id]);
 
+    // Find current user's review
     const userReview = currentUser ? reviews.find(r => r.userId === currentUser.uid) : null;
 
+    // Populate form if editing
     useEffect(() => {
         if (userReview) {
             setRating(userReview.rating);
@@ -50,6 +50,7 @@ function StoryReviews() {
         }
     }, [userReview]);
 
+    // Submit review
     function handleSubmit(e) {
         e.preventDefault();
         if (!currentUser) return alert("Please log in to submit a review.");
@@ -72,12 +73,14 @@ function StoryReviews() {
             alert("Review submitted!");
         }
 
+        // Refresh reviews
         retrieveReviews(allReviews => {
             const storyReviews = allReviews.filter(r => r.storyId === story.id);
             setReviews(storyReviews);
         });
     }
 
+    // Like/unlike review
     function handleLikeToggle(review) {
         if (!currentUser) return alert("Please log in to like reviews.");
 
@@ -88,16 +91,13 @@ function StoryReviews() {
             ? likedBy.filter(id => id !== currentUser.uid)
             : [...likedBy, currentUser.uid];
 
-        const updatedReview = {
-            ...review,
-            likedBy: newLikedBy,
-            likes: newLikedBy.length
-        };
-
+        const updatedReview = { ...review, likedBy: newLikedBy, likes: newLikedBy.length };
         updateReview(review.id, updatedReview);
+
         setReviews(prev => prev.map(r => r.id === review.id ? updatedReview : r));
     }
 
+    // Ratings summary
     const totalReviews = reviews.length;
     const starCounts = [5, 4, 3, 2, 1].map(star => reviews.filter(r => r.rating === star).length);
     const starPercentages = starCounts.map(count => totalReviews ? Math.round((count / totalReviews) * 100) : 0);
@@ -122,14 +122,9 @@ function StoryReviews() {
                         <div key={star} className="rating-row">
                             <span>{star}★:</span>
                             <div className="bar-container">
-                                <div
-                                    className="bar"
-                                    style={{ width: `${starPercentages[i]}%` }}
-                                ></div>
+                                <div className="bar" style={{ width: `${starPercentages[i]}%` }}></div>
                             </div>
-                            <span>
-                                {starPercentages[i]}% ({starCounts[i]})
-                            </span>
+                            <span>{starPercentages[i]}% ({starCounts[i]})</span>
                         </div>
                     ))}
                 </div>
@@ -140,7 +135,7 @@ function StoryReviews() {
                     <form onSubmit={handleSubmit}>
                         <label>Your Rating:</label>
                         <div className="stars">
-                            {[1, 2, 3, 4, 5].map((star) => (
+                            {[1, 2, 3, 4, 5].map(star => (
                                 <span
                                     key={star}
                                     className={`star ${star <= rating ? "active" : ""}`}
@@ -155,13 +150,13 @@ function StoryReviews() {
                             type="text"
                             placeholder="Review Topic"
                             value={reviewTopic}
-                            onChange={(e) => setReviewTopic(e.target.value)}
+                            onChange={e => setReviewTopic(e.target.value)}
                         />
 
                         <textarea
                             placeholder="Your Review"
                             value={reviewText}
-                            onChange={(e) => setReviewText(e.target.value)}
+                            onChange={e => setReviewText(e.target.value)}
                         />
 
                         <button type="submit">
@@ -174,34 +169,28 @@ function StoryReviews() {
                 <hr />
 
                 <div className="review-list">
-                    {reviews.map((review) => {
+                    {reviews.map(review => {
                         const reviewer = allUsers.find(u => u.id === review.userId);
-
                         return (
-                            <div key={review?.id} className="review-item">
+                            <div key={review.id} className="review-item">
                                 <div>
                                     <strong>{reviewer?.displayName}</strong>{" "}
-                                    <span>{new Date(review?.createdAt).toLocaleString()}</span>
+                                    <span>{new Date(review.createdAt).toLocaleString()}</span>
                                 </div>
+                                <div><strong>Review Topic:</strong> {review.topic}</div>
+                                <p>{review.message}</p>
                                 <div>
-                                    <strong>Review Topic:</strong> {review?.topic}
-                                </div>
-                                <p>{review?.message}</p>
-                                <div>
-                                    Rating:{" "}
-                                    <span style={{ color: "#f5c518" }}>
-                                        {review?.rating} <i className="fa-solid fa-star"></i>
-                                    </span>{" "}
-                                    |   <span
-                                            onClick={() => handleLikeToggle(review)}
-                                            style={{
-                                                color: review.likedBy?.includes(currentUser.uid) ? "red" : "gray",
-                                                cursor: "pointer",
-                                                userSelect: "none"
-                                            }}
-                                        >
-                                            <i className="fa-solid fa-heart"></i> {review.likes || 0}
-                                        </span>
+                                    Rating: <span style={{ color: "#f5c518" }}>{review.rating} <i className="fa-solid fa-star"></i></span> |{" "}
+                                    <span
+                                        onClick={() => handleLikeToggle(review)}
+                                        style={{
+                                            color: review.likedBy?.includes(currentUser?.uid) ? "red" : "gray",
+                                            cursor: "pointer",
+                                            userSelect: "none"
+                                        }}
+                                    >
+                                        <i className="fa-solid fa-heart"></i> {review.likes || 0}
+                                    </span>
                                 </div>
                             </div>
                         );
