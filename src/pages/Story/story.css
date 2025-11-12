@@ -828,6 +828,15 @@
   margin-bottom: 6px;
 }
 
+.genre-tag {
+  background-color: #facc15;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 5px;
+  margin-right: 5px;
+  font-size: 13px;
+}
+
 .series-desc {
   font-size: 14px;
   color: #d0d0d0;

@@ -4,6 +4,7 @@ nav {
   height: 70px;
   background: linear-gradient(135deg, #0C0C1D, #1E2A38, #523A28, #A47E3B);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   padding-inline-start: 50px;
   position: sticky;
@@ -407,6 +408,7 @@ footer p {
   margin-bottom: 50px;
   margin-top: 70px;
   margin: 0 auto;
+  box-shadow: 0px 0px 20px 0px rgb(0, 0, 0);
 }
 
 .carousel-slides {
@@ -491,7 +493,7 @@ footer p {
 }
 
 .carousel-cta {
-  background-color: #2d8b8e;
+  background-color: #003040;
   color: white;
   border: none;
   padding: 14px 32px;
@@ -501,13 +503,20 @@ footer p {
   cursor: pointer;
   transition: all 0.3s ease;
   width: fit-content;
-  box-shadow: 0 4px 12px rgba(45, 139, 142, 0.3);
+  box-shadow: 0 4px 12px rgba(142, 126, 45, 0.3);
+}
+
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
 }
 
 .carousel-cta:hover {
-  background-color: #236366;
+  background-color: #005e7d;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(45, 139, 142, 0.4);
+  box-shadow: 0 6px 16px rgba(142, 126, 45, 0.4);
 }
 
 
@@ -580,6 +589,7 @@ footer p {
 .story-section {
   margin-bottom: 50px;
   padding-inline: 50px;
+  width: 100%;
 }
 
 .story-section-header {
@@ -614,9 +624,16 @@ footer p {
 }
 
 .story-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+  justify-content: flex-start;
+}
+
+.story-grid > * {
+  flex: 1 1 calc(20% - 10px); 
+  max-width: calc(20% - 10px);
+  box-sizing: border-box;
 }
 
 .no-stories {

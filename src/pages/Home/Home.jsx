@@ -1,5 +1,8 @@
 import './home.css';
-import JZ from '../../assets/jz.png';
+import StartJourney from '../../assets/StartJourney.png';
+import AngLihamNiLuna from '../../assets/AngLihamNiLuna.png';
+import SummerLove from '../../assets/SummerLove.png';
+import MyBaby from '../../assets/MyBaby.png';
 import { useEffect, useState } from 'react';
 import { readComic } from '../../firebase/db.js';
 
@@ -36,10 +39,10 @@ function Home() {
   if (loading) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>;
 
   const slides = [
-    { image: JZ, title: 'Start Your Journey', description: 'Create your own story and get featured on our homepage', author: 'Platform Name', category: 'Promotion' },
-    { image: JZ, title: 'Featured Story', description: 'Discover amazing stories from talented authors', author: 'Author Name', category: 'Adventure' },
-    { image: JZ, title: 'Latest Release', description: 'Read the newest chapters and series', author: 'Author Name', category: 'Romance' },
-    { image: JZ, title: 'Popular Works', description: 'Explore the most loved stories', author: 'Author Name', category: 'SciFi' }
+    { image: StartJourney, title: 'Start Your Journey', description: 'Create your own story and get featured on our homepage', author: 'Chronica', category: 'Promotion' },
+    { image: MyBaby, title: 'Featured Story', description: 'Discover amazing stories from talented authors', author: 'Jhae', category: 'Fantasy | Adventure' },
+    { image: SummerLove, title: 'Latest Release', description: 'Read the newest chapters and series', author: 'Arvs', category: 'Romance | Drama' },
+    { image: AngLihamNiLuna, title: 'Popular Works', description: 'Explore the most loved stories', author: 'sekkiii', category: 'Romance | Mystery | Slice of Life' }
   ];
 
   return (

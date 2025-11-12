@@ -77,7 +77,7 @@ export default function CreateSeries() {
       <div className="subnav-control">
         <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
         <NavLink to='/my-series'>My Series</NavLink> /
-        <NavLink to='/create-story'>Reviews</NavLink>
+        <NavLink to='/create-story'>Create your Story</NavLink>
       </div>
 
       <div className="create-form-page">

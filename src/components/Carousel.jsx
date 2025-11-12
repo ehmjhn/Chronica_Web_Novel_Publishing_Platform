@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './components.css';
+import { NavLink } from 'react-router';
 
 const Carousel = ({ slides }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -68,7 +69,10 @@ const Carousel = ({ slides }) => {
               <span className="carousel-author">by {currentSlide.author}</span>
               <span className="carousel-category">{currentSlide.category}</span>
             </div>
-            <button className="carousel-cta">Read Now</button>
+            <div className="cta-buttons">
+              <NavLink to='/create-story' className="carousel-cta">Publish Story Now</NavLink>
+              <NavLink to='/search-discovery' className="carousel-cta">Find Story Now</NavLink>
+            </div>
           </div>
         </div>
       </div>

@@ -90,7 +90,11 @@ function MySeries() {
               />
               <div className="series-info">
                 <h3 className="series-title">{s.title}</h3>
-                <span className="series-genre">{s.genre}</span>
+                <div className="series-genre">
+                  {s.genre?.map((g, i) => (
+                    <span key={i} className="genre-tag">{g}</span>
+                  ))}
+                </div>
                 <p className="series-desc">{s.synopsis}</p>
                 <span className="series-meta">
                   <i className="fa-solid fa-eye"></i> {s.views || 0} |{" "}
