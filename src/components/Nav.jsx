@@ -2,17 +2,25 @@ import "./components.css";
 import LOGO from '../assets/CHRONICA.png'
 import { NavLink} from "react-router";
 import { logout, subscribeAuthChanges } from '../firebase/auth';
+import { getUserProfile } from "../firebase/db";
 import { useEffect, useState } from "react";
 
 function Nav() {
 
   const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
   
   useEffect(() => {
 
     const unsubscribe = subscribeAuthChanges((currentUser) => {
       if (currentUser) {
-        setUser(currentUser);
+        setUser(currentUser)
+        getUserProfile(currentUser.uid)
+          .then(userData => {
+            if (userData) {
+              setUserData(userData);
+            }
+          });
       } else {
         setUser(null);
       }
@@ -75,7 +83,7 @@ function Nav() {
                     className="fa-solid fa-circle-user"
                   ></i>
                 ) : (
-                  <img src={user.photoURL} alt="User profile" />
+                  <img src={userData?.profilePic} alt="User profile" />
                 )}
                 <i className="fa-solid fa-caret-down"></i>
               </div>

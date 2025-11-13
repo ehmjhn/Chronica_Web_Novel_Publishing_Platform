@@ -89,7 +89,9 @@
 
 .edit-profile-wrapper .signout-btn {
   margin-top: 10px;
-  background: #ffcc33;
+  padding: 10px;
+  border: 1px solid white;
+  border-radius: 10px;
 }
 
 .edit-profile-wrapper .signout-btn:hover {
