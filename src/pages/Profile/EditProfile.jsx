@@ -3,14 +3,14 @@ import { FaFacebook, FaInstagram, FaTiktok, FaEnvelope } from "react-icons/fa";
 import { NavLink } from 'react-router';
 import { useState, useEffect } from 'react';
 import { subscribeAuthChanges } from '../../firebase/auth';
-import { getUserProfile } from '../../firebase/db';
-import { updateUserProfile } from '../../firebase/db';  
+import { getUserProfile, updateUserProfile, uploadProfilePhoto } from '../../firebase/db';  
 
 function EditProfile() {
   const [userData, setUserData] = useState();
   const [editData, setEditData] = useState();
   const [loading, setIsLoading] = useState(true);
   const [currentUid, setCurrentUid] = useState(null);
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     const unsubscribe = subscribeAuthChanges((currentUser) => {
@@ -58,19 +58,26 @@ function EditProfile() {
   };
 
   // save button 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editData || !currentUid) return;
 
-    updateUserProfile(currentUid, editData)
-      .then(() => {
-        setUserData(editData); 
-        alert("Profile updated successfully!");
-        window.location.href = '/profile'
-      })
-      .catch((error) => {
-        console.error(error);
-        alert("Error updating profile: " + error.message);
-      });
+    let uploadedUrl = null;
+    if (image) {
+      uploadedUrl = await uploadProfilePhoto(image);
+    }
+
+    const updatedData = { ...editData };
+    if (uploadedUrl) updatedData.profilePic = uploadedUrl;
+
+    try {
+      await updateUserProfile(currentUid, updatedData);
+      setUserData(updatedData);
+      alert("Profile updated successfully!");
+      window.location.href = '/profile';
+    } catch (error) {
+      console.error(error);
+      alert("Error updating profile: " + error.message);
+    } 
   };
 
   return (
@@ -94,7 +101,12 @@ function EditProfile() {
           </div>
 
           <div className="profile-nav">
-            <button className="signout-btn">Upload Photo</button>
+            <input
+              className="signout-btn"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImage(e.target.files[0])}
+            />
           </div>
         </div>
 

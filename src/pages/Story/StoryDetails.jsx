@@ -85,7 +85,7 @@ function StoryDetails() {
                       <img src={author?.profileURL || author?.profilePic} alt="WOW" />
                     </div>
                     <p className="handle">{author?.displayName}</p>
-                    <p>Followers: {isFollowed ? author?.followersCount + 1 : author?.followersCount} • Following: {author?.followingCount}</p>
+                    <p>Followers: {isFollowed ? author?.followersCount : author?.followersCount} • Following: {author?.followingCount}</p>
 
                     {user?.uid === authorId ? (<h1></h1>) : (isFollowed ? <button className="btn follow" onClick={handledeleteFollow}>Following</button> :
                       <button className="btn follow" onClick={handleAddFollow}>+ Follow</button>)}

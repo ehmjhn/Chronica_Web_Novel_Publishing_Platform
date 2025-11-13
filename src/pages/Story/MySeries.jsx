@@ -36,7 +36,7 @@ function MySeries() {
     );
   if (seriesList.length === 0)
     return (
-      <div style={{ textAlign: "center", marginTop: "20px" }}>
+      <div className='homepage' style={{ textAlign: "center", color: "white"}}>
         No series has been created yet.
       </div>
     );

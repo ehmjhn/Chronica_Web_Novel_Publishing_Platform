@@ -142,7 +142,6 @@ export async function addFollowerList(userId, followedId) {
     const followedUserSnapshot = await get(followedRef)
     let followerValue = followedUserSnapshot.val()
 
-
     if (userSnapshot.exists()) {
       console.log("you already followed this user.")
     }
@@ -532,5 +531,30 @@ export async function addChapter(
   } catch (error) {
     console.log(chapterJSON)
     console.error("Error inserting story:", error);
+  }
+};
+
+// upload photo
+export const uploadProfilePhoto = async (file) => {
+  if (!file) return null;
+
+  const data = new FormData();
+  data.append("file", file);
+  data.append("upload_preset", "sample");
+  data.append("cloud_name", "dzvwgxnss");
+
+  try {
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dzvwgxnss/image/upload",
+      {
+        method: "POST",
+        body: data
+      }
+    );
+    const fileData = await res.json();
+    return fileData.secure_url;
+  } catch (err) {
+    console.error("Upload failed:", err);
+    return null;
   }
 };
