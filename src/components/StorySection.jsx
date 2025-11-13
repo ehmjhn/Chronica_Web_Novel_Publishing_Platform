@@ -31,29 +31,32 @@ function StorySection({ title, stories, viewAllPath, showFeaturedBadge = false }
 
       <div className="story-grid">
         {stories && stories.length > 0 ? (
-          stories.map((story, index) => {
-            const authorInfo = authors[story.id];
+          stories
+            .slice(0, 5) 
+            .map((story, index) => {
+              const authorInfo = authors[story.id];
 
-            return (
-              <StoryCard
-                key={index}
-                storyId={story.id}
-                title={story.title}
-                author={authorInfo ? authorInfo.displayName : '--'}
-                views={story.views}
-                rate={story.rate}
-                coverImage={story.coverImage}
-                isFeatured={story.isFeatured}
-                showFeatured={showFeaturedBadge && story.isFeatured}
-              />
-            );
-          })
+              return (
+                <StoryCard
+                  key={index}
+                  storyId={story.id}
+                  title={story.title}
+                  author={authorInfo ? authorInfo.displayName : '--'}
+                  views={story.views}
+                  rate={story.rate}
+                  coverImage={story.coverImage}
+                  isFeatured={story.isFeatured}
+                  showFeatured={showFeaturedBadge && story.isFeatured}
+                />
+              );
+            })
         ) : (
           <div className="no-stories">
             <p>No stories available at the moment.</p>
           </div>
         )}
       </div>
+
     </section>
   );
 }

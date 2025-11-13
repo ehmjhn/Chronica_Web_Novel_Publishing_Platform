@@ -68,8 +68,11 @@ function ViewChapter() {
               <NavLink to={`/read-chapter/${chapter.id}`} key={k} className="chapter-item">
                 <span>{chapter.chapterTitle}</span>
                 <span className="chapter-date">
-                  {new Date(chapter.publishDate).toLocaleDateString()}{" "}
-                  {new Date(chapter.publishDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {`Publish: ${new Date(chapter.publishDate).toLocaleDateString()} ${new Date(chapter.publishDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                  <br/>
+                  {chapter.updateDate
+                    ? `Update: ${new Date(chapter.updateDate).toLocaleDateString()} ${new Date(chapter.updateDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                    : " "}
                 </span>
               </NavLink>
             )) :

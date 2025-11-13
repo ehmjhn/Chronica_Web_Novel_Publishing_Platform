@@ -1,24 +1,39 @@
-import './home.css'
+import './home.css';
 import { useState, useEffect } from 'react';
-import { readComic } from '../../firebase/db';
-
+import { readComic, retrieveUsers } from '../../firebase/db';
 import StoryCard from '../../components/StoryCard';
 
 function FeaturedStories() {
-const [featuredComics, setFeatured] = useState([]);
+  const [featuredComics, setFeatured] = useState([]);
 
   useEffect(() => {
+    let usersList = [];
 
-    const unsubscribe = readComic((comics) => {
-      if (!comics) return;
-
-      const featured = comics.filter(comic => comic.isFeatured === true)
-      setFeatured(featured)
-      
+    const unsubscribeUsers = retrieveUsers((users) => {
+      usersList = users;
     });
 
-    return () => unsubscribe();
+    const unsubscribeComics = readComic((comics) => {
+      if (!comics) return;
 
+      const featured = comics
+        .filter(comic => comic.isFeatured)
+        .map(comic => {
+
+          const author = usersList.find(u => u.id === comic.authorId);
+          return {
+            ...comic,
+            authorName: author?.displayName || "Unknown",
+          };
+        });
+
+      setFeatured(featured);
+    });
+
+    return () => {
+      unsubscribeUsers();
+      unsubscribeComics();
+    };
   }, []);
 
   return (
@@ -31,10 +46,10 @@ const [featuredComics, setFeatured] = useState([]);
               key={comic.id}
               storyId={comic.id}
               title={comic.title}
-              author={comic.author?.author || comic.author || "Unknown"}
-              coverImage={comic.coverImage?.coverImage || comic.coverImage || ""}
-              views={comic.views?.views || comic.views || 0}
-              rate={comic.rate?.rate || comic.rate || 0}
+              author={comic.authorName}
+              coverImage={comic.coverImage || ""}
+              views={comic.views || 0}
+              rate={comic.rate || 0}
               isFeatured={comic.isFeatured || false}
               showFeatured={true}
             />
