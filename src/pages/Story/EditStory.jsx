@@ -159,7 +159,7 @@ function EditStory() {
             </select>
 
             <div className="create-form-chip-list">
-              {selectedGenres.map((genre, index) => (
+              {Object.values(selectedGenres || {}).map((genre, index) => (
                 <span key={index} className="create-form-chip">
                   {genre}
                   <button type="button" className="create-form-remove-chip" onClick={() => handleRemoveGenre(genre)}>×</button>
@@ -177,7 +177,7 @@ function EditStory() {
             </select>
 
             <div className="create-form-chip-list">
-              {selectedTags.map((tag, index) => (
+              {Object.values(selectedTags || {}).map((tag, index) => (
                 <span key={index} className="create-form-chip">
                   {tag}
                   <button type="button" className="create-form-remove-chip" onClick={() => handleRemoveTag(tag)}>×</button>

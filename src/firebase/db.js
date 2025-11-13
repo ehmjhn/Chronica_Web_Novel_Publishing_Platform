@@ -245,6 +245,7 @@ export const updateUserProfile = (uid, newData) => {
 export const updateStory = async (
   storyId,
   title,
+  authorId,
   genre,
   status,
   synopsis,
@@ -267,6 +268,7 @@ export const updateStory = async (
     const updatedStory = {
       ...existingStory,
       title: title,
+      authorId: authorId,
       coverImage: coverImage || existingStory.coverImage || "https://placehold.net/300x200",
       genre: genre,
       status: status,

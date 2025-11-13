@@ -4,7 +4,7 @@ import { NavLink, useParams } from 'react-router';
 
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import { addChapter, readComic, retrieveChapter } from '../../firebase/db';
+import { addChapter, readComic } from '../../firebase/db';
 
 function AddChapter() {
     // date time

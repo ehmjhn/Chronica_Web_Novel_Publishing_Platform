@@ -11,7 +11,6 @@ function ReadChapter() {
   const [chapters, setChapters] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(null);
   const [loading, setIsLoading] = useState(true);
-  const [cleanContent, setCleanContent] = useState("")
 
   const navigate = useNavigate();
 
@@ -71,6 +70,11 @@ function ReadChapter() {
 
   return (
     <div className="page-background">
+      <div className="subnav-control">
+        <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
+        <NavLink to={`/story-chapter-list/${story?.id}`}>Chapter List</NavLink> /
+        <i>{chapter?.chapterTitle}</i>
+      </div>
       <div className="read-bg">
         {/* Series Header */}
         <div className="chapter-header">
@@ -90,7 +94,7 @@ function ReadChapter() {
                 <i className="fa-solid fa-heart"></i> {story?.likes}
               </div>
               <div className="stat rating">
-                <i className="fa-solid fa-star"></i> {story?.rate}/10 (wala pang total ratings)
+                <i className="fa-solid fa-star"></i> {story?.rate}/5
               </div>
             </div>
           </div>
@@ -119,7 +123,10 @@ function ReadChapter() {
 
         {/* Chapter Content */}
         <div className="chapter-content">
-          <p>{(chapter.content).replace('<p>', '').replace('</p>', '')}</p>
+          <div
+            className="ql-editor"
+            dangerouslySetInnerHTML={{ __html: chapter.content }} //nakukuha pati html behavior ng content
+          />
         </div>
 
         {/* Footer Navigation */}
