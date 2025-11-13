@@ -53,6 +53,10 @@ function StoryDetails() {
   if (loading) return <div className="homepage"><div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>Loading...</div></div>;
 
   async function handleAddFollow() {
+    if (user === null) {
+      alert("Please login first.")
+      return
+    }
     await addFollowerList(user.uid, authorId)
     setIsFollowed(true)
 
@@ -83,7 +87,7 @@ function StoryDetails() {
                     <p className="handle">{author?.displayName}</p>
                     <p>Followers: {isFollowed ? author?.followersCount + 1 : author?.followersCount} • Following: {author?.followingCount}</p>
 
-                    {user.uid === authorId ? (<h1></h1>) : (isFollowed ? <button className="btn follow" onClick={handledeleteFollow}>Following</button> :
+                    {user?.uid === authorId ? (<h1></h1>) : (isFollowed ? <button className="btn follow" onClick={handledeleteFollow}>Following</button> :
                       <button className="btn follow" onClick={handleAddFollow}>+ Follow</button>)}
 
                   </div>
