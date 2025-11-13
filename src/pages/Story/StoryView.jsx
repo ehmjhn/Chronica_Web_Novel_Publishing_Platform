@@ -45,7 +45,6 @@ function StoryView() {
               setIsBookmarked(profile?.bookmarkedStories?.includes(foundStory.id) || false);
               setHasLiked(profile?.likedStories?.includes(foundStory.id) || false);
 
-              // Increment views only if first-time AND NOT the author
               updateStoryViews(foundStory.id, user.uid, foundStory.authorId).then(newViews => {
                 if (newViews) {
                   setStory(prev => ({ ...prev, views: newViews }));

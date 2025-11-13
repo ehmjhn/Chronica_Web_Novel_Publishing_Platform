@@ -8,6 +8,7 @@ function ViewChapter() {
   const [limit, setLimit] = useState(10); 
   const [orderAsc, setOrderAsc] = useState(true);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true)
 
   const {id} = useParams();
   const [chapters, setChapters] = useState([]);
@@ -18,6 +19,7 @@ function ViewChapter() {
 
       const storyChaps = chaps.filter(c => c.storyId === id);
       setChapters(storyChaps || []);
+      setLoading(false)
     });
   }, [id]);
 
@@ -29,6 +31,8 @@ function ViewChapter() {
   const paginatedChapters = sortedChapters.slice(startIndex, startIndex + limit);
 
   const totalPages = Math.ceil(chapters.length / limit);
+
+  if (loading) return <div className="homepage"><div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>Loading...</div></div>;
 
   return (
     <div className="storyview-page">
@@ -63,7 +67,13 @@ function ViewChapter() {
             paginatedChapters.map((chapter, k) => (
               <NavLink to={`/read-chapter/${chapter.id}`} key={k} className="chapter-item">
                 <span>{chapter.chapterTitle}</span>
-                <span className="chapter-date">{chapter.publishDate}</span>
+                <span className="chapter-date">
+                  {`Publish: ${new Date(chapter.publishDate).toLocaleDateString()} ${new Date(chapter.publishDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                  <br/>
+                  {chapter.updateDate
+                    ? `Update: ${new Date(chapter.updateDate).toLocaleDateString()} ${new Date(chapter.updateDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                    : " "}
+                </span>
               </NavLink>
             )) :
             <p style={{margin: "0 auto"}}>No Chapter Available.</p>

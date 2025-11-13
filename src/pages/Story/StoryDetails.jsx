@@ -82,7 +82,7 @@ function StoryDetails() {
                 <div className="author-details">
                   <div className="author-profile">
                     <div className="author-photo">
-                      <img src={author?.profileURL} alt="WOW" />
+                      <img src={author?.profileURL || author?.profilePic} alt="WOW" />
                     </div>
                     <p className="handle">{author?.displayName}</p>
                     <p>Followers: {isFollowed ? author?.followersCount + 1 : author?.followersCount} • Following: {author?.followingCount}</p>

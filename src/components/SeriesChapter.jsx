@@ -1,34 +1,35 @@
-import React from 'react'
-import { useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { NavLink } from 'react-router'
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { NavLink } from 'react-router';
 
-function SeriesChapter ({id, title, date}) {
+function SeriesChapter({ id, chapterId, title, date }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
-    const {attributes, listeners, setNodeRef, transform, transition} = useSortable({id})
-
-    const style = {
-       transition,
-       transform: CSS.Transform.toString(transform)
-    }
+  console.log(chapterId)
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+    cursor: 'grab'
+  };
 
   return (
-    <div key={id} ref={setNodeRef} {...attributes} {...listeners} style={style} className="chapter-card">
-
-        <div className="chapter-info">
-            <i className="fa-solid fa-bars"></i>
-            <div>
-                <span>{title}</span>
-                <span className="chapter-date">{date}</span>
-            </div>
+    <div ref={setNodeRef} style={style} className="chapter-card">
+      <div className="chapter-info">
+        <i className="fa-solid fa-bars" {...listeners} {...attributes}></i>
+        <div>
+          <span>{title}</span>
+          <span className="chapter-date">
+            {new Date(date).toLocaleDateString([], { month: '2-digit', day: '2-digit', year: 'numeric' })}{" "}
+            {new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+          </span>
         </div>
-        <div className="chapter-control-icons">
-            <i className="fa-solid fa-trash"></i>
-            <NavLink to='/edit-chapter'><i className="fa-solid fa-pen-fancy"></i></NavLink>
-        </div>
-
+      </div>
+      <div className="chapter-control-icons">
+        <i className="fa-solid fa-trash"></i>
+        <NavLink to={`/edit-chapter/${chapterId}`}><i className="fa-solid fa-pen-fancy"></i></NavLink>
+      </div>
     </div>
-  )
+  );
 }
 
-export default SeriesChapter
+export default SeriesChapter;

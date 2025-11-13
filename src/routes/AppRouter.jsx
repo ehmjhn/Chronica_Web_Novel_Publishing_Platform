@@ -80,7 +80,7 @@ function AppRouter() {
           <Route path="create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
           <Route path="update-story/:id" element={<ProtectedRoute><EditStory /></ProtectedRoute>} />
           <Route path="update-chapter-list/:id" element={<ProtectedRoute><ChapterList /></ProtectedRoute>} />
-          <Route path="edit-chapter" element={<ProtectedRoute><EditChapter /></ProtectedRoute>} />
+          <Route path="edit-chapter/:id" element={<ProtectedRoute><EditChapter /></ProtectedRoute>} />
 
         </Route>
 

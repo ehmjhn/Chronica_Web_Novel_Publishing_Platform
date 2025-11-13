@@ -380,20 +380,24 @@
 
 .chapter-content {
   width: 90%;
-  background-color: #252740;;
+  margin: 1.5rem auto;
+  background-color: #252740;
   padding: 20px;
   border-radius: 15px;
-  margin-top: 1.5rem;
   box-sizing: border-box;
-
   min-height: 300px;
   font-family: "Georgia", serif;
 }
 
+.chapter-content .ql-container {
+  border-radius: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .chapter-content .ql-toolbar {
+  border-radius: 15px 15px 0 0;
   background-color: #f4f4f4;
-  border-radius: 10px 10px 0 0;
-  border: none;
 }
 
 .chapter-content .ql-toolbar button,
@@ -420,6 +424,8 @@
   text-align: justify;
   border-radius: 0 0 15px 15px;
   box-sizing: border-box;
+  width: 100%;
+  padding: 20px;
 }
 
 .chapter-content .ql-editor p {
@@ -436,6 +442,13 @@
   outline: none;
 }
 
+.chapter-content .ql-editor h1,
+.chapter-content .ql-editor h2,
+.chapter-content .ql-editor h3 {
+  color: #fff;
+  margin: 1rem 0;
+  font-family: 'Montserrat', Georgia, 'Times New Roman', Times, serif
+}
 
 .chapter-footer {
   width: 90%;

@@ -8,8 +8,8 @@ function CreateSeries() {
   const [coverImage, setCoverImage] = useState(null);
   const [title, setTitle] = useState("");
   const [synopsis, setSynopsis] = useState("");
-  const [contentWarning, setContentWarning] = useState("");
-  const [status, setStatus] = useState("");
+  const [contentWarning, setContentWarning] = useState("None");
+  const [status, setStatus] = useState("Ongoing");
   const [copyright, setCopyright] = useState("All Rights Reserved");
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
@@ -63,7 +63,7 @@ function CreateSeries() {
 
   function handleCreateSeries() {
     if (!title || !synopsis || !status || selectedGenres.length === 0 || selectedTags.length === 0 || !contentWarning || !copyright) {
-      console.log("ILAGAY MO LAHAT NG FIELDS");
+      alert("Please fill all fields.")
       return;
     }
     insertStory(title, user?.uid, selectedGenres, status, synopsis, copyright, selectedTags, contentWarning, coverImage)
@@ -189,7 +189,7 @@ function CreateSeries() {
             <div>
               <label className="create-form-label">Content Warning</label>
               <select value={contentWarning} onChange={(e) => setContentWarning(e.target.value)}>
-                <option value="">Select</option>
+                <option value="None">None</option>
                 <option value="Gore">Gore</option>
                 <option value="Sexual Content">Sexual Content</option>
                 <option value="Strong Language">Strong Language</option>
@@ -199,7 +199,6 @@ function CreateSeries() {
             <div>
               <label className="create-form-label">Story Status</label>
               <select value={status} onChange={(e) => setStatus(e.target.value)}>
-                <option value="">Select</option>
                 <option>Ongoing</option>
                 <option>Completed</option>
                 <option>Hiatus</option>

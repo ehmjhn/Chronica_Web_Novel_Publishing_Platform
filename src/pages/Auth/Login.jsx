@@ -9,12 +9,34 @@ function Login() {
   const [password, setPassword] = useState("");
   const [pass, setShowPass] = useState(false);
 
+  const [emailValid, setEmailValid] = useState(true);
+
   function handleLogin() {
+    if (!email || !password) {
+      alert("Please fill in all fields");
+      return;
+    }
+    if (!emailValid) {
+      alert("Invalid email format");
+      return;
+    }
     loginUser(email, password);
   }
+
   function handleGoogleLogin() {
     signInWithGoogle();
   }
+
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (value === "") {
+      setEmailValid(true);
+      return;
+    }
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setEmailValid(regex.test(value));
+  };
 
   return (
     <div className="login-page">
@@ -32,13 +54,14 @@ function Login() {
             <p className="login-text">Please enter your Login credentials</p>
 
             <div className="input-icons">
+              {!emailValid && <span className="validation-text">Invalid email format</span>}
               <div className="input-field-ul">
                 <i className="fas fa-envelope input-icon"></i>
                 <input
                   className="input-field"
                   type="email"
                   placeholder="Email"
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
                 />
               </div>
             </div>

@@ -1,22 +1,39 @@
 import './home.css'
-import { readComic } from '../../firebase/db';
+import { readComic, retrieveUsers } from '../../firebase/db';
 import { useState, useEffect } from 'react';
 
 import StoryCard from '../../components/StoryCard';
 
 function PopularWorks() {
-
     const [popularComics, setPopular] = useState([])
 
     useEffect(()=>{
-        const unsubscribe = readComic((comics) => {
+        let usersList = [];
+
+        const unsubscribeUsers = retrieveUsers((users) => {
+            usersList = users;
+        });
+
+        const unsubscribeComics = readComic((comics) => {
             if (!comics) return;
 
-            const sorted = [...comics].sort((a, b) => b.views - a.views);
+            const sorted = [...comics]
+                .map((comic) => {
+                    const author = usersList.find(u => u.id === comic.authorId);
+                    return {
+                        ...comic,
+                        authorName: author?.displayName || "Unknown",
+                    };
+                })
+                .sort((a, b) => b.views - a.views);
+
             setPopular(sorted);
         });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribeUsers();
+            unsubscribeComics();
+        };
     },[])
 
     return (
@@ -26,15 +43,15 @@ function PopularWorks() {
                 {popularComics.length > 0 ? (
                 popularComics.map((comic) => (
                     <StoryCard
-                    key={comic.id}
-                    storyId={comic.id}
-                    title={comic.title}
-                    author={comic.author?.name || comic.author || "Unknown"}
-                    coverImage={comic.coverImage?.coverImage || comic.coverImage || ""}
-                    views={comic.views?.views || comic.views || 0}
-                    rate={comic.rate?.rate || comic.rate || 0}
-                    isFeatured={comic.isFeatured || false}
-                    showFeatured={false}
+                        key={comic.id}
+                        storyId={comic.id}
+                        title={comic.title}
+                        author={comic.authorName}
+                        coverImage={comic.coverImage || ""}
+                        views={comic.views || 0}
+                        rate={comic.rate || 0}
+                        isFeatured={comic.isFeatured || false}
+                        showFeatured={false}
                     />
                 ))
                 ) : (

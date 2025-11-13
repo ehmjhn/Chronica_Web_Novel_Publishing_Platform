@@ -7,9 +7,9 @@ function ResultCard({
   cover,
   rate,
   status,
-  genres = [],
+  genre = [],
   tags = [],
-  summary,
+  synopsis,
   views,
   chapters,
   likes,
@@ -30,11 +30,15 @@ function ResultCard({
             <span className="result-rate"><i className="fa-solid fa-star"></i> {rate?.toFixed(1)}</span>
           </div>
 
-          <p className="result-summary">{summary}</p>
+          <p className="result-summary">{synopsis}</p>
 
           <div className="result-tags">
-            {[...genres, ...tags].map((tag, i) => (
-              <span key={i} className={`tag ${genres.includes(tag) ? "genre-tag" : ""}`}>{tag}</span>
+            {genre.map((genre, i) => (
+              <span key={`genre-${i}`} className="genre-tag">{genre}</span>
+            ))}
+
+            {tags.map((tag, i) => (
+              <span key={`tag-${i}`} className="tag">{tag}</span>
             ))}
           </div>
 

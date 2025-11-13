@@ -245,6 +245,7 @@ export const updateUserProfile = (uid, newData) => {
 export const updateStory = async (
   storyId,
   title,
+  authorId,
   genre,
   status,
   synopsis,
@@ -267,6 +268,7 @@ export const updateStory = async (
     const updatedStory = {
       ...existingStory,
       title: title,
+      authorId: authorId,
       coverImage: coverImage || existingStory.coverImage || "https://placehold.net/300x200",
       genre: genre,
       status: status,
@@ -378,6 +380,34 @@ export const updateBookmark = (userId, storyId, callback) => {
         .catch(err => console.error(err));
     })
     .catch(err => console.error(err));
+};
+
+// update chapter
+export const updateChapter = async (chapterId, updatedData) => {
+  try {
+    const chapterRef = ref(database, `chapters/${chapterId}`);
+    const snapshot = await get(chapterRef);
+
+    if (!snapshot.exists()) {
+      console.error("Chapter not found.");
+      return null;
+    }
+
+    const existingChapter = snapshot.val();
+
+    const updatedChapter = {
+      ...existingChapter,
+      ...updatedData,
+      updatedDate: new Date().toISOString()
+    };
+
+    await set(chapterRef, updatedChapter);
+    console.log("Chapter updated successfully!");
+    return chapterId;
+  } catch (error) {
+    console.error("Error updating chapter:", error);
+    throw error;
+  }
 };
 
 // delete story
@@ -492,7 +522,6 @@ export async function addChapter(
     content: content,
     publishStatus: "published",
     publishDate: new Date().toISOString(),
-    updateDate: new Date().toISOString(),
     order: order
   };
   try {

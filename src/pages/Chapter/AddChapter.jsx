@@ -4,11 +4,9 @@ import { NavLink, useParams } from 'react-router';
 
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import { addChapter, readComic, retrieveChapter } from '../../firebase/db';
+import { addChapter, readComic } from '../../firebase/db';
 
 function AddChapter() {
-    // date time
-
     const { id } = useParams();
     const [story, setStory] = useState(0)
     const now = new Date();
@@ -29,7 +27,7 @@ function AddChapter() {
     const [date, setDate] = useState(today);
     const [time, setTime] = useState(currentTime);
     async function handleAddChapter() {
-        if (title === "" || content === "") { return alert("No missing fields.") }
+        if (title === "" || content === "") { return alert("Please fill all fields.") }
         const key = await addChapter(id, content, title)
 
         window.location.href = `/read-chapter/${key}`;
