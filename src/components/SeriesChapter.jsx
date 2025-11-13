@@ -5,7 +5,7 @@ import { NavLink } from 'react-router';
 function SeriesChapter({ id, chapterId, title, date }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
-  console.log(chapterId)
+  
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
