@@ -22,7 +22,7 @@ function ViewChapter() {
   }, [id]);
 
   const sortedChapters = [...chapters].sort((a, b) =>
-    orderAsc ? a.order - b.order : b.order - a.order
+    orderAsc ? b.order - a.order : a.order - b.order
   );
 
   const startIndex = (page - 1) * limit;
@@ -54,7 +54,7 @@ function ViewChapter() {
               </select>
               <button onClick={() => setOrderAsc(!orderAsc)}>
                 <i className="fa-solid fa-filter"></i>
-                {orderAsc ? "Latest" : "Oldest"}
+                {orderAsc ? "Oldest" : "Latest"}
               </button>
             </div>
           </div>

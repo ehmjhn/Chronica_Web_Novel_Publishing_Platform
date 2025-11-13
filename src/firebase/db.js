@@ -384,9 +384,9 @@ export const updateBookmark = (userId, storyId, callback) => {
 export const deleteStory = async (storyId, authorId) => {
   try {
     const storyRef = ref(database, `stories/${storyId}`);
-    const storycountRef = ref(database, `users/${authorId}/`)
-    const snapshot = await get(storyRef);
+    const userRef = ref(database, `users/${authorId}`);
 
+    const snapshot = await get(storyRef);
     if (!snapshot.exists()) {
       console.error("Story not found.");
       return false;
@@ -401,6 +401,18 @@ export const deleteStory = async (storyId, authorId) => {
 
     await remove(storyRef);
     console.log("Story deleted successfully!");
+
+    const userSnapshot = await get(userRef);
+    if (userSnapshot.exists()) {
+      const userData = userSnapshot.val();
+      const totalSeries = userData.totalSeries || 0;
+
+      await update(userRef, {
+        totalSeries: totalSeries > 0 ? totalSeries - 1 : 0,
+      });
+      console.log("User totalSeries updated!");
+    }
+
     return true;
   } catch (error) {
     console.error("Error deleting story:", error);

@@ -117,6 +117,11 @@ function MySeries() {
                     <span key={i} className="genre-tag">{g}</span>
                   ), console.log(s.genre))}
                 </div>
+                <div className="series-genre">
+                  {Object.values(s.tags).map((t, i) => (
+                    <span key={i} className="tag-genre">{t}</span>
+                  ), console.log(s.genre))}
+                </div>
                 <p className="series-desc">{s.synopsis}</p>
                 <span className="series-meta">
                   <i className="fa-solid fa-eye"></i> {s.views || 0} |{" "}
