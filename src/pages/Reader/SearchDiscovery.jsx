@@ -2,24 +2,18 @@ import "./reader.css";
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router";
 import ResultCard from "../../components/ResultCard";
-import { readComic } from "../../firebase/db";
+import { readComic, retrieveGenres, retrieveTags } from "../../firebase/db";
 
 function SearchDiscovery() {
   const [stories, setStories] = useState([]);
   const [filteredStories, setFilteredStories] = useState([]);
 
-  const genreOptions = [
-    "Fantasy", "Romance", "Adventure", "Drama", "Comedy",
-    "Action", "Horror", "Mystery", "Slice of Life", "Sci-Fi"
-  ];
-  const tagOptions = [
-    "Magic", "System", "Reincarnation", "Isekai", "Overpowered",
-    "Villainess", "RomCom", "Tragedy", "Friendship", "School Life"
-  ];
   const contentWarnings = ["Sexual Content", "Strong Language", "Gore"];
   const storyStatuses = ["Ongoing", "Completed", "Hiatus"];
   const sortOptions = ["Page Views", "Ratings", "Favorites"];
 
+  const [genreOptions, setGenreOptions] = useState([])
+  const [tagOptions, setTagOptions] = useState([])
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedCW, setSelectedCW] = useState([]);
@@ -27,16 +21,21 @@ function SearchDiscovery() {
   const [sortBy, setSortBy] = useState("");
   const [sortOrder, setSortOrder] = useState("desc");
   const [searchClicked, setSearchClicked] = useState(false);
-  const [genreDropdown, setGenreDropdown] = useState(""); // for genre select
-  const [tagDropdown, setTagDropdown] = useState("");     // for tag select
-
+  const [genreDropdown, setGenreDropdown] = useState(""); 
+  const [tagDropdown, setTagDropdown] = useState("");
 
   useEffect(() => {
-    const unsubscribe = readComic((data) => {
+    readComic((data) => {
       setStories(data);
       setFilteredStories(data);
     });
-    return () => unsubscribe && unsubscribe();
+    retrieveGenres((genres)=>{
+      setGenreOptions(genres)
+    })
+    retrieveTags((tags)=>{
+      setTagOptions(tags)
+    })
+
   }, []);
 
   const handleGenreSelect = (e) => {

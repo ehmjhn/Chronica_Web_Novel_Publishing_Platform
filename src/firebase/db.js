@@ -142,7 +142,6 @@ export async function addFollowerList(userId, followedId) {
     const followedUserSnapshot = await get(followedRef)
     let followerValue = followedUserSnapshot.val()
 
-
     if (userSnapshot.exists()) {
       console.log("you already followed this user.")
     }
