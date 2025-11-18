@@ -533,6 +533,25 @@ export async function addChapter(
     console.error("Error inserting story:", error);
   }
 };
+export async function deleteChapter(
+  storyId,
+  chapterId
+) {
+  const storyRef = ref(database, `chapters/${chapterId}`);
+  const storyTotalChaptersRef = ref(database, `stories/${storyId}/totalChapters`);
+  let totalChapters = (await get(storyTotalChaptersRef)).val()
+
+  try {
+    await remove(storyRef)
+    await set(storyTotalChaptersRef, (totalChapters - 1))
+    console.log("deleted Successfully")
+  }
+  catch (error) {
+    console.log(chapterJSON)
+    console.error("Error inserting story:", error);
+  }
+};
+
 
 // upload photo
 export const uploadProfilePhoto = async (file) => {

@@ -1,7 +1,7 @@
 /* OVERVIEW STORY */
 .storyview-page {
   width: 100%;
-  background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062); 
+  background: linear-gradient(to top, #0e0f20d3 40%, #0e0f2062);
   color: #f0f0f0;
   padding: 30px;
   gap: 30px;
@@ -76,7 +76,7 @@
   margin: 0;
   font-size: 2rem;
   color: #fff;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
 }
 
 .storyview-hero-info .meta {
@@ -181,7 +181,7 @@
   animation: fadeIn 0.5s ease-in-out;
 }
 
-.storyview-author{
+.storyview-author {
   text-align: center;
   width: 50%;
 }
@@ -201,7 +201,7 @@
   gap: 20px;
 }
 
-.author-profile{
+.author-profile {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -213,7 +213,7 @@
   height: 90px;
   background-color: #222;
   border-radius: 50%;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
 .handle {
@@ -314,15 +314,18 @@
   color: #fff;
 }
 
-.chapter-item:nth-child(even), .chapter-card:nth-child(even) {
+.chapter-item:nth-child(even),
+.chapter-card:nth-child(even) {
   background-color: #242438;
 }
 
-.chapter-item:nth-child(odd), .chapter-card:nth-child(odd) {
+.chapter-item:nth-child(odd),
+.chapter-card:nth-child(odd) {
   background-color: #2c2c44;
 }
 
-.chapter-item:hover, .chapter-card:hover {
+.chapter-item:hover,
+.chapter-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 2px 6px rgba(255, 204, 0, 0.278);
 }
@@ -333,12 +336,12 @@
   padding-block: 12px;
   padding-inline-end: 16px;
   margin-bottom: 4px;
-  border-radius: 6px; 
+  border-radius: 6px;
   height: 70px;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   color: #fff;
-  background-color: #2c2c2c; 
+  background-color: #2c2c2c;
 }
 
 .chapter-info {
@@ -348,10 +351,10 @@
 }
 
 .chapter-info .fa-bars {
-  display: inline-block; 
+  display: inline-block;
   width: 70px;
-  line-height: 70px;      
-  padding-inline: 20px; 
+  line-height: 70px;
+  padding-inline: 20px;
   font-size: large;
   color: #3a3a50;
   background: linear-gradient(90deg, #fbc02d, #ffeb3b);
@@ -360,7 +363,7 @@
   transition: ease-in-out 0.2s;
 }
 
-.chapter-info .fa-bars:hover{
+.chapter-info .fa-bars:hover {
   transform: translateY(-2);
 }
 
@@ -373,8 +376,8 @@
   color: #bbb;
 }
 
-.chapter-control-icons .fa-pen-fancy,  
-.chapter-control-icons .fa-trash{
+.chapter-control-icons .fa-pen-fancy,
+.chapter-control-icons .fa-trash {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -389,14 +392,14 @@
   font-size: 16px;
 }
 
-.chapter-control-icons .fa-trash{
+.chapter-control-icons .fa-trash {
   background: linear-gradient(90deg, #fb2d2d, #ff9595);
   color: white;
 }
 
 .chapter-control-icons i:hover {
   transform: scale(1.1);
-  filter: brightness(1.2); 
+  filter: brightness(1.2);
 }
 
 .chapter-date {
@@ -409,7 +412,7 @@
   margin-top: 12px;
 }
 
-.chapter-pagination button, 
+.chapter-pagination button,
 .chapter-controls .save-changes {
   padding: 6px 12px;
   border-radius: 4px;
@@ -497,12 +500,26 @@
   background: linear-gradient(90deg, #fbc02d, #ffeb3b);
   transition: width 0.4s ease;
 }
+
 .write-review {
   margin-bottom: 40px;
   padding: 20px;
   background-color: #2a2a3a;
   border-radius: 10px;
   border: 1px solid rgba(255, 217, 0, 0.2);
+  animation: slideInDown 0.5s ease-in-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .write-review h3 {
@@ -587,7 +604,21 @@
   border-radius: 10px;
   border: 1px solid rgba(255, 217, 0, 0.15);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.3s ease, max-height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+  max-height: 200px;
+  overflow: hidden;
+  opacity: 1;
+}
+
+.review-item.expanded {
+  max-height: 900px;
+}
+
+.review-item.closing {
+  max-height: 0;
+  opacity: 0;
+  padding: 0 20px;
+  margin: 0;
 }
 
 .review-item:hover {
@@ -670,8 +701,8 @@
 
 .series-chapter-link {
   display: flex;
-  gap: 10px; 
-  background-color: #2f2f46; 
+  gap: 10px;
+  background-color: #2f2f46;
   padding: 8px 12px;
   border-radius: 8px;
   width: 100%;
@@ -688,7 +719,7 @@
   font-weight: 500;
   border-radius: 6px;
   transition: background-color 0.2s, color 0.2s;
-  background-color: #e0e0e0; 
+  background-color: #e0e0e0;
 }
 
 .series-chapter-link a:hover {
@@ -697,11 +728,11 @@
 }
 
 .series-chapter-link a.active {
-  background-color: #ffd700; 
+  background-color: #ffd700;
   color: #333;
 }
 
-.filter-section{
+.filter-section {
   padding-block: 15px;
   border-top: 1px solid goldenrod;
   color: #fff;
@@ -712,15 +743,15 @@
   font-size: 14px;
   border-radius: 5px;
   border: 1px solid #ccc;
-  background-color: #1e1e1e; 
-  color: #fff; 
+  background-color: #1e1e1e;
+  color: #fff;
   outline: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
 
 .filter-section select:hover {
-  border-color: #facc15; 
+  border-color: #facc15;
 }
 
 .filter-section select:focus {
@@ -781,7 +812,7 @@
   background: rgba(42, 42, 64, 0.9);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   padding: 18px;
   border-radius: 12px;
   transition: all 0.25s ease;
@@ -790,7 +821,7 @@
 .series-card:hover {
   background: rgba(60, 60, 95, 0.95);
   transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.45);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
 }
 
 .series-img {
@@ -803,6 +834,7 @@
   border: 2px solid rgba(255, 255, 255, 0.1);
   transition: 0.2s;
 }
+
 .series-img:hover {
   scale: 1.05;
   border-color: #f7b500;
@@ -859,6 +891,7 @@
   margin: 12px 0;
   display: inline-block;
 }
+
 .series-page .series-meta i {
   color: #f7b500;
 }
@@ -880,6 +913,7 @@
   transition: all 0.25s ease;
   box-shadow: 0 2px 5px rgba(247, 181, 0, 0.3);
 }
+
 .btn-yellow:hover {
   background: linear-gradient(to bottom right, #ffd740, #f7b500);
   transform: translateY(-2px);
@@ -897,6 +931,7 @@
   box-shadow: 0 2px 5px rgba(255, 82, 82, 0.3);
   transition: all 0.25s ease;
 }
+
 .delete-btn:hover {
   background: linear-gradient(to bottom right, #ff6767, #ff1e1e);
   transform: scale(1.05);
@@ -932,10 +967,12 @@
   cursor: pointer;
   transition: all 0.25s ease;
 }
+
 .page-btn:hover {
   background: linear-gradient(to bottom right, #ffd740, #f7b500);
   transform: translateY(-1px);
 }
+
 .page-btn i {
   margin: 0 4px;
 }
@@ -1090,4 +1127,15 @@
 
 .create-form-submit:hover {
   background: #ffe45c;
+}
+
+.edit-but {
+  margin-left: 98%;
+  position: relative;
+}
+
+.edit-but i {
+  position: absolute;
+  top: 0;
+  transition: 0.2s;
 }

@@ -1,17 +1,19 @@
 import './story.css';
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useParams } from 'react-router';
 import { retrieveUsers, readComic, retrieveReviews, addReview, updateReview } from '../../firebase/db';
 import { subscribeAuthChanges } from '../../firebase/auth';
 import StoryView from './StoryView';
+import { HiH1 } from 'react-icons/hi2';
 
 function StoryReviews() {
     const { id } = useParams();
     const [story, setStory] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
+    const [editClicked, setEditClicked] = useState()
+    const [closingReviewId, setClosingReviewId] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
-
     const [rating, setRating] = useState(0);
     const [reviewTopic, setReviewTopic] = useState('');
     const [reviewText, setReviewText] = useState('');
@@ -25,6 +27,7 @@ function StoryReviews() {
             if (currentStory) {
                 retrieveReviews(allReviews => {
                     const storyReviews = allReviews.filter(r => r.storyId === currentStory.id);
+
                     setReviews(storyReviews);
                 });
 
@@ -67,6 +70,7 @@ function StoryReviews() {
 
         if (userReview) {
             updateReview(userReview.id, reviewData);
+            setEditClicked(false)
             alert("Your review has been updated!");
         } else {
             addReview(reviewData);
@@ -95,6 +99,18 @@ function StoryReviews() {
         updateReview(review.id, updatedReview);
 
         setReviews(prev => prev.map(r => r.id === review.id ? updatedReview : r));
+    }
+
+    function handleEditButton() {
+        if (!editClicked) {
+            setEditClicked(true)
+            console.log(editClicked)
+        }
+        else {
+            setEditClicked(false)
+            console.log(editClicked)
+        }
+
     }
 
     // Ratings summary
@@ -128,8 +144,8 @@ function StoryReviews() {
                         </div>
                     ))}
                 </div>
+                {userReview == null ? <div className="write-review">
 
-                <div className="write-review">
                     <h3>{userReview ? "Edit Your Review" : "Write a Review"}</h3>
 
                     <form onSubmit={handleSubmit}>
@@ -164,15 +180,18 @@ function StoryReviews() {
                             {userReview ? "Update Review" : "Submit Review"}
                         </button>
                     </form>
-                </div>
+                </div> : <h1></h1>}
+
 
                 <hr />
-
+                <h2>Latest Comments</h2>
                 <div className="review-list">
-                    {reviews.map(review => {
+                    {reviews.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(review => {
                         const reviewer = allUsers.find(u => u.id === review.userId);
                         return (
-                            <div key={review.id} className="review-item">
+
+                            <div key={review.id} className={`review-item ${editClicked && review.userId == currentUser?.uid ? 'expanded' : 'back'}`}>
+
                                 <div>
                                     <strong>{reviewer?.displayName}</strong>{" "}
                                     <span>{new Date(review.createdAt).toLocaleString()}</span>
@@ -190,14 +209,62 @@ function StoryReviews() {
                                         }}
                                     >
                                         <i className="fa-solid fa-heart"></i> {review.likes || 0}
+
                                     </span>
+                                    <span className="edit-but"
+
+                                        style={{
+                                            color: editClicked ? "orange" : "white",
+                                            fontSize: editClicked ? "20px" : "15px",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        {review.userId == currentUser?.uid ? (<i className="fa-solid fa-pen-to-square" onClick={handleEditButton}></i>) : (null)}
+                                    </span>
+                                    {editClicked && review.userId == currentUser?.uid && <div className="write-review">
+
+                                        <h3>{userReview ? "Edit Your Review" : "Write a Review"}</h3>
+
+                                        <form onSubmit={handleSubmit}>
+                                            <label>Your Rating:</label>
+                                            <div className="stars">
+                                                {[1, 2, 3, 4, 5].map(star => (
+                                                    <span
+                                                        key={star}
+                                                        className={`star ${star <= rating ? "active" : ""}`}
+                                                        onClick={() => setRating(star)}
+                                                    >
+                                                        <i className="fa-solid fa-star"></i>
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            <input
+                                                type="text"
+                                                placeholder="Review Topic"
+                                                value={reviewTopic}
+                                                onChange={e => setReviewTopic(e.target.value)}
+                                            />
+
+                                            <textarea
+                                                placeholder="Your Review"
+                                                value={reviewText}
+                                                onChange={e => setReviewText(e.target.value)}
+                                            />
+
+                                            <button type="submit">
+                                                <i className="fa-solid fa-paper-plane"></i>{" "}
+                                                {userReview ? "Update Review" : "Submit Review"}
+                                            </button>
+                                        </form>
+                                    </div>}
                                 </div>
                             </div>
                         );
                     })}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

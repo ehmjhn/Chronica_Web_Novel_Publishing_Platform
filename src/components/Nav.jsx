@@ -1,6 +1,6 @@
 import "./components.css";
 import LOGO from '../assets/CHRONICA.png'
-import { NavLink} from "react-router";
+import { NavLink } from "react-router";
 import { logout, subscribeAuthChanges } from '../firebase/auth';
 import { getUserProfile } from "../firebase/db";
 import { useEffect, useState } from "react";
@@ -9,7 +9,7 @@ function Nav() {
 
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
-  
+
   useEffect(() => {
 
     const unsubscribe = subscribeAuthChanges((currentUser) => {
@@ -25,16 +25,16 @@ function Nav() {
         setUser(null);
       }
     });
-    
-    return () => unsubscribe(); 
-    
+
+    return () => unsubscribe();
+
   }, []);
 
-  function handleLogout(){
-      logout();
-      window.location.href = '/login'
+  function handleLogout() {
+    logout();
+    window.location.href = '/login'
   }
-  
+
   return (
     <>
       <nav>
@@ -44,7 +44,7 @@ function Nav() {
           </NavLink>
         </div>
 
-        <div className="search">
+        {/* <div className="search">
           <i className="fa-solid fa-magnifying-glass"></i>
           <input
             type="text"
@@ -55,19 +55,20 @@ function Nav() {
           <NavLink to="/notification">
             <i className="fa-solid fa-bell"></i>
           </NavLink>
-        </div>
+        </div> */}
 
         <div className="account-wrapper">
-          {!user || (!user.emailVerified && !user.providerData?.some(p => p.providerId === "google.com")) ?  (
+          {!user || (!user.emailVerified && !user.providerData?.some(p => p.providerId === "google.com")) ? (
             <>
               <div className="account">
                 <i
                   style={{ fontSize: "30px" }}
                   className="fa-solid fa-circle-user"
                 ></i>
+                <h2>Guest</h2>
                 <i className="fa-solid fa-caret-down"></i>
               </div>
-
+              
               <div className="nav-settings">
                 <h2>Guest</h2>
                 <NavLink to="/login">Login</NavLink>
@@ -84,6 +85,10 @@ function Nav() {
                   ></i>
                 ) : (
                   <img src={userData?.profilePic} alt="User profile" />
+
+                )}
+                {userData?.displayName == null ? (
+                  <h4>{userData?.name}</h4>) : (<h4>{userData.displayName}</h4>
                 )}
                 <i className="fa-solid fa-caret-down"></i>
               </div>
@@ -116,14 +121,14 @@ function Nav() {
             Popular Works
           </NavLink>
 
-          <div className="dropdown">
+          {/* <div className="dropdown">
             <button className="dropbtn">
               Categories <i className="fa-solid fa-angle-down"></i>
             </button>
             <div className="dropdown-content">
               <div className="genre-grid">
                 {/* FIX: NavLink should use "to" instead of "href" */}
-                <NavLink to="#">Action</NavLink>
+          {/* <NavLink to="#">Action</NavLink>
                 <NavLink to="#">Romance</NavLink>
                 <NavLink to="#">Fantasy</NavLink>
                 <NavLink to="#">Drama</NavLink>
@@ -140,7 +145,7 @@ function Nav() {
                 <NavLink to="#">Psychological</NavLink>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <NavLink to="/about-us" className="dropbtn">
             About
