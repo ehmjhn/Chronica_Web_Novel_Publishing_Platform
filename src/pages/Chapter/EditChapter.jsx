@@ -115,7 +115,7 @@ function EditChapter() {
                             onChange={(e) => setChapter({...chapter, publishOption: e.target.value})}
                         >
                             <option value="immediate">Publish Immediately</option>
-                            <option value="schedule">Schedule Publication</option>
+                            {/* <option value="schedule">Schedule Publication</option> */}
                         </select>
 
                         {chapter.publishOption === 'schedule' && (

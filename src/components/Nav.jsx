@@ -94,7 +94,7 @@ function Nav() {
               </div>
 
               <div className="nav-settings">
-                <h2>{user.displayName}</h2>
+                <h2>{user?.displayName}</h2>
                 <NavLink to="/profile">Account Settings</NavLink>
                 <NavLink to="/author-profile">Profile Page</NavLink>
                 <NavLink to="/bookmark">Reading List</NavLink>

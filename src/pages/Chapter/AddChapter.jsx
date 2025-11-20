@@ -88,7 +88,7 @@ function AddChapter() {
                             onChange={(e) => setPublishOption(e.target.value)}
                         >
                             <option value="immediate">Publish Immediately</option>
-                            <option value="schedule">Schedule Publication</option>
+                            {/* <option value="schedule">Schedule Publication</option> */}
                         </select>
 
                         {publishOption === 'schedule' && (

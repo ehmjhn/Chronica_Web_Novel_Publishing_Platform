@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router";
-import { insertStory, retrieveGenres, retrieveTags } from "../../firebase/db";
+import { insertStory, retrieveGenres, retrieveTags, uploadCoverImage } from "../../firebase/db";
 import { subscribeAuthChanges } from "../../firebase/auth";
 
 function CreateSeries() {
@@ -61,16 +61,35 @@ function CreateSeries() {
     handleCreateSeries();
   }
 
-  function handleCreateSeries() {
-    if (!title || !synopsis || !status || selectedGenres.length === 0 || selectedTags.length === 0 || !contentWarning || !copyright) {
-      alert("Please fill all fields.")
-      return;
-    }
-    insertStory(title, user?.uid, selectedGenres, status, synopsis, copyright, selectedTags, contentWarning, coverImage)
-      .then((id) => {
-        window.location.href = `/story-details/${id}`;
-      });
+  async function handleCreateSeries() {
+  if (!title || !synopsis || !status || selectedGenres.length === 0 || selectedTags.length === 0 || !contentWarning || !copyright) {
+    alert("Please fill all fields.");
+    return;
   }
+
+  let uploadedCoverUrl = coverImage;
+
+  // If selected coverImage is a Base64 preview, upload it to Cloudinary
+  if (coverImage && coverImage.startsWith("data:")) {
+    const blob = await fetch(coverImage).then(res => res.blob());
+    uploadedCoverUrl = await uploadCoverImage(blob);
+  }
+
+  insertStory(
+    title,
+    user?.uid,
+    selectedGenres,
+    status,
+    synopsis,
+    copyright,
+    selectedTags,
+    contentWarning,
+    uploadedCoverUrl
+  ).then((id) => {
+    window.location.href = `/story-details/${id}`;
+  });
+}
+
 
   return (
     <div className="storyview-page">

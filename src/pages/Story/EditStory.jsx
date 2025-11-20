@@ -1,7 +1,7 @@
 import './story.css'
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate, useParams } from 'react-router';
-import { getUserStories, updateStory } from '../../firebase/db.js';
+import { getUserStories, updateStory, uploadCoverImage } from '../../firebase/db.js';
 import { subscribeAuthChanges } from '../../firebase/auth.js';
 
 function EditStory() {
@@ -88,6 +88,13 @@ function EditStory() {
     e.preventDefault();
     if (!storyId || !currentUserId) return;
 
+    let uploadedCoverUrl = coverImage;
+
+    if (coverImage && coverImage.startsWith("data:")) {
+      const blob = await fetch(coverImage).then(res => res.blob());
+      uploadedCoverUrl = await uploadCoverImage(blob);
+    }
+
     await updateStory(
       storyId,
       title,
@@ -98,7 +105,7 @@ function EditStory() {
       copyright,
       selectedTags,
       contentWarning,
-      coverImage
+      uploadedCoverUrl
     );
 
     alert("Story updated successfully!");
