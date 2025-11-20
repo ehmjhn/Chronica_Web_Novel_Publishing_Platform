@@ -1,6 +1,7 @@
 // db.js
 import { getDatabase, get, ref, set, push, onValue, update, remove } from "firebase/database";
 import { app } from "./firebase-config.js";
+import { FaChampagneGlasses } from "react-icons/fa6";
 
 export const database = getDatabase(app);
 
@@ -601,3 +602,14 @@ export const uploadCoverImage = async (file) => {
     return null;
   }
 };
+
+export async function saveOrder(chapters) {
+  console.log(chapters)
+  var order = 1
+  for (const chapter of chapters) {
+    const chapterRef = ref(database, `chapters/${chapter.id}/order`);
+    await set(chapterRef, order);
+    order += 1
+  }
+
+}

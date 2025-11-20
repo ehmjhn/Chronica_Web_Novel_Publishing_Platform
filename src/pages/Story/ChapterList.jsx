@@ -4,7 +4,7 @@ import { NavLink, useParams } from "react-router";
 import { closestCorners, DndContext } from "@dnd-kit/core";
 import SortableChapter from "../../components/SortableChapter";
 import { arrayMove } from "@dnd-kit/sortable";
-import { retrieveChapter } from "../../firebase/db";
+import { retrieveChapter, saveOrder } from "../../firebase/db";
 
 function ChapterList() {
   const { id } = useParams();
@@ -22,7 +22,7 @@ function ChapterList() {
       storyChaps.sort((a, b) => a.order - b.order);
 
       setChapters(storyChaps);
-      setLimit(storyChaps.length); 
+      setLimit(storyChaps.length);
     });
 
     return () => {
@@ -57,9 +57,13 @@ function ChapterList() {
     });
   };
 
-  const saveOrder = () => {
-    console.log("Saved chapters order:", chapters);
-    alert("Chapter order saved!");
+  function handlesaveOrder() {
+    if (confirm("Do you want to save changes?")) {
+      saveOrder(chapters)
+    }
+    else {
+      return
+    }
   };
 
   return (
@@ -98,10 +102,10 @@ function ChapterList() {
 
               <button onClick={() => setOrderAsc(!orderAsc)}>
                 <i className="fa-solid fa-filter"></i>{" "}
-                {orderAsc ? "Latest" : "Oldest"}
+                {orderAsc ? "Ascending" : "Descending"}
               </button>
 
-              <button className="save-changes" onClick={saveOrder}>
+              <button className="save-changes" onClick={handlesaveOrder}>
                 Save Changes
               </button>
             </div>

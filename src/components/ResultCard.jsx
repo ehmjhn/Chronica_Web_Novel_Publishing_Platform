@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 function ResultCard({
   id,
   title,
-  cover,
+  coverImage,
   rate,
   status,
   genre = [],
@@ -20,7 +20,7 @@ function ResultCard({
   return (
     <NavLink to={`/story-details/${id}`} className="result-link">
       <div className="result-card">
-        <img src={cover} alt={title} className="result-cover" />
+        <img src={coverImage} alt={title} className="result-cover" />
 
         <div className="result-details">
           <h3 className="result-title">{title}</h3>

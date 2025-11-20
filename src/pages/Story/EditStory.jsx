@@ -95,6 +95,10 @@ function EditStory() {
       uploadedCoverUrl = await uploadCoverImage(blob);
     }
 
+    if (!title || !synopsis || !status || selectedGenres.length === 0 || selectedTags.length === 0 || !contentWarning || !copyright) {
+      alert("Please fill all fields.");
+      return;
+    }
     await updateStory(
       storyId,
       title,

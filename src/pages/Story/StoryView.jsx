@@ -99,9 +99,10 @@ function StoryView() {
       <div className="storyview-hero">
         <div className="storyview-wrapper">
           <img
-            src={story?.cover || "https://fantasy-faction.com/wp-content/uploads/2025/01/image-2.jpeg"}
+            src={story?.coverImage || "https://fantasy-faction.com/wp-content/uploads/2025/01/image-2.jpeg"}
             alt="Cover"
             className="storyview-cover"
+            
           />
 
           <div className="storyview-hero-info">

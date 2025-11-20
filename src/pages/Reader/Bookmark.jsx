@@ -9,7 +9,7 @@ function Bookmark() {
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [search, setSearch] = useState(''); 
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     const unsubscribeAuth = subscribeAuthChanges(async (user) => {
@@ -65,7 +65,9 @@ function Bookmark() {
   // pagination
   const totalPages = Math.ceil(filteredBookmarks.length / limit);
   const paginatedBookmarks = filteredBookmarks.slice((currentPage - 1) * limit, currentPage * limit);
-
+  function buttont() {
+    console.log(paginatedBookmarks)
+  }
   return (
     <div className="bookmark-wrap">
       <div className="bookmark-cont">
@@ -86,7 +88,7 @@ function Bookmark() {
             value={limit}
             onChange={(e) => {
               setLimit(Number(e.target.value));
-              setCurrentPage(1); 
+              setCurrentPage(1);
             }}
           >
             {[10, 25, 50, 75, 100].map(i => <option key={i} value={i}>{i}</option>)}
@@ -96,7 +98,7 @@ function Bookmark() {
         <hr />
 
         <div className="results-grid">
-          {paginatedBookmarks.length === 0 && <p style={{color: "white"}}>No bookmarks available.</p>}
+          {paginatedBookmarks.length === 0 && <p style={{ color: "white" }}>No bookmarks available.</p>}
           {paginatedBookmarks.map(book => (
             <ResultCard
               key={book.id}
@@ -116,6 +118,7 @@ function Bookmark() {
           <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}>
             Next
           </button>
+          <button onClick={buttont}>w</button>
         </div>
       </div>
     </div>

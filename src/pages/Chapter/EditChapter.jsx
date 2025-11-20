@@ -34,6 +34,7 @@ function EditChapter() {
     }, [id]);
 
     const handleUpdateChapter = async () => {
+        if (chapter.chapterTitle === "" || chapter.content === "") { return alert("Please fill all fields.") }
         try {
             const publishDate = chapter.publishOption === 'schedule'
                 ? new Date(`${chapter.date}T${chapter.time}`)
