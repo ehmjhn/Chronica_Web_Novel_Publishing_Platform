@@ -3,13 +3,13 @@ import { useState, useEffect } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 
 import ReactQuill from "react-quill-new";
-import "react-quill-new/dist/quill.snow.css"; 
+import "react-quill-new/dist/quill.snow.css";
 import { retrieveChapter, updateChapter } from '../../firebase/db';
 
 function EditChapter() {
-    const { id } = useParams(); 
+    const { id } = useParams();
 
-    const [chapter, setChapter] = useState(null); 
+    const [chapter, setChapter] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -35,7 +35,7 @@ function EditChapter() {
 
     const handleUpdateChapter = async () => {
         try {
-            const publishDate = chapter.publishOption === 'schedule' 
+            const publishDate = chapter.publishOption === 'schedule'
                 ? new Date(`${chapter.date}T${chapter.time}`)
                 : new Date();
 
@@ -60,10 +60,10 @@ function EditChapter() {
     return (
         <div className="page-background">
             <div className="subnav-control">
-                <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> / 
+                <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
                 <NavLink to='/my-series'>My Series</NavLink> /
-                <NavLink to='/update-chapter-list'>Update Chapters</NavLink> /
-                <NavLink to={`/edit-chapter/${id}`}>Edit Chapter</NavLink> 
+                <NavLink to={`/update-chapter-list/${chapter.storyId}`}>Update Chapters</NavLink> /
+                <NavLink to={`/edit-chapter/${id}`}>Edit Chapter</NavLink>
             </div>
 
             <div className="addchapter-container">
@@ -96,14 +96,14 @@ function EditChapter() {
                         id="chapter-title"
                         type="text"
                         value={chapter.chapterTitle || ''}
-                        onChange={(e) => setChapter({...chapter, chapterTitle: e.target.value})}
+                        onChange={(e) => setChapter({ ...chapter, chapterTitle: e.target.value })}
                     />
 
                     <label htmlFor="chapter-content">Chapter Content</label>
                     <ReactQuill
                         className="chapter-content"
                         value={chapter.content || ''}
-                        onChange={(value) => setChapter({...chapter, content: value})}
+                        onChange={(value) => setChapter({ ...chapter, content: value })}
                         theme="snow"
                         placeholder="Write your chapter here..."
                     />
@@ -112,7 +112,7 @@ function EditChapter() {
                         <h3>Publish Options</h3>
                         <select
                             value={chapter.publishOption}
-                            onChange={(e) => setChapter({...chapter, publishOption: e.target.value})}
+                            onChange={(e) => setChapter({ ...chapter, publishOption: e.target.value })}
                         >
                             <option value="immediate">Publish Immediately</option>
                             {/* <option value="schedule">Schedule Publication</option> */}
@@ -124,13 +124,13 @@ function EditChapter() {
                                     type="date"
                                     className="schedule-date"
                                     value={chapter.date || ''}
-                                    onChange={(e) => setChapter({...chapter, date: e.target.value})}
+                                    onChange={(e) => setChapter({ ...chapter, date: e.target.value })}
                                 />
                                 <input
                                     type="time"
                                     className="schedule-time"
                                     value={chapter.time || ''}
-                                    onChange={(e) => setChapter({...chapter, time: e.target.value})}
+                                    onChange={(e) => setChapter({ ...chapter, time: e.target.value })}
                                 />
                             </div>
                         )}

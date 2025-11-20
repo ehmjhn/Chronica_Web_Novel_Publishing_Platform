@@ -14,7 +14,7 @@ import {
   linkWithCredential
 } from "firebase/auth";
 import { ref, get, set } from "firebase/database";
-import { database } from "./db.js"; 
+import { database } from "./db.js";
 import { app } from "./firebase-config.js";
 
 // init
@@ -22,74 +22,68 @@ export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 
 //register ngani
-export const registerUser = (email, password, displayName, fullname) => {
+export const registerUser = async (email, password, displayName, fullname) => {
   const actionCodeSettings = {
     url: window.location.origin + '/login',
     handleCodeInApp: true
   };
 
-  return createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    await updateProfile(user, { displayName });
+    await sendEmailVerification(user, actionCodeSettings);
+    auth.signOut()
+    const user_3 = user;
+    const userData = {
+      name: fullname || "",
+      displayName: user_3.displayName || "",
+      bio: "",
+      email: user_3.email || "",
+      bdate: "",
+      gender: "",
+      location: "",
+      contactNo: "",
+      joinedDate: new Date().toISOString().split("T")[0],
+      profilePic: user_3.photoURL || "",
+      followersCount: 0,
+      followingCount: 0,
+      totalSeries: 0,
+      bookmarkedStories: {},
+      viewedStory: {}
+    };
 
-      return updateProfile(user, { displayName })
-        .then(() => sendEmailVerification(user, actionCodeSettings))
-        .then(() => user);
-    })
-    .then((user) => {
-      const userData = {
-        name: fullname || "",
-        displayName: user.displayName || "",
-        bio: "",
-        email: user.email || "",
-        bdate: "",
-        gender: "",
-        location: "",
-        contactNo: "",
-        joinedDate: new Date().toISOString().split("T")[0],
-        profilePic: user.photoURL || "",
-        followersCount: 0,
-        followingCount: 0,
-        totalSeries: 0,
-        bookmarkedStories: {},
-        viewedStory: {}
-      };
+    const user_4 = user_3;
+    console.log("Registration successful! Please verify your email before logging in.");
+    alert("Registration successful! Please verify your email before logging in.");
 
-      return set(ref(database, `users/${user.uid}`), userData).then(() => user);
-    })
-    .then((user) => {
-      console.log("Registration successful! Please verify your email before logging in.");
-      alert("Registration successful! Please verify your email before logging in.");
-
-      // Polling: check every 5 seconds if email is verified
-      const interval = setInterval(() => {
-        user.reload().then(() => {
-          if (user.emailVerified) {
-            clearInterval(interval);
-            alert("Email verified! Reloading page...");
-            window.location.reload();
-          }
-        });
-      }, 5000);
-    })
-    .catch((error) => {
-      console.error("Error creating user:", error);
-      alert(error.message);
-    });
+    // Polling: check every 5 seconds if email is verified
+    const interval = setInterval(() => {
+      user_4.reload().then(async () => {
+        if (user_4.emailVerified) {
+          clearInterval(interval);
+          alert("Verified")
+          await set(ref(database, `users/${user_3.uid}`), userData);
+          window.location.reload();
+        }
+      });
+    }, 5000);
+  } catch (error) {
+    console.error("Error creating user:", error);
+    alert(error.message);
+  }
 };
 
 // login ngani
-export const loginUser = (email, password) => {
-  return signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      
-      return user;
-    })
-    .catch((error) => {
-      alert(error.message);
-      return null;
-    });
+export const loginUser = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    return user;
+  } catch (error) {
+    alert(error.message);
+    return null;
+  }
 };
 
 //google sign in ngani
@@ -121,7 +115,7 @@ export const signInWithGoogle = () => {
 
           set(userRef, userData).catch((err) => console.error(err));
         }
-       
+
       }).catch((err) => console.error(err));
     })
     .catch((error) => {
@@ -147,19 +141,18 @@ export const setPasswordForGoogleUser = (user, newPassword) => {
 };
 
 //nakalimutan ngani
-export const forgotPass = (email) =>{
+export const forgotPass = async (email) => {
   const actionCodeSettings = {
     url: window.location.origin + '/login',
     handleCodeInApp: true
   };
-  
-  return sendPasswordResetEmail(auth, email, actionCodeSettings)
-  .then(()=>{
-    alert("Password reset email sent!")
-  })
-  .catch(() => {
+
+  try {
+    await sendPasswordResetEmail(auth, email, actionCodeSettings);
+    alert("Password reset email sent!");
+  } catch {
     alert("If this email exists, a password reset link has been sent.");
-  });
+  }
 }
 
 // logout

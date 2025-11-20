@@ -151,6 +151,7 @@ export async function addFollowerList(userId, followedId) {
       await set(followedRef, followerValue)
       await set(userFollowerRef, followingValue)
       await set(userRef, followedId)
+      console.log("updated")
     }
   } catch (error) {
     console.error(error);

@@ -36,7 +36,7 @@ function MySeries() {
     );
   if (seriesList.length === 0)
     return (
-      <div className='homepage' style={{ textAlign: "center", color: "white"}}>
+      <div className='homepage' style={{ textAlign: "center", color: "white" }}>
         No series has been created yet.
       </div>
     );
@@ -101,14 +101,12 @@ function MySeries() {
         </div>
 
         <div className="series-list">
-          {paginatedData.map((s) => (
+          {paginatedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((s) => (
             <div key={s.id} className="series-card">
               <img
                 src={s.coverImage || "https://via.placeholder.com/120x150"}
                 alt={s.title}
                 className="series-img"
-
-
               />
               <div className="series-info">
                 <h3 className="series-title">{s.title}</h3>
@@ -138,7 +136,9 @@ function MySeries() {
                     <i className="fa-solid fa-pen"></i> Update
                   </NavLink>
                 </div>
+
               </div>
+              Created at : {new Date(s.createdAt).toLocaleString()}
               <button className="delete-btn" onClick={() => handleDelete(s.id)}>
                 <i className="fa-solid fa-trash"></i>
               </button>

@@ -7,91 +7,91 @@ import { registerUser } from "../../firebase/auth";
 
 function Registration() {
 
-    const [fullname, setFullname] = useState('');
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPass, setConfirmPass] = useState('');
-    const [npass, setnShow] = useState(false);
-    const [cpass, setcShow] = useState(false);
+  const [fullname, setFullname] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+  const [npass, setnShow] = useState(false);
+  const [cpass, setcShow] = useState(false);
 
-    const [emailValid, setEmailValid] = useState(true);
-    const [passValid, setPassValid] = useState({
-        length: false,
-        uppercase: false,
-        lowercase: false,
-        numeric: false,
-        special: false,
-    });
+  const [emailValid, setEmailValid] = useState(true);
+  const [passValid, setPassValid] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    numeric: false,
+    special: false,
+  });
 
-    const [showPassValidation, setShowPassValidation] = useState(true);
-    const [passwordMismatch, setPasswordMismatch] = useState(false);
+  const [showPassValidation, setShowPassValidation] = useState(true);
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
 
-    const toggleNewPassword = () => setnShow(prev => !prev);
-    const toggleConfirmPassword = () => setcShow(prev => !prev);
+  const toggleNewPassword = () => setnShow(prev => !prev);
+  const toggleConfirmPassword = () => setcShow(prev => !prev);
 
-    const handleEmailChange = (e) => {
-        const value = e.target.value;
-        setEmail(value);
-        if(value === "") {
-            setEmailValid(true);
-            return;
-        }
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        setEmailValid(regex.test(value));
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (value === "") {
+      setEmailValid(true);
+      return;
+    }
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setEmailValid(regex.test(value));
+  }
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+
+    const newPassValid = {
+      length: value.length >= 8,
+      uppercase: /[A-Z]/.test(value),
+      lowercase: /[a-z]/.test(value),
+      numeric: /[0-9]/.test(value),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(value)
+    };
+
+    setPassValid(newPassValid);
+    setShowPassValidation(true);
+
+    if (Object.values(newPassValid).every(v => v === true)) {
+      setShowPassValidation(false);
+    }
+  }
+
+  useEffect(() => {
+    if (confirmPass === "") {
+      setPasswordMismatch(false);
+    } else {
+      setPasswordMismatch(password !== confirmPass);
+    }
+  }, [password, confirmPass]);
+
+  function handleRegister() {
+    if (!email || !password || !confirmPass || !username || !fullname) {
+      alert('Please fill up all fields.')
+      return;
     }
 
-    const handlePasswordChange = (e) => {
-        const value = e.target.value;
-        setPassword(value);
-
-        const newPassValid = {
-            length: value.length >= 8,
-            uppercase: /[A-Z]/.test(value),
-            lowercase: /[a-z]/.test(value),
-            numeric: /[0-9]/.test(value),
-            special: /[!@#$%^&*(),.?":{}|<>]/.test(value)
-        };
-
-        setPassValid(newPassValid);
-        setShowPassValidation(true);
-
-        if(Object.values(newPassValid).every(v => v === true)) {
-          setShowPassValidation(false);
-        }
+    if (!emailValid) {
+      alert('Invalid email format.');
+      return;
     }
 
-    useEffect(() => {
-        if(confirmPass === "") {
-            setPasswordMismatch(false);
-        } else {
-            setPasswordMismatch(password !== confirmPass);
-        }
-    }, [password, confirmPass]);
-
-    function handleRegister() {
-        if(!email || !password || !confirmPass || !username || !fullname){
-            alert('Please fill up all fields.')
-            return;
-        }
-
-        if(!emailValid){
-            alert('Invalid email format.');
-            return;
-        }
-
-        if(Object.values(passValid).includes(false)){
-            alert('Password does not meet all requirements.');
-            return;
-        }
-
-        if(password !== confirmPass){
-            alert('Password mismatch.')
-            return;
-        }
-
-        registerUser(email, password, username, fullname)
+    if (Object.values(passValid).includes(false)) {
+      alert('Password does not meet all requirements.');
+      return;
     }
+
+    if (password !== confirmPass) {
+      alert('Password mismatch.')
+      return;
+    }
+
+    registerUser(email, password, username, fullname)
+  }
 
   return (
     <div className="register-wrapper">
@@ -115,7 +115,7 @@ function Registration() {
               />
             </div>
           </div>
-          
+
           <div className="reg-input-icons">
             <div className="reg-input-field-ul">
               <i className="fa fa-pen-nib icon"></i>
@@ -155,7 +155,7 @@ function Registration() {
               <i className="fa fa-key icon"></i>
               <input
                 className="reg-input-field"
-                type={npass ? "text" : "password"} 
+                type={npass ? "text" : "password"}
                 placeholder="Must at least 8 characters"
                 onChange={handlePasswordChange}
               />
@@ -173,7 +173,7 @@ function Registration() {
               <i className="fa fa-check-circle icon"></i>
               <input
                 className="reg-input-field"
-                type={cpass ? "text" : "password"} 
+                type={cpass ? "text" : "password"}
                 placeholder="Re-enter your password"
                 onChange={(e) => setConfirmPass(e.target.value)}
               />

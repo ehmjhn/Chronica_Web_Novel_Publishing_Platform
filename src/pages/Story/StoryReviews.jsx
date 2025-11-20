@@ -144,7 +144,7 @@ function StoryReviews() {
                         </div>
                     ))}
                 </div>
-                {userReview == null ? <div className="write-review">
+                {userReview == null && story.authorId !== currentUser?.uid ? <div className="write-review">
 
                     <h3>{userReview ? "Edit Your Review" : "Write a Review"}</h3>
 

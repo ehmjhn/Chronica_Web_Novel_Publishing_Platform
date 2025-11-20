@@ -1,8 +1,9 @@
 import "./auth.css";
 import AUTH from "../../assets/AUTH.png";
 import { NavLink } from "react-router";
-import { useState } from "react";
-import { loginUser, signInWithGoogle } from "../../firebase/auth";
+import { useEffect, useState } from "react";
+import { auth, loginUser, signInWithGoogle } from "../../firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -10,6 +11,8 @@ function Login() {
   const [pass, setShowPass] = useState(false);
 
   const [emailValid, setEmailValid] = useState(true);
+
+
 
   function handleLogin() {
     if (!email || !password) {
@@ -36,7 +39,9 @@ function Login() {
     }
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     setEmailValid(regex.test(value));
-  };
+  }
+
+
 
   return (
     <div className="login-page">
@@ -71,7 +76,7 @@ function Login() {
                 <i className="fas fa-lock input-icon"></i>
                 <input
                   className="input-field"
-                  type={pass ? "text" : "password"} 
+                  type={pass ? "text" : "password"}
                   placeholder="Password"
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -96,7 +101,7 @@ function Login() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export default Login;

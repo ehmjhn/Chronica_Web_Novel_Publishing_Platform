@@ -15,6 +15,7 @@ function StoryDetails() {
   const [user, setCurrentUser] = useState(0)
   const [isFollowed, setIsFollowed] = useState()
 
+
   useEffect(() => {
     const unsubscribeStories = readComic((stories) => {
       setView(stories);
@@ -25,6 +26,7 @@ function StoryDetails() {
         getUserProfile(story.authorId).then((userData) => {
           setAuthor(userData);
           console.log("Author data:", userData);
+
         });
       }
       setIsLoading(false)
@@ -35,6 +37,7 @@ function StoryDetails() {
   useEffect(() => {
     const unsubscribe = subscribeAuthChanges((currentUser) => {
       setCurrentUser(currentUser)
+
     })
     return () => unsubscribe()
   })
@@ -44,8 +47,10 @@ function StoryDetails() {
         console.log(checkIfFollowed(user.uid, authorId))
         const result = await checkIfFollowed(user.uid, authorId)
         setIsFollowed(result)
+
       })()
     }
+
 
   }, [user, authorId])
 
@@ -59,13 +64,17 @@ function StoryDetails() {
     }
     await addFollowerList(user.uid, authorId)
     setIsFollowed(true)
-
+    // Refresh author data to get updated follower count
+    const updatedAuthor = await getUserProfile(authorId)
+    setAuthor(updatedAuthor)
   }
   async function handledeleteFollow() {
     await deleteFollowerList(user.uid, authorId)
     setIsFollowed(false)
+    // Refresh author data to get updated follower count
+    const updatedAuthor = await getUserProfile(authorId)
+    setAuthor(updatedAuthor)
   }
-
   return (
     <>
       {viewStory
