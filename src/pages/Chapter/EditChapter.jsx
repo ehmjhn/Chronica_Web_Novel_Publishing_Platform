@@ -34,7 +34,7 @@ function EditChapter() {
     }, [id]);
 
     const handleUpdateChapter = async () => {
-        if (chapter.chapterTitle === "" || chapter.content === "") { return alert("Please fill all fields.") }
+        if (chapter.chapterTitle === "" || chapter.content === "<p><br></p>") { return alert("Please fill all fields.") }
         try {
             const publishDate = chapter.publishOption === 'schedule'
                 ? new Date(`${chapter.date}T${chapter.time}`)
@@ -104,7 +104,7 @@ function EditChapter() {
                     <ReactQuill
                         className="chapter-content"
                         value={chapter.content || ''}
-                        onChange={(value) => setChapter({ ...chapter, content: value })}
+                        onChange={(value) => console.log(value)}
                         theme="snow"
                         placeholder="Write your chapter here..."
                     />

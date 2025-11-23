@@ -652,7 +652,7 @@
 }
 
 .password-validation .invalid {
-  color: #ff4d4f;
+  color: #ffffff;
 }
 
 .password-validation .valid {
@@ -660,7 +660,7 @@
 }
 
 .password-validation .invalid::before {
-  content: "✖";
+  content: "•";
   font-size: 10px;
 }
 

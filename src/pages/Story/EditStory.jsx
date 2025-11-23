@@ -62,6 +62,7 @@ function EditStory() {
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => setCoverImage(event.target.result);
+      console.log(coverImage)
       reader.readAsDataURL(file);
     }
   }
@@ -89,11 +90,17 @@ function EditStory() {
     if (!storyId || !currentUserId) return;
 
     let uploadedCoverUrl = coverImage;
-
-    if (coverImage && coverImage.startsWith("data:")) {
+    console.log(uploadedCoverUrl)
+    
+    if (uploadedCoverUrl && uploadedCoverUrl.startsWith("data:") &&  (coverImage.includes("png;base64,") || coverImage.includes("jpeg;base64,") || coverImage.includes("jpg;base64,"))) {
       const blob = await fetch(coverImage).then(res => res.blob());
       uploadedCoverUrl = await uploadCoverImage(blob);
     }
+    else{
+       alert("Please upload a valid image file.");
+       return
+    }
+    
 
     if (!title || !synopsis || !status || selectedGenres.length === 0 || selectedTags.length === 0 || !contentWarning || !copyright) {
       alert("Please fill all fields.");
@@ -147,7 +154,7 @@ function EditStory() {
               )}
             </div>
 
-            <input type="file" accept="image/*" onChange={handleImageChange} className="create-form-file" />
+            <input type="file" accept="image/*" onChange={(e)=>{handleImageChange(e)}} className="create-form-file" />
           </div>
 
           {/* Title & Synopsis */}
