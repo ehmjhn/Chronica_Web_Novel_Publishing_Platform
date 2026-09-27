@@ -1,66 +1,46 @@
-import { useState, useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { subscribeAuthChanges } from "../firebase/auth";
+import { Navigate, useLocation } from "react-router";
+import { useAuthUser } from "../hooks/useAuthUser";
+import { hasPasswordProvider, isGoogleUser } from "../firebase/auth";
+import { LoadingState } from "../components/States";
 
-function GuestRoute({ children }) {
-  const [user, setUser] = useState(null);
-  const [hasPassword, setHasPassword] = useState(null);
-  const [loading, setLoading] = useState(true);
+/**
+ * Gate for the auth pages. Signed-in visitors are sent onward:
+ *  - Google accounts without a password are pushed to /set-password so they
+ *    can also sign in with email.
+ *  - Everyone else lands on the page they originally requested, or /home.
+ */
+export default function GuestRoute({ children }) {
+  const { user, profile, loading } = useAuthUser();
   const location = useLocation();
 
-  useEffect(() => {
-    const unsubscribe = subscribeAuthChanges((currentUser) => {
-      if (!currentUser) {
-        setUser(null);
-        setHasPassword(null);
-        setLoading(false);
-        return;
-      }
-
-      setUser(currentUser);
-
-      const isGoogle = currentUser.providerData.some(
-        (p) => p.providerId === "google.com"
-      );
-
-      if (isGoogle) {
-        
-        const googleHasPassword = currentUser.providerData.some(
-          (p) => p.providerId === "password"
-        );
-        setHasPassword(googleHasPassword);
-      } else {
-        setHasPassword(true); 
-      }
-
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (loading || (user && hasPassword === null)) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>;
-
+  if (loading) return <LoadingState label="Loading…" />;
   if (!user) return children;
 
-  const isGoogle = user.providerData.some((p) => p.providerId === "google.com");
+  const destination = location.state?.from || "/home";
 
-  if (isGoogle && hasPassword === false) {
-    if (location.pathname !== "/set-password") {
-      return <Navigate to="/set-password" replace />;
-    }
-    return children;
+  // A Google account with no password must set one before it can use the rest
+  // of the app — but let it see the set-password page itself.
+  if (isGoogleUser(user) && !hasPasswordProvider(user)) {
+    return location.pathname === "/set-password" ? (
+      children
+    ) : (
+      <Navigate to="/set-password" replace />
+    );
   }
 
-  if (!isGoogle && !user.emailVerified) {
-    return <Navigate to="/login" replace />;
+  // An unverified account is shown /login so the page can offer "resend
+  // verification" and a sign-out. Redirecting to /login from /login was a
+  // self-redirect loop that made the verification flow unreachable.
+  if (!user.emailVerified) {
+    return location.pathname === "/login" ? (
+      children
+    ) : (
+      <Navigate to="/login" replace state={{ needsVerification: true }} />
+    );
   }
 
-  if (location.pathname !== "/home") {
-    return <Navigate to="/home" replace />;
-  }
+  // A Google user who just linked a password has no profile row yet.
+  if (!profile) return <LoadingState label="Preparing your profile…" />;
 
-  return children;
+  return <Navigate to={destination} replace />;
 }
-
-export default GuestRoute;

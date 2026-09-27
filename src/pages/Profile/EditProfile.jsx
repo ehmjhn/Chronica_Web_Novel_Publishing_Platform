@@ -1,203 +1,218 @@
-import './profile.css';
+import "./profile.css";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { FaFacebook, FaInstagram, FaTiktok, FaEnvelope } from "react-icons/fa";
-import { NavLink } from 'react-router';
-import { useState, useEffect } from 'react';
-import { subscribeAuthChanges } from '../../firebase/auth';
-import { getUserProfile, updateUserProfile, uploadProfilePhoto } from '../../firebase/db';  
+import { EmptyState, InlineMessage, LoadingState } from "../../components/States";
+import { useToast } from "../../components/toast-context";
+import { useAuthUser } from "../../hooks/useAuthUser";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { useFilePreview } from "../../hooks/useForm";
+import { updateUserProfile, uploadProfilePhoto } from "../../firebase/db";
+import { displayNameOf } from "../../lib/format";
+import { LIMITS, isBlank } from "../../lib/validation";
 
-function EditProfile() {
-  const [userData, setUserData] = useState();
-  const [editData, setEditData] = useState();
-  const [loading, setIsLoading] = useState(true);
-  const [currentUid, setCurrentUid] = useState(null);
-  const [image, setImage] = useState(null);
+const FIELDS = [
+  { name: "name", label: "Full Name", type: "text", maxLength: LIMITS.displayName },
+  { name: "displayName", label: "Username", type: "text", maxLength: LIMITS.username },
+  { name: "location", label: "Location", type: "text", maxLength: 80 },
+  { name: "contactNo", label: "Contact No", type: "tel", maxLength: 25 },
+];
 
+const GENDERS = ["Male", "Female", "Other", "Prefer not to say"];
+
+const SOCIALS = [
+  { Icon: FaFacebook, label: "Facebook" },
+  { Icon: FaInstagram, label: "Instagram" },
+  { Icon: FaTiktok, label: "TikTok" },
+  { Icon: FaEnvelope, label: "Email" },
+];
+
+export default function EditProfile() {
+  const { user, profile, loading } = useAuthUser();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const { run, busy } = useAsyncAction();
+  const { preview, file, error: fileError, select } = useFilePreview();
+
+  const [draft, setDraft] = useState(null);
+  const [errors, setErrors] = useState({});
+
+  // Seed the form once the profile arrives.
   useEffect(() => {
-    const unsubscribe = subscribeAuthChanges((currentUser) => {
-      if (currentUser) {
-        setCurrentUid(currentUser.uid);
+    if (profile) setDraft({ ...profile });
+  }, [profile]);
 
-        getUserProfile(currentUser.uid)
-          .then((data) => {
-            if (data) {
-              setUserData(data);
-              setEditData(data);
-            } else {
-              console.log("No user data found");
-            }
-            setIsLoading(false);
-          })
-          .catch((error) => {
-            console.error(error);
-            setIsLoading(false);
-          });
-      } else {
-        setIsLoading(false);
-        setUserData(null);
-        setEditData(null);
-        setCurrentUid(null);
-      }
-    });
+  if (loading) return <LoadingState label="Loading your profile…" />;
 
-    return () => unsubscribe();
-  }, []);
-
-  if (loading)
+  if (!user) {
     return (
-      <div className="homepage">
-        <div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>
-          Loading...
-        </div>
-      </div>
+      <EmptyState
+        icon="fa-user"
+        title="You are not signed in"
+        message="Sign in to edit your profile."
+        action={
+          <Link to="/login" className="btn btn-yellow">
+            Sign in
+          </Link>
+        }
+      />
     );
+  }
 
-  // handle editable fields
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditData(prev => ({ ...prev, [name]: value }));
-  };
+  if (!draft) return <LoadingState label="Preparing the editor…" />;
 
-  // save button 
-  const handleSave = async () => {
-    if (!editData || !currentUid) return;
+  const set = (name) => (event) => setDraft((d) => ({ ...d, [name]: event.target.value }));
 
-    let uploadedUrl = null;
-    if (image) {
-      uploadedUrl = await uploadProfilePhoto(image);
+  function validate() {
+    const next = {};
+    if (isBlank(draft.displayName)) next.displayName = "A username is required.";
+    if ((draft.bio || "").length > LIMITS.bio) next.bio = `Keep the bio under ${LIMITS.bio} characters.`;
+    if (draft.bdate && new Date(draft.bdate) > new Date())
+      next.bdate = "Birthdate cannot be in the future.";
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (!validate()) return;
+
+    const payload = { ...draft };
+    if (file) {
+      try {
+        payload.profilePic = await uploadProfilePhoto(file);
+      } catch (err) {
+        toast.error(err.message);
+        return;
+      }
     }
 
-    const updatedData = { ...editData };
-    if (uploadedUrl) updatedData.profilePic = uploadedUrl;
+    const result = await run(() => updateUserProfile(user.uid, payload), {
+      success: "Profile updated.",
+    });
+    if (result !== false) navigate("/profile");
+  }
 
-    try {
-      await updateUserProfile(currentUid, updatedData);
-      setUserData(updatedData);
-      alert("Profile updated successfully!");
-      window.location.href = '/profile';
-    } catch (error) {
-      console.error(error);
-      alert("Error updating profile: " + error.message);
-    } 
-  };
+  const name = displayNameOf(draft);
+  const avatar = preview || draft.profilePic || user.photoURL || "";
 
   return (
     <div className="edit-profile-wrapper">
-      <div className="edit-profile-card">
-        {/* LEFT SIDE */}
+      <form className="edit-profile-card" onSubmit={handleSubmit} noValidate>
         <div className="edit-left">
           <div className="profile-image">
             <div className="image-circle">
-              <img src={userData?.profilePic || "https://via.placeholder.com/150"} alt="Profile" />
+              {avatar ? (
+                <img src={avatar} alt={`${name}'s profile picture`} />
+              ) : (
+                <span className="image-circle__fallback" aria-hidden="true">
+                  {name.charAt(0).toUpperCase()}
+                </span>
+              )}
             </div>
-            <h2>{userData?.name || "--"}</h2>
-            <p>{userData?.displayName || "--"}</p>
+            <h2>{name}</h2>
+            {draft.displayName && <p>@{draft.displayName}</p>}
           </div>
 
-          <div className="social-icons">
-            <FaFacebook />
-            <FaInstagram />
-            <FaTiktok />
-            <FaEnvelope />
+          <div className="social-icons" aria-hidden="true">
+            {SOCIALS.map(({ Icon, label }) => (
+              <Icon key={label} title={label} />
+            ))}
           </div>
 
           <div className="profile-nav">
+            <label htmlFor="avatar-file" className="signout-btn upload-label">
+              Change photo
+            </label>
             <input
-              className="signout-btn"
+              id="avatar-file"
+              className="visually-hidden-input"
               type="file"
               accept="image/*"
-              onChange={(e) => setImage(e.target.files[0])}
+              onChange={(event) => select(event.target.files?.[0])}
             />
+            {fileError && <InlineMessage tone="error">{fileError}</InlineMessage>}
+            {file && <small className="muted">New photo will be uploaded on save.</small>}
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
         <div className="edit-right">
           <div className="edit-header">
             <h2>Edit Personal Information</h2>
           </div>
 
           <div className="edit-info">
-            <label>About Me</label>
+            <label htmlFor="profile-bio">About Me</label>
             <textarea
+              id="profile-bio"
               name="bio"
-              value={editData?.bio || ""}
-              onChange={handleChange}
+              rows={4}
+              maxLength={LIMITS.bio}
+              value={draft.bio || ""}
+              onChange={set("bio")}
+              placeholder="Tell readers about yourself…"
             />
+            <small className="muted">
+              {(draft.bio || "").length}/{LIMITS.bio}
+            </small>
+            {errors.bio && <InlineMessage tone="error">{errors.bio}</InlineMessage>}
 
-            <label>Date Joined</label>
-            <input
-              type="text"
-              name="joinedDate"
-              value={editData?.joinedDate || ""}
-              disabled
-            />
+            <label htmlFor="profile-joined">Date Joined</label>
+            <input id="profile-joined" type="text" value={draft.joinedDate || "—"} readOnly disabled />
 
-            <label>Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={editData?.name || ""}
-              onChange={handleChange}
-            />
+            {FIELDS.map(({ name: field, label, type, maxLength }) => (
+              <div key={field}>
+                <label htmlFor={`profile-${field}`}>{label}</label>
+                <input
+                  id={`profile-${field}`}
+                  type={type}
+                  name={field}
+                  maxLength={maxLength}
+                  value={draft[field] || ""}
+                  onChange={set(field)}
+                  aria-invalid={errors[field] ? "true" : undefined}
+                />
+                {errors[field] && <InlineMessage tone="error">{errors[field]}</InlineMessage>}
+              </div>
+            ))}
 
-            <label>Username</label>
-            <input
-              type="text"
-              name="displayName"
-              value={editData?.displayName || ""}
-              onChange={handleChange}
-            />
+            <label htmlFor="profile-email">Email</label>
+            <input id="profile-email" type="email" name="email" value={draft.email || user.email || ""} readOnly disabled />
 
-            <label>Email</label>
+            <label htmlFor="profile-bdate">Birthdate</label>
             <input
-              type="email"
-              name="email"
-              value={editData?.email || ""}
-              disabled
-            />
-
-            <label>Birthdate</label>
-            <input
+              id="profile-bdate"
               type="date"
               name="bdate"
-              value={editData?.bdate || ""}
-              onChange={handleChange}
+              value={draft.bdate || ""}
+              onChange={set("bdate")}
+              max={new Date().toISOString().slice(0, 10)}
+              aria-invalid={errors.bdate ? "true" : undefined}
             />
+            {errors.bdate && <InlineMessage tone="error">{errors.bdate}</InlineMessage>}
 
-            <label>Gender</label>
-            <select name="gender" value={editData?.gender || ""} onChange={handleChange}>
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-              <option value="Prefer not to say">Prefer not to say</option>
+            <label htmlFor="profile-gender">Gender</label>
+            <select id="profile-gender" name="gender" value={draft.gender || ""} onChange={set("gender")}>
+              <option value="">Prefer not to say</option>
+              {GENDERS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
             </select>
 
-            <label>Location</label>
-            <input
-              type="text"
-              name="location"
-              value={editData?.location || ""}
-              onChange={handleChange}
-            />
-
-            <label>Contact No</label>
-            <input
-              type="text"
-              name="contactNo"
-              value={editData?.contactNo || ""}
-              onChange={handleChange}
-            />
-
             <div className="save-container">
-              <NavLink to='/profile' className="cancel-btn">Cancel</NavLink>
-              <button className="save-btn" onClick={handleSave}>Save Changes</button>
+              <Link to="/profile" className="cancel-btn">
+                Cancel
+              </Link>
+              <button type="submit" className="save-btn" disabled={busy}>
+                {busy ? "Saving…" : "Save Changes"}
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
-
-export default EditProfile;

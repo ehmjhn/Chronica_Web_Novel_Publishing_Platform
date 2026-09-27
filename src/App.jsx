@@ -1,12 +1,12 @@
-import AppRouter from "./routes/AppRouter"
+import AppRouter from "./routes/AppRouter";
+import { ToastProvider } from "./components/Toast";
 
 function App() {
-
   return (
-    <>
-        <AppRouter/>
-    </>
-  )
+    <ToastProvider>
+      <AppRouter />
+    </ToastProvider>
+  );
 }
 
-export default App
+export default App;

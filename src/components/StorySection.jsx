@@ -1,22 +1,13 @@
-import { NavLink } from 'react-router-dom';
-import StoryCard from './StoryCard.jsx';
-import { useEffect, useState } from 'react';
-import { getUserProfile } from '../firebase/db';
-import './components.css';
+import { NavLink } from "react-router";
+import StoryCard from "./StoryCard";
+import "./components.css";
 
-function StorySection({ title, stories, viewAllPath, showFeaturedBadge = false }) {
-
-  const [authors, setAuthors] = useState({}); 
-
-  useEffect(() => {
-    stories.forEach((story) => {
-      if (story.authorId && !authors[story.id]) {
-        getUserProfile(story.authorId).then((userData) => {
-          setAuthors((prev) => ({ ...prev, [story.id]: userData }));
-        });
-      }
-    });
-  }, [stories]);
+/**
+ * `stories` must already carry `authorName` (see useStoriesWithAuthors) — this
+ * component used to fire one getUserProfile() read per card on every render.
+ */
+function StorySection({ title, stories = [], viewAllPath, showFeaturedBadge = false, emptyMessage }) {
+  const visible = stories.slice(0, 5);
 
   return (
     <section className="story-section">
@@ -30,33 +21,31 @@ function StorySection({ title, stories, viewAllPath, showFeaturedBadge = false }
       </div>
 
       <div className="story-grid">
-        {stories && stories.length > 0 ? (
-          stories
-            .slice(0, 5) 
-            .map((story, index) => {
-              const authorInfo = authors[story.id];
-
-              return (
-                <StoryCard
-                  key={index}
-                  storyId={story.id}
-                  title={story.title}
-                  author={authorInfo ? authorInfo.displayName : '--'}
-                  views={story.views}
-                  rate={story.rate}
-                  coverImage={story.coverImage}
-                  isFeatured={story.isFeatured}
-                  showFeatured={showFeaturedBadge && story.isFeatured}
-                />
-              );
-            })
+        {visible.length > 0 ? (
+          visible.map((story) => (
+            <StoryCard
+              key={story.id}
+              storyId={story.id}
+              title={story.title}
+              author={story.authorName}
+              views={story.views}
+              rate={story.rate}
+              coverImage={story.coverImage}
+              isFeatured={story.isFeatured}
+              showFeatured={showFeaturedBadge && story.isFeatured}
+            />
+          ))
         ) : (
           <div className="no-stories">
-            <p>No stories available at the moment.</p>
+            <p>{emptyMessage || "No stories available at the moment."}</p>
+            {viewAllPath && (
+              <NavLink to={viewAllPath} className="view-all-link">
+                Browse the catalogue →
+              </NavLink>
+            )}
           </div>
         )}
       </div>
-
     </section>
   );
 }

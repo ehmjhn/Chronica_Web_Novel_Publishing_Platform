@@ -1,69 +1,87 @@
-import './profile.css';
-import { FaFacebook, FaInstagram, FaEnvelope, FaDiscord } from "react-icons/fa";
-import { useEffect, useState } from 'react';
-import { subscribeAuthChanges } from '../../firebase/auth';
-import { getUserProfile } from '../../firebase/db';
-import { logout } from '../../firebase/auth';
+import { Link } from "react-router";
+import "./profile.css";
+import { FaFacebook, FaInstagram, FaTiktok, FaEnvelope } from "react-icons/fa";
+import { LoadingState, EmptyState } from "../../components/States";
+import { useToast } from "../../components/toast-context";
+import { useAuthUser } from "../../hooks/useAuthUser";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { logout } from "../../firebase/auth";
+import { displayNameOf, formatDate, formatNumber } from "../../lib/format";
 
-function ProfileSettings() {
+const SOCIALS = [
+  { Icon: FaFacebook, label: "Facebook" },
+  { Icon: FaInstagram, label: "Instagram" },
+  { Icon: FaTiktok, label: "TikTok" },
+  { Icon: FaEnvelope, label: "Email" },
+];
 
-  const [userData, setUserData] = useState()
-  const [loading, setIsLoading] = useState(true)
+export default function ProfileSettings() {
+  const { user, profile, loading } = useAuthUser();
+  const toast = useToast();
+  const { run, busy } = useAsyncAction();
 
-  useEffect(() => {
-    const unsubscribe = subscribeAuthChanges((currentUser) => {
-      
-      if (currentUser) {
-        getUserProfile(currentUser.uid)
-          .then((data) => {
-            setUserData(data);
-            setIsLoading(false);
-          })
-          .catch((error) => {
-            console.error(error);
-            setIsLoading(false);
-          });
-      } else {
-        setUserData(null);
-        setIsLoading(false);
-      }
+  async function handleLogout() {
+    const result = await run(() => logout());
+    if (result !== false) toast.info("Signed out.");
+  }
 
-    });
+  if (loading) return <LoadingState label="Loading your profile…" />;
 
-    return () => unsubscribe();
-  }, []);
-  
-  console.log(userData)
+  if (!user) {
+    return (
+      <EmptyState
+        icon="fa-user"
+        title="You are not signed in"
+        message="Sign in to view your profile."
+        action={
+          <Link to="/login" className="btn btn-yellow">
+            Sign in
+          </Link>
+        }
+      />
+    );
+  }
 
-  if(loading) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>
+  const display = profile || {};
+  const name = displayNameOf(display);
+  const avatar = display.profilePic || user.photoURL || "";
 
   return (
     <div className="profile-wrapper">
       <div className="profile-card">
-        {/* LEFT SIDE */}
         <div className="profile-left">
           <div className="profile-image">
             <div className="image-circle">
-              <img src={userData?.profilePic} alt={userData?.displayName} />
+              {avatar ? (
+                <img src={avatar} alt={`${name}'s profile picture`} />
+              ) : (
+                <span className="image-circle__fallback" aria-hidden="true">
+                  {name.charAt(0).toUpperCase()}
+                </span>
+              )}
             </div>
-            <h2>{userData?.name || "--"}</h2>
-            <p>{userData?.displayName || "--"}</p>
-            <p>Following: {userData?.followingCount} | Followers: {userData?.followersCount}</p>
+            <h2>{name}</h2>
+            {display.displayName && <p>@{display.displayName}</p>}
+            <p>
+              Following: {formatNumber(display.followingCount)} | Followers:{" "}
+              {formatNumber(display.followersCount)}
+            </p>
+            {display.totalSeries > 0 && <p>{display.totalSeries} published series</p>}
           </div>
 
-          <div className="social-icons">
-            <FaFacebook />
-            <FaInstagram />
-            <FaEnvelope />
-            <FaDiscord />
+          <div className="social-icons" aria-hidden="true">
+            {SOCIALS.map(({ Icon, label }) => (
+              <Icon key={label} title={label} />
+            ))}
           </div>
 
           <div className="profile-nav">
-            <button className="signout-btn" onClick={()=> logout()}>Log Out</button>
+            <button type="button" className="signout-btn" onClick={handleLogout} disabled={busy}>
+              {busy ? "Signing out…" : "Log Out"}
+            </button>
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
         <div className="profile-right">
           <div className="profile-header">
             <h2>Personal Information</h2>
@@ -71,42 +89,40 @@ function ProfileSettings() {
 
           <div className="profile-info">
             <label>About Me</label>
-            <textarea
-              value={userData?.bio || "No bio yet."}
-              readOnly
-            />
+            {display.bio ? (
+              <p className="profile-bio">{display.bio}</p>
+            ) : (
+              <p className="muted">You have not written a bio yet.</p>
+            )}
 
             <label>Joined</label>
-            <input type="text" value={userData?.joinedDate || "--"} readOnly />
+            <p className="profile-value">{display.joinedDate ? formatDate(display.joinedDate) : "—"}</p>
 
             <label>Full Name</label>
-            <input type="text" value={userData?.name || "--"} readOnly />
+            <p className="profile-value">{display.name || "—"}</p>
 
             <label>Username</label>
-            <input type="text" value={userData?.displayName || "--"} readOnly />
+            <p className="profile-value">{display.displayName || "—"}</p>
 
             <label>Email</label>
-            <input type="email" value={userData?.email || "--"} readOnly />
+            <p className="profile-value">{display.email || user.email || "—"}</p>
 
             <label>Contact No</label>
-            <input type="text" value="0912 345 6789" readOnly />
+            <p className="profile-value">{display.contactNo || "—"}</p>
 
             <label>Birthdate</label>
-            <input type="text" value={userData?.bdate || "--"} readOnly />
+            <p className="profile-value">{display.bdate ? formatDate(display.bdate) : "—"}</p>
 
             <label>Gender</label>
-            <input type="text" value={userData?.gender || "--"} readOnly />
+            <p className="profile-value">{display.gender || "—"}</p>
 
             <label>Location</label>
-            <input type="text" value={userData?.location || "--"} readOnly />
+            <p className="profile-value">{display.location || "—"}</p>
 
             <div className="edit-btn-container">
-              <button
-                className="edit-btn"
-                onClick={() => (window.location.href = '/edit-profile')}
-              >
+              <Link to="/edit-profile" className="edit-btn">
                 Edit Profile
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -114,5 +130,3 @@ function ProfileSettings() {
     </div>
   );
 }
-
-export default ProfileSettings;

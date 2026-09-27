@@ -1,25 +1,24 @@
-import './components.css';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import SeriesChapter from './SeriesChapter';
+import "./components.css";
+import { SortableContext, verticalListSortingStrategy, rectSortingStrategy } from "@dnd-kit/sortable";
+import SeriesChapter from "./SeriesChapter";
 
-function SortableChapter({ chapters }) {
+export default function SortableChapter({ chapters, onDelete, columns = 1, disabled = false }) {
   return (
     <SortableContext
-      items={chapters.map(ch => ch.id)}
-      strategy={verticalListSortingStrategy}
-      disabled={false}
+      items={chapters.map((chapter) => chapter.id)}
+      strategy={columns > 1 ? rectSortingStrategy : verticalListSortingStrategy}
     >
-      {chapters.map((chapter) => (
-        <SeriesChapter
-          key={chapter.id}
-          id={chapter.id}
-          chapterId={chapter.id}
-          title={chapter.chapterTitle}
-          date={chapter.publishDate}
-        />
-      ))}
+      <ul className={`sortable-chapters ${columns > 1 ? "is-grid" : ""}`}>
+        {chapters.map((chapter, index) => (
+          <SeriesChapter
+            key={chapter.id}
+            chapter={chapter}
+            onDelete={onDelete}
+            index={index}
+            disabled={disabled}
+          />
+        ))}
+      </ul>
     </SortableContext>
   );
 }
-
-export default SortableChapter;

@@ -2,8 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="public/Mythryl.png" />
+    <!-- Favicon lives in /public, so it is served from the site root. The old
+         path was "public/Mythryl.png", which resolved to /public/public/... and
+         404'd in production. -->
+    <link rel="icon" type="image/webp" href="/Mythryl.webp" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#373432" />
+    <meta
+      name="description"
+      content="Chronica is a web novel publishing platform. Read serialised stories, follow authors, and publish your own series."
+    />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
@@ -11,12 +19,13 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <title>Chronica</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <title>Chronica — Web Novel Publishing Platform</title>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>Chronica needs JavaScript enabled to run.</noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

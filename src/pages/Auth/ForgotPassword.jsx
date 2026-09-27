@@ -1,70 +1,78 @@
-import './auth.css'
-import { NavLink } from 'react-router';
-import { forgotPass } from '../../firebase/auth';
-import { IoMdMail } from "react-icons/io";
-import { IoIosArrowRoundBack } from "react-icons/io";
+import "./auth.css";
+import { useState } from "react";
+import { Link } from "react-router";
+import { IoMdMail, IoIosArrowRoundBack } from "react-icons/io";
 import { FiAlertCircle } from "react-icons/fi";
-import { useState } from 'react';
+import { InlineMessage } from "../../components/States";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { forgotPass } from "../../firebase/auth";
+import { isValidEmail, isBlank } from "../../lib/validation";
+import resetbgimg from "../../assets/AUTH.webp";
 
-function ForgotPassword (){
+export default function ForgotPassword() {
+  const { run, busy } = useAsyncAction();
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [sent, setSent] = useState(false);
 
-    const [email, setEmail] = useState('')
-    const [emailValid, setEmailValid] = useState(true)
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setError("");
+    setSent(false);
 
-    function handleResetPass(){
-        if(!email){
-            alert("Please enter an email")
-            return;
-        }
-        if(!emailValid){
-            alert("Invalid email format")
-            return;
-        }
-        forgotPass(email)
-    }
+    if (isBlank(email)) return setError("Please enter your email address.");
+    if (!isValidEmail(email)) return setError("That email address looks invalid.");
 
-    const handleEmailChange = (e) => {
-        const value = e.target.value
-        setEmail(value)
-        if(value === ""){
-            setEmailValid(true)
-            return
-        }
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        setEmailValid(regex.test(value))
-    }
-    
-    return(
-        <div className="form-container">
-            <div className="forgot-card">
-                <div className="forgot-form">
-                    <FiAlertCircle className="alert-icon"/>
-                
-                    <h2>Forgot Password</h2>
-                    <p>Enter your email and we'll send you a link to reset your password</p>
+    const result = await run(() => forgotPass(email.trim()));
+    if (result) setSent(true);
+  }
 
-                    {!emailValid && <span className="validation-text">Invalid email format</span>}
-                    <div className="email-container">
-                        <IoMdMail className="email-icon" />
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            onChange={handleEmailChange}
-                        />
-                    </div>
+  return (
+    <div className="form-container">
+      <div className="forgot-card">
+        <form className="forgot-form" onSubmit={handleSubmit} noValidate>
+          <FiAlertCircle className="alert-icon" aria-hidden="true" />
 
-                    <button type="submit" className="submit-email-btn" onClick={handleResetPass}>Submit</button>
+          <h2>Forgot Password</h2>
+          <p>Enter your email and we&apos;ll send you a link to reset your password.</p>
 
-                    <div className="back-to-login">
-                        <NavLink to="/login"><IoIosArrowRoundBack className="back-icon" />Back to login</NavLink>
-                    </div>
-                </div>
-                <div className="forgot-img">
-                    <img src='src/assets/AUTH.png' alt="image" />
-                </div>
-            </div>
+          <div className="email-container">
+            <IoMdMail className="email-icon" aria-hidden="true" />
+            <input
+              id="forgot-email"
+              type="email"
+              autoComplete="email"
+              placeholder="Email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              aria-invalid={error ? "true" : undefined}
+            />
+          </div>
+
+          <InlineMessage tone="error">{error}</InlineMessage>
+
+          {sent ? (
+            <InlineMessage tone="success">
+              If an account exists for {email}, a reset link is on its way. The link expires in
+              one hour.
+            </InlineMessage>
+          ) : (
+            <button type="submit" className="submit-email-btn" disabled={busy}>
+              {busy ? "Sending…" : "Submit"}
+            </button>
+          )}
+
+          <div className="back-to-login">
+            <Link to="/login">
+              <IoIosArrowRoundBack className="back-icon" aria-hidden="true" /> Back to login
+            </Link>
+          </div>
+        </form>
+
+        <div className="forgot-img">
+          <img src={resetbgimg} alt="" />
         </div>
-    );
+      </div>
+    </div>
+  );
 }
-
-export default ForgotPassword

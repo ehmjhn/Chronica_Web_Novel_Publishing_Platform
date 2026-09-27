@@ -1,103 +1,124 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router";
 
-// Layouts
 import { AuthLayout, MainLayout } from "./NavLayouts";
-
-// Access Control
 import ProtectedRoute from "./ProtectedRoute";
 import GuestRoute from "./GuestRoute";
-
-// Auth Pages
-import Login from "../pages/Auth/Login";
-import Register from "../pages/Auth/Register";
-import ForgotPassword from "../pages/Auth/ForgotPassword";
-import SetPassword from "../pages/Auth/SetPassword";
-
-// Home and Info Pages
 import Home from "../pages/Home/Home";
-import FeaturedStories from "../pages/Home/FeaturedStories";
-import LatestRelease from "../pages/Home/LatestRelease";
-import PopularWorks from "../pages/Home/PopularWorks";
-import About from "../pages/Info/About";
+import { LoadingState } from "../components/States";
 
-// Story and Chapter Pages
-import StoryDetails from "../pages/Story/StoryDetails";
-import StoryReviews from "../pages/Story/StoryReviews";
-import MySeries from "../pages/Story/MySeries";
-import CreateStory from "../pages/Story/CreateStory";
-import EditStory from "../pages/Story/EditStory";
-import ChapterList from "../pages/Story/ChapterList";
-import AddChapter from "../pages/Chapter/AddChapter";
-import EditChapter from "../pages/Chapter/EditChapter";
-import ReadChapter from "../pages/Chapter/ReadChapter";
-import ViewChapter from "../pages/Story/ViewChapter";
+// Route-level code splitting: the reader-facing pages land in their own chunks
+// instead of one ~900 kB bundle, which fixes the build's chunk-size warning.
+const FeaturedStories = lazy(() => import("../pages/Home/FeaturedStories"));
+const LatestRelease = lazy(() => import("../pages/Home/LatestRelease"));
+const PopularWorks = lazy(() => import("../pages/Home/PopularWorks"));
+const About = lazy(() => import("../pages/Info/About"));
+const Help = lazy(() => import("../pages/Info/Help"));
+const StoryDetails = lazy(() => import("../pages/Story/StoryDetails"));
+const StoryReviews = lazy(() => import("../pages/Story/StoryReviews"));
+const ViewChapter = lazy(() => import("../pages/Story/ViewChapter"));
+const ReadChapter = lazy(() => import("../pages/Chapter/ReadChapter"));
+const SearchDiscovery = lazy(() => import("../pages/Reader/SearchDiscovery"));
 
-// Profile Pages
-import ProfileSettings from "../pages/Profile/ProfileSettings";
-import EditProfile from "../pages/Profile/EditProfile";
-import AuthorProfile from "../pages/Profile/AuthorProfile";
+const Notification = lazy(() => import("../pages/Reader/Notification"));
+const Bookmark = lazy(() => import("../pages/Reader/Bookmark"));
+const MySeries = lazy(() => import("../pages/Story/MySeries"));
+const CreateStory = lazy(() => import("../pages/Story/CreateStory"));
+const EditStory = lazy(() => import("../pages/Story/EditStory"));
+const ChapterList = lazy(() => import("../pages/Story/ChapterList"));
+const AddChapter = lazy(() => import("../pages/Chapter/AddChapter"));
+const EditChapter = lazy(() => import("../pages/Chapter/EditChapter"));
+const ProfileSettings = lazy(() => import("../pages/Profile/ProfileSettings"));
+const EditProfile = lazy(() => import("../pages/Profile/EditProfile"));
+const AuthorProfile = lazy(() => import("../pages/Profile/AuthorProfile"));
 
-// Reader Pages
-import Bookmark from "../pages/Reader/Bookmark";
-import Notification from "../pages/Reader/Notification";
-import SearchDiscovery from "../pages/Reader/SearchDiscovery";
+const Login = lazy(() => import("../pages/Auth/Login"));
+const Register = lazy(() => import("../pages/Auth/Register"));
+const ForgotPassword = lazy(() => import("../pages/Auth/ForgotPassword"));
+const SetPassword = lazy(() => import("../pages/Auth/SetPassword"));
+const NotFound = lazy(() => import("../pages/Error/NotFound"));
 
-// Error Page
-import NotFound from "../pages/Error/NotFound";
+const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
 
-function AppRouter() {
+export default function AppRouter() {
   return (
     <BrowserRouter>
-      <Routes>
+      <Suspense fallback={<LoadingState />}>
+        <Routes>
+          <Route element={<MainLayout />}>
+            {/* Public */}
+            <Route index element={<Home />} />
+            <Route path="home" element={<Home />} />
+            <Route path="home/featured-stories" element={<FeaturedStories />} />
+            <Route path="home/latest-releases" element={<LatestRelease />} />
+            <Route path="home/popular-works" element={<PopularWorks />} />
 
-        {/* MAIN LAYOUT */}
-        <Route element={<MainLayout />}>
+            <Route path="about-us" element={<About />} />
+            <Route path="help" element={<Help />} />
+            <Route path="search-discovery" element={<SearchDiscovery />} />
+            <Route path="author/:id" element={<AuthorProfile />} />
 
-          {/* Public pages */}
-          <Route index element={<Home />} />
-          <Route path="home" element={<Home />} />
-          <Route path="home/featured-stories" element={<FeaturedStories />} />
-          <Route path="home/latest-releases" element={<LatestRelease />} />
-          <Route path="home/popular-works" element={<PopularWorks />} />
+            <Route path="story-details/:id" element={<StoryDetails />} />
+            <Route path="story-chapter-list/:id" element={<ViewChapter />} />
+            <Route path="story-reviews/:id" element={<StoryReviews />} />
+            <Route path="read-chapter/:id" element={<ReadChapter />} />
 
-          <Route path="about-us" element={<About />} />
-          <Route path="story-details" element={<StoryDetails />} />
-          <Route path="story-details/:id" element={<StoryDetails />} />
-          <Route path="story-chapter-list/:id" element={<ViewChapter />} />
-          <Route path="story-reviews/:id" element={<StoryReviews />} />
-          <Route path="search-discovery" element={<SearchDiscovery />} />
-          <Route path="read-chapter/:id" element={<ReadChapter />} />
+            {/* Signed-in */}
+            <Route path="notification" element={protect(<Notification />)} />
+            <Route path="bookmark" element={protect(<Bookmark />)} />
+            <Route path="my-series" element={protect(<MySeries />)} />
+            <Route path="create-story" element={protect(<CreateStory />)} />
+            <Route path="create-chapter/:id" element={protect(<AddChapter />)} />
+            <Route path="update-story/:id" element={protect(<EditStory />)} />
+            <Route path="update-chapter-list/:id" element={protect(<ChapterList />)} />
+            <Route path="edit-chapter/:id" element={protect(<EditChapter />)} />
+            <Route path="profile" element={protect(<ProfileSettings />)} />
+            <Route path="edit-profile" element={protect(<EditProfile />)} />
 
-          {/* Protected pages */}
-          <Route path="notification" element={<ProtectedRoute><Notification /></ProtectedRoute>} />
-          <Route path="profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
-          <Route path="edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-          <Route path="author-profile" element={<ProtectedRoute><AuthorProfile /></ProtectedRoute>} />
-          <Route path="create-chapter" element={<ProtectedRoute><AddChapter /></ProtectedRoute>} />
-          <Route path="create-chapter/:id" element={<ProtectedRoute><AddChapter /></ProtectedRoute>} />
-          <Route path="bookmark" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
-          <Route path="my-series" element={<ProtectedRoute><MySeries /></ProtectedRoute>} />
-          <Route path="create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
-          <Route path="update-story/:id" element={<ProtectedRoute><EditStory /></ProtectedRoute>} />
-          <Route path="update-chapter-list/:id" element={<ProtectedRoute><ChapterList /></ProtectedRoute>} />
-          <Route path="edit-chapter/:id" element={<ProtectedRoute><EditChapter /></ProtectedRoute>} />
+            {/* 404 - kept inside the main layout so it keeps the nav chrome.
+                React Router ranks static segments above the splat, so /login
+                and the other auth routes still resolve to the auth layout. */}
+            <Route path="*" element={<NotFound />} />
+          </Route>
 
-        </Route>
+          {/* Guests only */}
+          <Route element={<AuthLayout />}>
+            <Route
+              path="login"
+              element={
+                <GuestRoute>
+                  <Login />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="register"
+              element={
+                <GuestRoute>
+                  <Register />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="forgot-password"
+              element={
+                <GuestRoute>
+                  <ForgotPassword />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="set-password"
+              element={
+                <GuestRoute>
+                  <SetPassword />
+                </GuestRoute>
+              }
+            />
+          </Route>
 
-        {/* AUTH LAYOUT (Guest Only) */}
-        <Route element={<GuestRoute><AuthLayout /></GuestRoute>}>
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
-          <Route path="set-password" element={<SetPassword />} />
-        </Route>
-
-        {/* 404 */}
-        <Route path="*" element={<NotFound />} />
-
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
-
-export default AppRouter;

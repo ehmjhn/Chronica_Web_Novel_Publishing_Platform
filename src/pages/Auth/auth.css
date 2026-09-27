@@ -7,7 +7,7 @@
 	background-image: linear-gradient(to right,
 			rgba(15, 15, 28, 0.8),
 			rgba(42, 29, 9, 0.7)),
-		url("../../assets/NovelBG.png");
+		url("../../assets/NovelBG.webp");
 	background-size: cover;
 	background-position: center;
 }  
@@ -180,7 +180,7 @@
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 110px);
-  background-image: linear-gradient(to right, rgba(15, 15, 28, 0.8), rgba(42, 29, 9, 0.7)), url("../../assets/NovelBG.png");
+  background-image: linear-gradient(to right, rgba(15, 15, 28, 0.8), rgba(42, 29, 9, 0.7)), url("../../assets/NovelBG.webp");
   background-size: cover;
   background-position: center;
 }
@@ -354,7 +354,7 @@
 	background-image: linear-gradient(to right,
 		rgba(15, 15, 28, 0.8),
 		rgba(42, 29, 9, 0.7)),
-	url("../../assets/NovelBG.png");
+	url("../../assets/NovelBG.webp");
 	background-size: cover;
 	background-position: center;
 }
@@ -488,7 +488,7 @@
 	background-image: linear-gradient(to right,
 		rgba(15, 15, 28, 0.8),
 		rgba(42, 29, 9, 0.7)),
-	url("../../assets/NovelBG.png");
+	url("../../assets/NovelBG.webp");
 	background-size: cover;
 	background-position: center;
 }
@@ -633,40 +633,6 @@
 	object-fit: cover;
 	opacity: 0.9;
 	border-radius: 0 25px 25px 0;
-}
-
-/* PASSWORD VALIDATION */
-.password-validation {
-  margin-bottom: 8px;
-  margin-left: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.password-validation span {
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.password-validation .invalid {
-  color: #ffffff;
-}
-
-.password-validation .valid {
-  color: #4caf50;
-}
-
-.password-validation .invalid::before {
-  content: "•";
-  font-size: 10px;
-}
-
-.password-validation .valid::before {
-  content: "✔";
-  font-size: 10px;
 }
 
 .validation-text {

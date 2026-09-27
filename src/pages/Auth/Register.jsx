@@ -1,204 +1,174 @@
 import "./auth.css";
-import AUTH from '../../assets/AUTH.png'
+import AUTH from "../../assets/AUTH.webp";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import PasswordField from "../../components/PasswordField";
+import { InlineMessage } from "../../components/States";
+import { useToast } from "../../components/toast-context";
+import { registerUser, friendlyAuthError } from "../../firebase/auth";
+import { isValidEmail, isStrongPassword, isBlank, LIMITS } from "../../lib/validation";
 
-import { NavLink } from "react-router";
-import { useState, useEffect } from "react";
-import { registerUser } from "../../firebase/auth";
+const EMPTY = {
+  fullName: "",
+  displayName: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+};
 
-function Registration() {
+export default function Register() {
+  const navigate = useNavigate();
+  const toast = useToast();
 
-  const [fullname, setFullname] = useState('');
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPass, setConfirmPass] = useState('');
-  const [npass, setnShow] = useState(false);
-  const [cpass, setcShow] = useState(false);
+  const [values, setValues] = useState(EMPTY);
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const [emailValid, setEmailValid] = useState(true);
-  const [passValid, setPassValid] = useState({
-    length: false,
-    uppercase: false,
-    lowercase: false,
-    numeric: false,
-    special: false,
-  });
+  const set = (key) => (event) =>
+    setValues((current) => ({ ...current, [key]: event.target.value }));
 
-  const [showPassValidation, setShowPassValidation] = useState(true);
-  const [passwordMismatch, setPasswordMismatch] = useState(false);
+  function validate() {
+    const next = {};
 
-  const toggleNewPassword = () => setnShow(prev => !prev);
-  const toggleConfirmPassword = () => setcShow(prev => !prev);
+    if (isBlank(values.fullName)) next.fullName = "Please enter your full name.";
+    if (isBlank(values.displayName)) next.displayName = "Please choose a username.";
+    else if (values.displayName.length > LIMITS.username)
+      next.displayName = `Keep the username under ${LIMITS.username} characters.`;
 
-  const handleEmailChange = (e) => {
-    const value = e.target.value;
-    setEmail(value);
-    if (value === "") {
-      setEmailValid(true);
-      return;
+    if (isBlank(values.email)) next.email = "Please enter your email address.";
+    else if (!isValidEmail(values.email)) next.email = "That email address looks invalid.";
+
+    if (isBlank(values.password)) next.password = "Please choose a password.";
+    else if (!isStrongPassword(values.password))
+      next.password = "Your password does not meet all the requirements.";
+
+    if (values.confirmPassword !== values.password) {
+      next.confirmPassword = "The two passwords do not match.";
     }
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    setEmailValid(regex.test(value));
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
   }
 
-  const handlePasswordChange = (e) => {
-    const value = e.target.value;
-    setPassword(value);
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setFormError("");
+    if (!validate()) return;
 
-    const newPassValid = {
-      length: value.length >= 8,
-      uppercase: /[A-Z]/.test(value),
-      lowercase: /[a-z]/.test(value),
-      numeric: /[0-9]/.test(value),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(value)
-    };
+    setBusy(true);
+    try {
+      await registerUser({
+        email: values.email.trim(),
+        password: values.password,
+        displayName: values.displayName.trim(),
+        fullName: values.fullName.trim(),
+      });
 
-    setPassValid(newPassValid);
-    setShowPassValidation(true);
-
-    if (Object.values(newPassValid).every(v => v === true)) {
-      setShowPassValidation(false);
+      // registerUser signs the new account out again until the address is
+      // verified, so send them to sign in rather than into a protected page.
+      toast.success("Account created. Check your inbox to verify your email.");
+      navigate("/login", { replace: true, state: { justRegistered: true } });
+    } catch (err) {
+      setFormError(friendlyAuthError(err));
+    } finally {
+      setBusy(false);
     }
-  }
-
-  useEffect(() => {
-    if (confirmPass === "") {
-      setPasswordMismatch(false);
-    } else {
-      setPasswordMismatch(password !== confirmPass);
-    }
-  }, [password, confirmPass]);
-
-  function handleRegister() {
-    if (!email || !password || !confirmPass || !username || !fullname) {
-      alert('Please fill up all fields.')
-      return;
-    }
-
-    if (!emailValid) {
-      alert('Invalid email format.');
-      return;
-    }
-
-    if (Object.values(passValid).includes(false)) {
-      alert('Password does not meet all requirements.');
-      return;
-    }
-
-    if (password !== confirmPass) {
-      alert('Password mismatch.')
-      return;
-    }
-
-    registerUser(email, password, username, fullname)
   }
 
   return (
     <div className="register-wrapper">
       <div className="register-cont">
-
-        <div className="register-form">
-          <div className="register-head">
-            <img src="src/assets/CHRONICA.png" alt="logo" />
-          </div>
-
-          <p className='title-text'>CREATE ACCOUNT </p>
+        <form className="register-form" onSubmit={handleSubmit} noValidate>
+          <p className="title-text">CREATE ACCOUNT</p>
 
           <div className="reg-input-icons">
             <div className="reg-input-field-ul">
-              <i className="fa fa-user icon"></i>
+              <i className="fa fa-user icon" aria-hidden="true" />
               <input
+                id="reg-fullname"
                 className="reg-input-field"
                 type="text"
+                autoComplete="name"
                 placeholder="Enter your Full Name"
-                onChange={(e) => setFullname(e.target.value)}
+                value={values.fullName}
+                onChange={set("fullName")}
+                aria-invalid={errors.fullName ? "true" : undefined}
               />
             </div>
+            {errors.fullName && <span className="validation-text">{errors.fullName}</span>}
           </div>
 
           <div className="reg-input-icons">
             <div className="reg-input-field-ul">
-              <i className="fa fa-pen-nib icon"></i>
+              <i className="fa fa-pen-nib icon" aria-hidden="true" />
               <input
+                id="reg-username"
                 className="reg-input-field"
                 type="text"
+                autoComplete="nickname"
+                maxLength={LIMITS.username}
                 placeholder="Enter your Username"
-                onChange={(e) => setUsername(e.target.value)}
+                value={values.displayName}
+                onChange={set("displayName")}
+                aria-invalid={errors.displayName ? "true" : undefined}
               />
             </div>
+            {errors.displayName && <span className="validation-text">{errors.displayName}</span>}
           </div>
 
           <div className="reg-input-icons">
-            {!emailValid && <span className="validation-text">Invalid email format</span>}
             <div className="reg-input-field-ul">
-              <i className="fa fa-envelope icon"></i>
+              <i className="fa fa-envelope icon" aria-hidden="true" />
               <input
+                id="reg-email"
                 className="reg-input-field"
                 type="email"
+                autoComplete="email"
                 placeholder="Enter your email address"
-                onChange={handleEmailChange}
+                value={values.email}
+                onChange={set("email")}
+                aria-invalid={errors.email ? "true" : undefined}
               />
             </div>
+            {errors.email && <span className="validation-text">{errors.email}</span>}
           </div>
 
-          <div className="reg-input-icons">
-            {showPassValidation && (
-              <div className="password-validation">
-                <span className={passValid.length ? 'valid' : 'invalid'}>At least 8 characters</span>
-                <span className={passValid.uppercase ? 'valid' : 'invalid'}>Uppercase letter required</span>
-                <span className={passValid.lowercase ? 'valid' : 'invalid'}>Lowercase letter required</span>
-                <span className={passValid.numeric ? 'valid' : 'invalid'}>Numeric character required</span>
-                <span className={passValid.special ? 'valid' : 'invalid'}>Special character required</span>
-              </div>
-            )}
-            <div className="reg-input-field-ul">
-              <i className="fa fa-key icon"></i>
-              <input
-                className="reg-input-field"
-                type={npass ? "text" : "password"}
-                placeholder="Must at least 8 characters"
-                onChange={handlePasswordChange}
-              />
-              <i
-                className={`fas ${npass ? "fa-eye-slash" : "fa-eye"} eye-icon`}
-                onClick={toggleNewPassword}
-                style={{ cursor: "pointer" }}
-              ></i>
-            </div>
-          </div>
+          <PasswordField
+            id="reg-password"
+            label="Password"
+            value={values.password}
+            onChange={(value) => setValues((c) => ({ ...c, password: value }))}
+            error={errors.password}
+          />
 
-          <div className="reg-input-icons">
-            {passwordMismatch && <span className="validation-text">Passwords do not match</span>}
-            <div className="reg-input-field-ul">
-              <i className="fa fa-check-circle icon"></i>
-              <input
-                className="reg-input-field"
-                type={cpass ? "text" : "password"}
-                placeholder="Re-enter your password"
-                onChange={(e) => setConfirmPass(e.target.value)}
-              />
-              <i
-                className={`fas ${cpass ? "fa-eye-slash" : "fa-eye"} eye-icon`}
-                onClick={toggleConfirmPassword}
-                style={{ cursor: "pointer" }}
-              ></i>
-            </div>
-          </div>
+          <PasswordField
+            id="reg-confirm"
+            label="Confirm Password"
+            value={values.confirmPassword}
+            onChange={(value) => setValues((c) => ({ ...c, confirmPassword: value }))}
+            showRules={false}
+            placeholder="Re-enter your password"
+            error={errors.confirmPassword}
+          />
 
-          <button className="reg-btn" onClick={handleRegister}>REGISTER</button>
+          <InlineMessage tone="error">{formError}</InlineMessage>
+
+          <button className="reg-btn" type="submit" disabled={busy}>
+            {busy ? "Creating account…" : "REGISTER"}
+          </button>
 
           <div className="reg-link">
-            <p>Already have an account? <NavLink to="/login">Log In</NavLink></p>
+            <p>
+              Already have an account? <Link to="/login">Log In</Link>
+            </p>
           </div>
-        </div>
+        </form>
 
         <div className="register-img">
-          <img src={AUTH} alt="illustration" />
+          <img src={AUTH} alt="" />
         </div>
-
       </div>
     </div>
   );
 }
-
-export default Registration;

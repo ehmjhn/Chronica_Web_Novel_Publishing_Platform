@@ -1,174 +1,185 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import "./story.css";
-import { NavLink } from "react-router";
-import { subscribeAuthChanges } from "../../firebase/auth";
-import { getUserStories, deleteStory } from "../../firebase/db";
+import { Link } from "react-router";
+import ConfirmDialog from "../../components/ConfirmDialog";
+import Pagination from "../../components/Pagination";
+import { EmptyState } from "../../components/States";
+import { useToast } from "../../components/toast-context";
+import { useAuthUser } from "../../hooks/useAuthUser";
+import { useMyStories } from "../../hooks/useStories";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { deleteStory } from "../../firebase/db";
+import { formatNumber, formatDate, byIdDesc } from "../../lib/format";
+import { PAGE_SIZE_OPTIONS, PLACEHOLDER_COVER } from "../../lib/constants.js";
 
-function MySeries() {
-  const [seriesList, setSeriesList] = useState([]);
-  const [currentUserId, setCurrentUserId] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+export default function MySeries() {
+  const { user } = useAuthUser();
+  const { stories, loading } = useMyStories(user?.uid);
+  const toast = useToast();
+  const { run, busy } = useAsyncAction();
+
+  const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
-  useEffect(() => {
-    const unsubscribeAuth = subscribeAuthChanges((currentUser) => {
-      if (currentUser) {
-        setCurrentUserId(currentUser.uid)
-        getUserStories(currentUser.uid, (stories) => {
-          setSeriesList(stories);
-          setLoading(false);
-        });
-      } else {
-        setSeriesList([]);
-        setLoading(false);
-      }
-    });
+  const sorted = useMemo(() => [...stories].sort(byIdDesc), [stories]);
+  const visible = useMemo(
+    () => sorted.slice((page - 1) * limit, page * limit),
+    [sorted, page, limit]
+  );
 
-    return () => unsubscribeAuth();
-  }, []);
-
-  if (loading)
-    return (
-      <div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>
-        Loading...
-      </div>
-    );
-  if (seriesList.length === 0)
-    return (
-      <div className='homepage' style={{ textAlign: "center", color: "white" }}>
-        No series has been created yet.
-      </div>
-    );
-
-  // pagination
-  const totalPages = Math.ceil(seriesList.length / limit);
-  const startIndex = (currentPage - 1) * limit;
-  const paginatedData = seriesList.slice(startIndex, startIndex + limit);
-
-  const handleLimitChange = (e) => {
-    setLimit(Number(e.target.value));
-    setCurrentPage(1);
-  };
-
-  const handleDelete = async (storyId) => {
-    if (!currentUserId) return;
-
-    const confirm = window.confirm(
-      "Are you sure you want to delete this series? This action cannot be undone."
-    );
-
-    if (!confirm) return;
-
-    const success = await deleteStory(storyId, currentUserId);
-    if (success) {
-      setSeriesList(seriesList.filter((s) => s.id !== storyId));
-      alert("Series deleted successfully!");
-    } else {
-      alert("Failed to delete series.");
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    const target = pendingDelete;
+    const result = await run(() => deleteStory(target.id, user.uid));
+    if (result) {
+      setPendingDelete(null);
+      toast.success(`"${target.title}" has been deleted.`);
     }
-  };
+  }
 
-  const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
-  const handleBack = () => setCurrentPage((p) => Math.max(p - 1, 1));
+  if (loading) return <LoadingSeries />;
 
   return (
     <div className="storyview-page">
       <div className="subnav-control">
-        <NavLink to='/home'>
-          <i className="fa-solid fa-home"></i>
-        </NavLink>{" "}
-        / <NavLink to='/my-series'>My Series</NavLink>
+        <Link to="/home">
+          <i className="fa-solid fa-house" aria-hidden="true" />
+        </Link>{" "}
+        / <span>My Series</span>
       </div>
 
       <div className="series-page">
         <div className="series-header">
-          <h2>My Series ({seriesList.length})</h2>
-          <NavLink to='/create-story' className="add-series-btn">
-            <i className="fa-solid fa-plus"></i> Add series
-          </NavLink>
+          <h2>My Series ({sorted.length})</h2>
+          <Link to="/create-story" className="add-series-btn">
+            <i className="fa-solid fa-plus" aria-hidden="true" /> Add series
+          </Link>
         </div>
 
-        <div className="filter-section">
-          <span>Show per page: </span>
-          <select id="limit" value={limit} onChange={handleLimitChange}>
-            {[10, 25, 50, 75, 100].map((num) => (
-              <option key={num} value={num}>
-                {num}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="series-list">
-          {paginatedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((s) => (
-            <div key={s.id} className="series-card">
-              <img
-                src={s.coverImage || "https://via.placeholder.com/120x150"}
-                alt={s.title}
-                className="series-img"
-              />
-              <div className="series-info">
-                <h3 className="series-title">{s.title}</h3>
-                <div className="series-genre">
-                  {Object.values(s.genre).map((g, i) => (
-                    <span key={i} className="genre-tag">{g}</span>
-                  ), console.log(s.genre))}
-                </div>
-                <div className="series-genre">
-                  {Object.values(s.tags).map((t, i) => (
-                    <span key={i} className="tag-genre">{t}</span>
-                  ), console.log(s.genre))}
-                </div>
-                <p className="series-desc">{s.synopsis}</p>
-                <span className="series-meta">
-                  <i className="fa-solid fa-eye"></i> {s.views || 0} |{" "}
-                  <i className="fa-solid fa-book"></i> {s.totalChapters || 0}{" "}
-                  Chapters | <i className="fa-solid fa-heart"></i>{" "}
-                  {s.likes || 0} Favorites
-                </span>
-
-                <div className="series-buttons">
-                  <NavLink to={`/create-chapter/${s.id}`} className="btn-yellow">
-                    <i className="fa-solid fa-plus"></i> Add chapter
-                  </NavLink>
-                  <NavLink to={`/update-story/${s.id}`} className="btn-yellow">
-                    <i className="fa-solid fa-pen"></i> Update
-                  </NavLink>
-                </div>
-
-              </div>
-              Created at : {new Date(s.createdAt).toLocaleString()}
-              <button className="delete-btn" onClick={() => handleDelete(s.id)}>
-                <i className="fa-solid fa-trash"></i>
-              </button>
+        {sorted.length === 0 ? (
+          <EmptyState
+            icon="fa-feather-pointed"
+            title="You have not published anything yet"
+            message="Create your first series, then add chapters to start publishing."
+            action={
+              <Link to="/create-story" className="btn btn-yellow">
+                Create your first series
+              </Link>
+            }
+          />
+        ) : (
+          <>
+            <div className="filter-section">
+              <label htmlFor="series-per-page">Show per page: </label>
+              <select
+                id="series-per-page"
+                value={limit}
+                onChange={(event) => {
+                  setLimit(Number(event.target.value));
+                  setPage(1);
+                }}
+              >
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
             </div>
-          ))}
-        </div>
 
-        {/* PAGINATION: always visible */}
-        <div className="pagination">
-          <button
-            onClick={handleBack}
-            disabled={currentPage === 1}
-            className="page-btn"
-          >
-            <i className="fa-solid fa-angle-left"></i> Back
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="page-btn"
-          >
-            Next <i className="fa-solid fa-angle-right"></i>
-          </button>
-        </div>
+            <div className="series-list">
+              {visible.map((story) => (
+                <article key={story.id} className="series-card">
+                  <Link to={`/story-details/${story.id}`}>
+                    <img
+                      src={story.coverImage || PLACEHOLDER_COVER}
+                      alt=""
+                      className="series-img"
+                      loading="lazy"
+                    />
+                  </Link>
+
+                  <div className="series-info">
+                    <h3 className="series-title">
+                      <Link to={`/story-details/${story.id}`}>{story.title}</Link>
+                    </h3>
+
+                    <div className="series-genre">
+                      {(story.genre || []).map((genre) => (
+                        <span key={genre} className="genre-tag">
+                          {genre}
+                        </span>
+                      ))}
+                      {(story.tags || []).map((tag) => (
+                        <span key={tag} className="tag-genre">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    <p className="series-desc">{story.synopsis || "No synopsis yet."}</p>
+
+                    <span className="series-meta">
+                      <i className="fa-solid fa-eye" aria-hidden="true" /> {formatNumber(story.views)} &nbsp;|&nbsp;
+                      <i className="fa-solid fa-book" aria-hidden="true" /> {story.totalChapters || 0} chapters
+                      &nbsp;|&nbsp;
+                      <i className="fa-solid fa-heart" aria-hidden="true" /> {formatNumber(story.likes)}{" "}
+                      favourites
+                    </span>
+
+                    <div className="series-buttons">
+                      <Link to={`/create-chapter/${story.id}`} className="btn-yellow">
+                        <i className="fa-solid fa-plus" aria-hidden="true" /> Add chapter
+                      </Link>
+                      <Link to={`/update-story/${story.id}`} className="btn-yellow">
+                        <i className="fa-solid fa-pen" aria-hidden="true" /> Update
+                      </Link>
+                      <Link to={`/update-chapter-list/${story.id}`} className="btn-yellow">
+                        <i className="fa-solid fa-list" aria-hidden="true" /> Chapters
+                      </Link>
+                    </div>
+
+                    <small className="muted">Created {formatDate(story.createdAt)}</small>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="delete-btn"
+                    onClick={() => setPendingDelete(story)}
+                    aria-label={`Delete ${story.title}`}
+                  >
+                    <i className="fa-solid fa-trash" aria-hidden="true" />
+                  </button>
+                </article>
+              ))}
+            </div>
+
+            <Pagination page={page} total={sorted.length} perPage={limit} onChange={setPage} />
+          </>
+        )}
       </div>
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title="Delete this series?"
+        message={`"${pendingDelete?.title}" and all of its chapters and reviews will be permanently removed. This cannot be undone.`}
+        confirmLabel="Delete series"
+        busy={busy}
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }
 
-export default MySeries;
+function LoadingSeries() {
+  return (
+    <div className="homepage">
+      <div className="state-block" role="status">
+        <span className="state-spinner" aria-hidden="true" />
+        <p>Loading your series…</p>
+      </div>
+    </div>
+  );
+}

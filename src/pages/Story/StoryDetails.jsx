@@ -1,154 +1,180 @@
-import { useParams } from 'react-router';
-import { useEffect, useState } from 'react';
-import { readComic, getUserProfile, addFollowerList, deleteFollowerList, checkIfFollowed } from '../../firebase/db';
-import './story.css'
-import StoryView from './StoryView';
-import { subscribeAuthChanges } from '../../firebase/auth';
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router";
+import "./story.css";
+import StoryView from "./StoryView";
+import { EmptyState } from "../../components/States";
+import { useToast } from "../../components/toast-context";
+import { useAsyncData } from "../../hooks/useAsyncData";
+import { useAuthUser } from "../../hooks/useAuthUser";
+import { getStory, getUserProfile, followUser, unfollowUser, isFollowing } from "../../firebase/db";
 
-function StoryDetails() {
+export default function StoryDetails() {
+  const { id } = useParams();
+  const { user } = useAuthUser();
+  const toast = useToast();
 
-  const { id } = useParams(); //story id
-  const [viewStory, setView] = useState([]);
-  const [author, setAuthor] = useState()
-  const [authorId, setAuthorId] = useState()
-  const [loading, setIsLoading] = useState(true);
-  const [user, setCurrentUser] = useState(0)
-  const [isFollowed, setIsFollowed] = useState()
+  const { data: story, loading } = useAsyncData(() => getStory(id), [id]);
+  const { data: author } = useAsyncData(
+    () => (story?.authorId ? getUserProfile(story.authorId) : null),
+    [story?.authorId]
+  );
 
+  const [following, setFollowing] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
 
   useEffect(() => {
-    const unsubscribeStories = readComic((stories) => {
-      setView(stories);
-
-      const story = stories.find((s) => s.id === id);
-      setAuthorId(story.authorId)
-      if (story) {
-        getUserProfile(story.authorId).then((userData) => {
-          setAuthor(userData);
-          console.log("Author data:", userData);
-
-        });
-      }
-      setIsLoading(false)
+    if (!user || !story?.authorId || user.uid === story.authorId) {
+      setFollowing(false);
+      return;
+    }
+    let active = true;
+    isFollowing(user.uid, story.authorId).then((result) => {
+      if (active) setFollowing(result);
     });
+    return () => {
+      active = false;
+    };
+  }, [user, story?.authorId]);
 
-    return () => unsubscribeStories();
-  }, [id]);
-  useEffect(() => {
-    const unsubscribe = subscribeAuthChanges((currentUser) => {
-      setCurrentUser(currentUser)
-
-    })
-    return () => unsubscribe()
-  })
-  useEffect(() => {
-    if (user && authorId) {
-      (async () => {
-        console.log(checkIfFollowed(user.uid, authorId))
-        const result = await checkIfFollowed(user.uid, authorId)
-        setIsFollowed(result)
-
-      })()
+  async function toggleFollow() {
+    if (!user) {
+      toast.info("Please sign in to follow authors.");
+      return;
     }
+    if (followBusy) return;
 
-
-  }, [user, authorId])
-
-
-  if (loading) return <div className="homepage"><div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>Loading...</div></div>;
-
-  async function handleAddFollow() {
-    if (user === null) {
-      alert("Please login first.")
-      return
+    setFollowBusy(true);
+    try {
+      if (following) {
+        await unfollowUser(user.uid, story.authorId);
+        setFollowing(false);
+        toast.success(`You unfollowed ${author?.displayName || "this author"}.`);
+      } else {
+        await followUser(user.uid, story.authorId);
+        setFollowing(true);
+        toast.success(`You are now following ${author?.displayName || "this author"}.`);
+      }
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setFollowBusy(false);
     }
-    await addFollowerList(user.uid, authorId)
-    setIsFollowed(true)
-    // Refresh author data to get updated follower count
-    const updatedAuthor = await getUserProfile(authorId)
-    setAuthor(updatedAuthor)
   }
-  async function handledeleteFollow() {
-    await deleteFollowerList(user.uid, authorId)
-    setIsFollowed(false)
-    // Refresh author data to get updated follower count
-    const updatedAuthor = await getUserProfile(authorId)
-    setAuthor(updatedAuthor)
+
+  if (loading) {
+    return (
+      <div className="storyview-page">
+        <StoryView />
+      </div>
+    );
   }
+
+  if (!story) {
+    return (
+      <div className="storyview-page">
+        <StoryView />
+        <EmptyState
+          icon="fa-triangle-exclamation"
+          title="Series not found"
+          message="This series may have been removed by its author."
+          action={
+            <Link to="/search-discovery" className="btn btn-yellow">
+              Browse other series
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  const isOwner = user?.uid === story.authorId;
+  const genres = story.genre || [];
+  const tags = story.tags || [];
+
   return (
-    <>
-      {viewStory
-        .filter((story) => story.id === id)
-        .map((story, k) => {
+    <div className="storyview-page">
+      <StoryView />
 
-          return (
-            <div className="storyview-page">
-              <StoryView key={k} />
-
-              {/* AUTHOR SECTION */}
-              <div className="storyview-author">
-                <h2>Story Author Profile</h2>
-                <div className="author-details">
-                  <div className="author-profile">
-                    <div className="author-photo">
-                      <img src={author?.profileURL || author?.profilePic} alt="WOW" />
-                    </div>
-                    <p className="handle">{author?.displayName}</p>
-                    <p>Followers: {isFollowed ? author?.followersCount : author?.followersCount} • Following: {author?.followingCount}</p>
-
-                    {user?.uid === authorId ? (<h1></h1>) : (isFollowed ? <button className="btn follow" onClick={handledeleteFollow}>Following</button> :
-                      <button className="btn follow" onClick={handleAddFollow}>+ Follow</button>)}
-
-                  </div>
-                </div>
+      <section className="storyview-author">
+        <h2>About the author</h2>
+        <div className="author-details">
+          <div className="author-profile">
+            {author?.profilePic ? (
+              <div className="author-photo">
+                <img src={author.profilePic} alt={author.displayName || "Author"} />
               </div>
-
-              {/* SYNOPSIS */}
-              <div className="storyview-synopsis">
-                <h2>Synopsis</h2>
-                <p>{story.synopsis}</p>
+            ) : (
+              <div className="author-photo author-photo--empty" aria-hidden="true">
+                <i className="fa-solid fa-user" />
               </div>
+            )}
 
-              {/* GENRE */}
-              <div className="storyview-genre">
-                <h2>Genre</h2>
-                <div className="genre-list">
-                  {
-                    story.genre.map((g, k) => (
-                      <span key={k}>{g}</span>
-                    ))
-                  }
-                </div>
-              </div>
+            <Link to={`/author/${story.authorId}`} className="handle">
+              {author?.displayName || "Unknown author"}
+            </Link>
 
-              {/* TAGS */}
-              <div className="storyview-genre">
-                <h2>Tags</h2>
-                <div className="genre-list">
-                  {
-                    story.tags.map((t, k) => (
-                      <span key={k}>{t}</span>
-                    ))
-                  }
-                </div>
-              </div>
+            <p>
+              {author?.followersCount ?? 0} Followers &nbsp;•&nbsp; {author?.followingCount ?? 0} Following
+            </p>
 
-              {/* CONTENT WARNING */}
-              <div className="storyview-warning">
-                <h2>Content Warning</h2>
-                <span>{story.contentWarning}</span>
-              </div>
+            {!isOwner && (
+              <button
+                type="button"
+                className={`btn follow ${following ? "is-following" : ""}`}
+                onClick={toggleFollow}
+                disabled={followBusy}
+              >
+                {following ? (
+                  <>
+                    <i className="fa-solid fa-check" aria-hidden="true" /> Following
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-plus" aria-hidden="true" /> Follow
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
 
-              <div className="storyview-warning">
-                <h2>Copyright</h2>
-                <span>{story.copyright}</span>
-              </div>
-            </div>
-          );
-        })}
+      <section className="storyview-synopsis">
+        <h2>Synopsis</h2>
+        <p>{story.synopsis || "This author has not written a synopsis yet."}</p>
+      </section>
 
-    </>
+      {genres.length > 0 && (
+        <section className="storyview-genre">
+          <h2>Genre</h2>
+          <div className="genre-list">
+            {genres.map((genre) => (
+              <span key={genre}>{genre}</span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {tags.length > 0 && (
+        <section className="storyview-genre">
+          <h2>Tags</h2>
+          <div className="genre-list">
+            {tags.map((tag) => (
+              <span key={tag}>{tag}</span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="storyview-warning">
+        <h2>Content Warning</h2>
+        <span>{story.contentWarning || "None"}</span>
+      </section>
+
+      <section className="storyview-warning">
+        <h2>Copyright</h2>
+        <span>{story.copyright || "All Rights Reserved"}</span>
+      </section>
+    </div>
   );
 }
-
-export default StoryDetails;

@@ -1,4 +1,8 @@
-// auth.js
+// auth.js — Firebase Authentication plus first-party profile provisioning.
+//
+// This module never calls alert() and never reloads the page; it returns or
+// throws so the calling form can show an inline message and a toast.
+
 import {
   getAuth,
   GoogleAuthProvider,
@@ -8,158 +12,160 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  reload,
   sendEmailVerification,
   sendPasswordResetEmail,
   EmailAuthProvider,
-  linkWithCredential
+  linkWithCredential,
 } from "firebase/auth";
-import { ref, get, set } from "firebase/database";
-import { database } from "./db.js";
+import { get, set, update, ref } from "firebase/database";
 import { app } from "./firebase-config.js";
+import { database } from "./db.js";
+import { buildUserProfile, DEFAULT_USER } from "./db.js";
 
-// init
 export const auth = getAuth(app);
-export const provider = new GoogleAuthProvider();
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });
 
-//register ngani
-export const registerUser = async (email, password, displayName, fullname) => {
-  const actionCodeSettings = {
-    url: window.location.origin + '/login',
-    handleCodeInApp: true
+const isGoogleUser = (user) => user?.providerData?.some((p) => p.providerId === "google.com");
+const hasPasswordProvider = (user) => user?.providerData?.some((p) => p.providerId === "password");
+
+export { isGoogleUser, hasPasswordProvider };
+
+/** Turns a Firebase error code into something a person can act on. */
+export function friendlyAuthError(error) {
+  const map = {
+    "auth/invalid-email": "That email address looks invalid.",
+    "auth/user-not-found": "No account exists for that email.",
+    "auth/wrong-password": "Incorrect password. Please try again.",
+    "auth/invalid-credential": "Incorrect email or password.",
+    "auth/invalid-login-credentials": "Incorrect email or password.",
+    "auth/email-already-in-use": "An account already exists for that email.",
+    "auth/weak-password": "Please choose a stronger password.",
+    "auth/too-many-requests": "Too many attempts. Please try again in a moment.",
+    "auth/network-request-failed": "Network error. Check your connection and try again.",
+    "auth/popup-closed-by-user": "The sign-in window was closed before finishing.",
+    "auth/popup-blocked": "Your browser blocked the sign-in popup.",
+    "auth/account-exists-with-different-credential":
+      "An account already exists with that email using a different sign-in method.",
+    "auth/requires-recent-login": "Please sign in again before making this change.",
+    "auth/operation-not-allowed": "This sign-in method is disabled. Contact support.",
   };
-
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    await updateProfile(user, { displayName });
-    await sendEmailVerification(user, actionCodeSettings);
-    auth.signOut()
-    const user_3 = user;
-    const userData = {
-      name: fullname || "",
-      displayName: user_3.displayName || "",
-      bio: "",
-      email: user_3.email || "",
-      bdate: "",
-      gender: "",
-      location: "",
-      contactNo: "",
-      joinedDate: new Date().toISOString().split("T")[0],
-      profilePic: user_3.photoURL || "",
-      followersCount: 0,
-      followingCount: 0,
-      totalSeries: 0,
-      bookmarkedStories: {},
-      viewedStory: {}
-    };
-
-    const user_4 = user_3;
-    console.log("Registration successful! Please verify your email before logging in.");
-    alert("Registration successful! Please verify your email before logging in.");
-
-    // Polling: check every 5 seconds if email is verified
-    const interval = setInterval(() => {
-      user_4.reload().then(async () => {
-        if (user_4.emailVerified) {
-          clearInterval(interval);
-          alert("Verified")
-          await set(ref(database, `users/${user_3.uid}`), userData);
-          window.location.reload();
-        }
-      });
-    }, 5000);
-  } catch (error) {
-    console.error("Error creating user:", error);
-    alert(error.message);
-  }
-};
-
-// login ngani
-export const loginUser = async (email, password) => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    return user;
-  } catch (error) {
-    alert(error.message);
-    return null;
-  }
-};
-
-//google sign in ngani
-export const signInWithGoogle = () => {
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      const user = result.user;
-      const userRef = ref(database, `users/${user.uid}`);
-
-      get(userRef).then((snapshot) => {
-        if (!snapshot.exists()) {
-          const userData = {
-            name: user.displayName || "",
-            displayName: user.displayName || "",
-            bio: "",
-            email: user.email || "",
-            bdate: "",
-            gender: "",
-            location: "",
-            contactNo: "",
-            joinedDate: new Date().toISOString().split("T")[0],
-            profilePic: user.photoURL || "",
-            followersCount: 0,
-            followingCount: 0,
-            totalSeries: 0,
-            bookmarkedStories: {},
-            viewedStory: {}
-          };
-
-          set(userRef, userData).catch((err) => console.error(err));
-        }
-
-      }).catch((err) => console.error(err));
-    })
-    .catch((error) => {
-      console.error("Google sign-in error:", error);
-      alert(error.message);
-    });
-};
-
-//set pass for google acc
-export const setPasswordForGoogleUser = (user, newPassword) => {
-  if (!user) return;
-
-  const credential = EmailAuthProvider.credential(user.email, newPassword);
-
-  linkWithCredential(user, credential)
-    .then(() => {
-      console.log("Password set successfully!");
-    })
-    .catch((error) => {
-      console.error(error);
-      alert(error.message);
-    });
-};
-
-//nakalimutan ngani
-export const forgotPass = async (email) => {
-  const actionCodeSettings = {
-    url: window.location.origin + '/login',
-    handleCodeInApp: true
-  };
-
-  try {
-    await sendPasswordResetEmail(auth, email, actionCodeSettings);
-    alert("Password reset email sent!");
-  } catch {
-    alert("If this email exists, a password reset link has been sent.");
-  }
+  return map[error?.code] || error?.message || "Something went wrong. Please try again.";
 }
 
-// logout
-export const logout = () => {
-  signOut(auth).catch((e) => console.error(e.message));
+/**
+ * Creates the auth account, provisions the database profile immediately, and
+ * sends the verification email. The profile is written up-front so the user
+ * never lands on a blank account if they close the tab before verifying.
+ */
+export const registerUser = async ({ email, password, displayName, fullName }) => {
+  const actionCodeSettings = {
+    url: `${window.location.origin}/login`,
+    handleCodeInApp: true,
+  };
+
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
+
+  await updateProfile(user, { displayName });
+  await set(
+    ref(database, `users/${user.uid}`),
+    buildUserProfile({
+      uid: user.uid,
+      displayName,
+      email: user.email,
+      photoURL: user.photoURL,
+      fullName,
+    })
+  );
+  await sendEmailVerification(user, actionCodeSettings);
+  await signOut(auth);
+
+  return user;
 };
 
-// auth state listener
-export const subscribeAuthChanges = (callback) =>
-  onAuthStateChanged(auth, callback);
+export const loginUser = async (email, password) => {
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  return userCredential.user;
+};
+
+/** Signs in with Google, provisioning the database profile on first login. */
+export const signInWithGoogle = async () => {
+  const result = await signInWithPopup(auth, googleProvider);
+  const user = result.user;
+  await ensureUserProfile(user);
+  return user;
+};
+
+/** Creates the DB profile if it is missing (e.g. first Google login). */
+export const ensureUserProfile = async (user) => {
+  const userRef = ref(database, `users/${user.uid}`);
+  const snapshot = await get(userRef);
+
+  if (!snapshot.exists()) {
+    await set(
+      userRef,
+      buildUserProfile({
+        uid: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        fullName: user.displayName,
+      })
+    );
+  } else {
+    // Older accounts were created with placeholder fields; backfill what's missing.
+    const existing = snapshot.val();
+    const backfill = {};
+    if (!Array.isArray(existing.bookmarkedStories)) backfill.bookmarkedStories = DEFAULT_USER.bookmarkedStories;
+    if (!Array.isArray(existing.likedStories)) backfill.likedStories = DEFAULT_USER.likedStories;
+    if (existing.followersCount == null) backfill.followersCount = 0;
+    if (existing.followingCount == null) backfill.followingCount = 0;
+    if (existing.totalSeries == null) backfill.totalSeries = 0;
+    if (Object.keys(backfill).length) await update(userRef, backfill);
+  }
+  return user;
+};
+
+/** Links a password onto a Google account so email/password sign-in works. */
+export const setPasswordForGoogleUser = async (user, newPassword) => {
+  if (!user) throw new Error("No user found. Please sign in again.");
+  if (!user.email) throw new Error("This account has no email address.");
+
+  const alreadyHasPassword = hasPasswordProvider(user);
+  if (alreadyHasPassword) {
+    await updateProfile(user, {});
+    throw new Error("This account already has a password. Use 'Forgot Password?' instead.");
+  }
+
+  const credential = EmailAuthProvider.credential(user.email, newPassword);
+  await linkWithCredential(user, credential);
+  return true;
+};
+
+export const forgotPass = async (email) => {
+  const actionCodeSettings = {
+    url: `${window.location.origin}/login`,
+    handleCodeInApp: true,
+  };
+  await sendPasswordResetEmail(auth, email, actionCodeSettings);
+  return true;
+};
+
+export const resendVerification = async (user) => {
+  if (!user) throw new Error("Please sign in first.");
+  if (user.emailVerified) return false;
+  await sendEmailVerification(user);
+  return true;
+};
+
+export const logout = () => signOut(auth);
+
+/** Re-reads the auth user, e.g. after an email-verification link is opened. */
+export const refreshUser = async () => {
+  await reload(auth.currentUser);
+  return auth.currentUser;
+};
+
+export const subscribeAuthChanges = (callback) => onAuthStateChanged(auth, callback);

@@ -1,38 +1,40 @@
 import "./story.css";
+import { useState, useMemo, useEffect } from "react";
+import { Link, useParams } from "react-router";
 import StoryView from "./StoryView";
-import { useEffect, useState } from "react";
-import { NavLink, useParams } from "react-router";
-import { retrieveChapter } from "../../firebase/db";
+import { EmptyState } from "../../components/States";
+import Pagination from "../../components/Pagination";
+import { useStoryChapters } from "../../hooks/useChapters";
+import { useAsyncData } from "../../hooks/useAsyncData";
+import { getStory } from "../../firebase/db";
+import { formatDate, formatDateTime, pageCount } from "../../lib/format";
+import { PAGE_SIZE_OPTIONS } from "../../lib/constants.js";
 
-function ViewChapter() {
-  const [limit, setLimit] = useState(10); 
-  const [orderAsc, setOrderAsc] = useState(true);
+export default function ViewChapter() {
+  const { id } = useParams();
+  const { chapters, loading } = useStoryChapters(id);
+  const { data: story } = useAsyncData(() => getStory(id), [id]);
+
+  const [pageSize, setPageSize] = useState(25);
+  const [newestFirst, setNewestFirst] = useState(false);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true)
 
-  const {id} = useParams();
-  const [chapters, setChapters] = useState([]);
-
-  useEffect(() => {
-    retrieveChapter((chaps) => {
-      if (!chaps) return;
-
-      const storyChaps = chaps.filter(c => c.storyId === id);
-      setChapters(storyChaps || []);
-      setLoading(false)
-    });
-  }, [id]);
-
-  const sortedChapters = [...chapters].sort((a, b) =>
-    orderAsc ? b.order - a.order : a.order - b.order
+  const sorted = useMemo(
+    () => (newestFirst ? [...chapters].reverse() : chapters),
+    [chapters, newestFirst]
   );
 
-  const startIndex = (page - 1) * limit;
-  const paginatedChapters = sortedChapters.slice(startIndex, startIndex + limit);
+  const totalPages = pageCount(chapters.length, pageSize);
 
-  const totalPages = Math.ceil(chapters.length / limit);
+  // Clamp the page if the chapter list shrinks underneath us.
+  useEffect(() => {
+    if (page > totalPages) setPage(1);
+  }, [page, totalPages]);
 
-  if (loading) return <div className="homepage"><div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>Loading...</div></div>;
+  const visible = useMemo(
+    () => sorted.slice((page - 1) * pageSize, page * pageSize),
+    [sorted, page, pageSize]
+  );
 
   return (
     <div className="storyview-page">
@@ -41,65 +43,79 @@ function ViewChapter() {
       <div className="chapter-section">
         <div className="chapter-list-container">
           <div className="chapt-header">
-            <h2>CHAPTER LIST TABLE {`(${chapters.length})`}</h2>
+            <h2>Chapter List ({chapters.length})</h2>
             <div className="chapter-controls">
+              <label className="sr-only" htmlFor="chapter-page-size">
+                Chapters per page
+              </label>
               <select
-                value={limit}
-                onChange={(e) => {
-                  setLimit(parseInt(e.target.value));
-                  setPage(1); 
+                id="chapter-page-size"
+                value={pageSize}
+                onChange={(event) => {
+                  setPageSize(Number(event.target.value));
+                  setPage(1);
                 }}
               >
-                <option value={10}>10 Chapters</option>
-                <option value={25}>25 Chapters</option>
-                <option value={50}>50 Chapters</option>
-                <option value={75}>75 Chapters</option>
-                <option value={100}>100 Chapters</option>
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size} per page
+                  </option>
+                ))}
               </select>
-              <button onClick={() => setOrderAsc(!orderAsc)}>
-                <i className="fa-solid fa-filter"></i>
-                {orderAsc ? "Oldest" : "Latest"}
+
+              <button
+                type="button"
+                onClick={() => setNewestFirst((value) => !value)}
+                aria-pressed={newestFirst}
+              >
+                <i className="fa-solid fa-arrow-down-wide-short" aria-hidden="true" />{" "}
+                {newestFirst ? "Newest first" : "Oldest first"}
               </button>
+
+              {story?.authorId && (
+                <Link to={`/update-chapter-list/${id}`} className="btn btn-gray">
+                  <i className="fa-solid fa-pen" aria-hidden="true" /> Manage
+                </Link>
+              )}
             </div>
           </div>
 
-          {chapters.length > 0 ?
-            paginatedChapters.map((chapter, k) => (
-              <NavLink to={`/read-chapter/${chapter.id}`} key={k} className="chapter-item">
-                <span>{chapter.chapterTitle}</span>
-                <span className="chapter-date">
-                  {`Publish: ${new Date(chapter.publishDate).toLocaleDateString()} ${new Date(chapter.publishDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-                  <br/>
-                  {chapter.updateDate
-                    ? `Update: ${new Date(chapter.updateDate).toLocaleDateString()} ${new Date(chapter.updateDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                    : " "}
-                </span>
-              </NavLink>
-            )) :
-            <p style={{margin: "0 auto"}}>No Chapter Available.</p>
-          }
+          {loading ? (
+            <p className="muted">Loading chapters…</p>
+          ) : chapters.length === 0 ? (
+            <EmptyState
+              icon="fa-file-lines"
+              title="No chapters yet"
+              message="This series has not published any chapters."
+            />
+          ) : (
+            <>
+              <ol className="chapter-index">
+                {visible.map((chapter) => (
+                  <li key={chapter.id}>
+                    <Link to={`/read-chapter/${chapter.id}`} className="chapter-item">
+                      <span className="chapter-number">{chapter.order}</span>
+                      <span className="chapter-title">{chapter.chapterTitle}</span>
+                      <span className="chapter-date">
+                        Published {formatDateTime(chapter.publishDate)}
+                        {chapter.updatedDate && <br />}
+                        {chapter.updatedDate && <>Updated {formatDate(chapter.updatedDate)}</>}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
 
-          <div className="chapter-pagination">
-            <button
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              disabled={page === 1}
-            >
-              Back
-            </button>
-            <span>
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={page === totalPages}
-            >
-              Next
-            </button>
-          </div>
+              <Pagination
+                page={page}
+                total={chapters.length}
+                perPage={pageSize}
+                onChange={setPage}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-export default ViewChapter;

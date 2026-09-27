@@ -1,121 +1,122 @@
-import './chapter.css';
-import { useEffect, useState } from 'react';
-import { NavLink, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from "react-router";
+import ChapterEditor from "../../components/ChapterEditor";
+import { EmptyState, LoadingState, InlineMessage } from "../../components/States";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { useAsyncData } from "../../hooks/useAsyncData";
+import { useAuthUser } from "../../hooks/useAuthUser";
+import { addChapter, getStory } from "../../firebase/db";
+import { PLACEHOLDER_COVER } from "../../lib/constants.js";
+import "./chapter.css";
 
-import ReactQuill from "react-quill-new";
-import "react-quill-new/dist/quill.snow.css";
-import { addChapter, readComic } from '../../firebase/db';
+export default function AddChapter() {
+  const { id } = useParams();
+  const { user } = useAuthUser();
+  const navigate = useNavigate();
+  const { run, busy } = useAsyncAction();
 
-function AddChapter() {
-    const { id } = useParams();
-    const [story, setStory] = useState(0)
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
-    const currentTime = now.toTimeString().slice(0, 5);
+  const { data: story, loading } = useAsyncData(() => getStory(id), [id]);
 
-    useEffect(() => {
-        readComic((stories) => {
-            const foundStory = stories.find(s => s.id === id);
-            setStory(foundStory);
-        })
-    }, [])
-
-
-    const [publishOption, setPublishOption] = useState('immediate');
-    const [content, setContent] = useState("");
-    const [title, setTitle] = useState("")
-    const [date, setDate] = useState(today);
-    const [time, setTime] = useState(currentTime);
-    async function handleAddChapter() {
-        if (title === "" || content === "") { return alert("Please fill all fields.") }
-        const key = await addChapter(id, content, title)
-
-        window.location.href = `/read-chapter/${key}`;
-    }
-    return (
-        <div className="page-background">
-            <div className="subnav-control">
-                <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
-                <NavLink to='/my-series'>My Series</NavLink> /
-                <NavLink to='/publish-chapter'>New Chapter</NavLink>
-            </div>
-            <div className="addchapter-container">
-                {/* Header */}
-                <div className="addchapter-header">
-                    <h1>Create New Chapter</h1>
-                    <hr />
-                </div>
-
-                {/* Series Info */}
-                <div className="series-info">
-                    <h2>Selected Series</h2>
-                    <div className="series-card">
-                        <div className="series-image">
-                            <img src="" alt="Series cover" />
-                        </div>
-                        <div className="series-details">
-                            <h3 className="series-title">{story.title}</h3>
-                            <p className="series-genre">{story.genre?.map((g, i) => (
-                                <span key={i} className="genre-tag">{g}</span>
-                            ),)}</p>
-                            <p className="series-description">
-                                {story.synopsis}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Chapter Form */}
-                <div className="chapter-form">
-                    <h2>New Chapter Details</h2>
-
-                    <label htmlFor="chapter-title">Chapter Title</label>
-                    <input id="chapter-title" type="text" onChange={(e) => setTitle(e.target.value)} placeholder="Enter chapter title..." />
-
-                    <label htmlFor="chapter-content">Chapter Content</label>
-                    <ReactQuill
-                        className='chapter-content'
-                        onChange={(e) => setContent(e)}
-                        theme="snow"
-                        placeholder="Write your chapter here..."
-                    />
-
-                    {/* Publish Options */}
-                    <div className="publish-options">
-                        <h3>Publish Options</h3>
-                        <select
-                            value={publishOption}
-                            onChange={(e) => setPublishOption(e.target.value)}
-                        >
-                            <option value="immediate">Publish Immediately</option>
-                            {/* <option value="schedule">Schedule Publication</option> */}
-                        </select>
-
-                        {publishOption === 'schedule' && (
-                            <div className="schedule-inputs">
-                                <input
-                                    type="date"
-                                    className="schedule-date"
-                                    value={date}
-                                    onChange={(e) => setDate(e.target.value)}
-                                />
-                                <input
-                                    type="time"
-                                    className="schedule-time"
-                                    value={time}
-                                    onChange={(e) => setTime(e.target.value)}
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="form-actions">
-                        <button className="save-btn" onClick={handleAddChapter}>Save Chapter</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+  async function handleSubmit({ chapterTitle, content }) {
+    const chapterId = await run(
+      () => addChapter(id, { chapterTitle, content, authorId: user.uid }),
+      { success: "Chapter published." }
     );
-}
+    if (chapterId) {
+      // Land on the chapter list so the author sees the new entry in sequence.
+      navigate(`/update-chapter-list/${id}`);
+    }
+  }
 
-export default AddChapter;
+  if (loading) return <LoadingState label="Loading series…" />;
+
+  if (!story) {
+    return (
+      <div className="page-background">
+        <EmptyState
+          icon="fa-triangle-exclamation"
+          title="Series not found"
+          message="This series may have been removed."
+          action={
+            <Link to="/my-series" className="btn btn-yellow">
+              Back to My Series
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (story.authorId !== user?.uid) {
+    return (
+      <div className="page-background">
+        <EmptyState
+          icon="fa-lock"
+          title="Not your series"
+          message="You can only add chapters to series that you published."
+          action={
+            <Link to="/my-series" className="btn btn-gray">
+              Back to My Series
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="page-background">
+      <div className="subnav-control">
+        <Link to="/home">
+          <i className="fa-solid fa-house" aria-hidden="true" />
+        </Link>{" "}
+        / <Link to="/my-series">My Series</Link> / <span>New Chapter</span>
+      </div>
+
+      <div className="addchapter-container">
+        <div className="addchapter-header">
+          <h1>Create New Chapter</h1>
+          <hr />
+        </div>
+
+        <div className="series-info">
+          <h2>Selected Series</h2>
+          <div className="series-card">
+            <div className="series-image">
+              <img
+                src={story.coverImage || PLACEHOLDER_COVER}
+                alt={`Cover of ${story.title}`}
+              />
+            </div>
+            <div className="series-details">
+              <h3 className="series-title">{story.title}</h3>
+              <p className="series-genre">
+                {(story.genre || []).map((genre) => (
+                  <span key={genre} className="genre-tag">
+                    {genre}
+                  </span>
+                ))}
+              </p>
+              <p className="series-description">{story.synopsis}</p>
+            </div>
+          </div>
+        </div>
+
+        {story.totalChapters > 0 && (
+          <InlineMessage tone="info">
+            This will be chapter {story.totalChapters + 1} in <strong>{story.title}</strong>.
+          </InlineMessage>
+        )}
+
+        <div className="chapter-form">
+          <h2>New Chapter Details</h2>
+          <ChapterEditor
+            submitLabel={busy ? "Publishing…" : "Publish chapter"}
+            busy={busy}
+            onSubmit={handleSubmit}
+            onCancel={() => navigate(`/update-chapter-list/${id}`)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

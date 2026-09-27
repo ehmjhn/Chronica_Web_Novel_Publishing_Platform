@@ -1,159 +1,182 @@
-import { useEffect, useState } from 'react';
-import './chapter.css';
-import { NavLink, useParams, useNavigate } from 'react-router-dom';
-import { retrieveChapter, readComic, getUserProfile } from '../../firebase/db';
+import { useEffect, useMemo } from "react";
+import "./chapter.css";
+import { Link, useNavigate, useParams } from "react-router";
+import { EmptyState, LoadingState } from "../../components/States";
+import { useAsyncData } from "../../hooks/useAsyncData";
+import { useStoryChapters } from "../../hooks/useChapters";
+import { getChapter, getStory, getUserProfile } from "../../firebase/db";
+import { sanitizeChapterHtml } from "../../lib/sanitize";
+import { displayNameOf, formatNumber } from "../../lib/format";
+import { PLACEHOLDER_COVER } from "../../lib/constants.js";
 
-function ReadChapter() {
-  const { id } = useParams(); // chapter ID
-  const [story, setStory] = useState(null);
-  const [chapter, setChapter] = useState(null);
-  const [author, setAuthor] = useState(null);
-  const [chapters, setChapters] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(null);
-  const [loading, setIsLoading] = useState(true);
-
+export default function ReadChapter() {
+  const { id } = useParams();
   const navigate = useNavigate();
 
+  const { data: chapter, loading: chapterLoading, error } = useAsyncData(() => getChapter(id), [id]);
+  const { data: story } = useAsyncData(
+    () => (chapter?.storyId ? getStory(chapter.storyId) : null),
+    [chapter?.storyId]
+  );
+  const { data: author } = useAsyncData(
+    () => (story?.authorId ? getUserProfile(story.authorId) : null),
+    [story?.authorId]
+  );
+  const { chapters } = useStoryChapters(chapter?.storyId);
+
+  // Sanitised once per chapter body. Rendering the stored HTML verbatim let any
+  // author run script in every reader's browser (stored XSS).
+  const safeContent = useMemo(() => sanitizeChapterHtml(chapter?.content), [chapter?.content]);
+
+  const currentIndex = useMemo(
+    () => (chapter ? chapters.findIndex((c) => c.id === chapter.id) : -1),
+    [chapter, chapters]
+  );
+
+  const previous = currentIndex > 0 ? chapters[currentIndex - 1] : null;
+  const next = currentIndex >= 0 && currentIndex < chapters.length - 1 ? chapters[currentIndex + 1] : null;
+
+  // Send the reader back to the top when they move between chapters.
   useEffect(() => {
-
-    retrieveChapter((chaps) => {
-      if (!chaps) return;
-
-      const foundChapter = chaps.find((c) => c.id === id);
-      setChapter(foundChapter || null);
-      console.log('Current Chapter:', foundChapter);
-
-      if (foundChapter) {
-
-        const storyChaps = chaps
-          .filter((c) => c.storyId === foundChapter.storyId)
-          .sort((a, b) => a.order - b.order);
-        setChapters(storyChaps);
-        const index = storyChaps.findIndex((c) => c.id === foundChapter.id);
-        setCurrentIndex(index);
-
-        readComic((stories) => {
-          if (!stories) return;
-          const foundStory = stories.find((s) => s.id === foundChapter.storyId);
-          setStory(foundStory || null);
-          console.log('Story:', foundStory);
-
-          if (foundStory) {
-            getUserProfile(foundStory.authorId).then((userData) => {
-              setAuthor(userData);
-              console.log('Author:', userData);
-            });
-          }
-        });
-      }
-
-      setIsLoading(false)
-    });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, [id]);
 
-  if (loading) return <div className="homepage"><div style={{ margin: "0 auto", fontSize: "20px", color: "white" }}>Loading...</div></div>;
+  if (chapterLoading) return <LoadingState label="Loading chapter…" />;
 
-  const handlePrevious = () => {
-    if (currentIndex > 0) {
-      const prevChapter = chapters[currentIndex - 1];
-      navigate(`/read-chapter/${prevChapter.id}`);
-    }
-  };
+  if (error) {
+    return (
+      <div className="page-background">
+        <EmptyState
+          icon="fa-triangle-exclamation"
+          title="Unable to load this chapter"
+          message={error.message}
+          action={
+            <Link to="/home" className="btn btn-gray">
+              Go home
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
-  const handleNext = () => {
-    if (currentIndex < chapters.length - 1) {
-      const nextChapter = chapters[currentIndex + 1];
-      navigate(`/read-chapter/${nextChapter.id}`);
-    }
-  };
-
+  if (!chapter) {
+    return (
+      <div className="page-background">
+        <EmptyState
+          icon="fa-file-circle-question"
+          title="Chapter not found"
+          message="This chapter may have been removed by its author."
+          action={
+            <Link to="/search-discovery" className="btn btn-yellow">
+              Browse other series
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="page-background">
       <div className="subnav-control">
-        <NavLink to='/home'><i className="fa-solid fa-home"></i></NavLink> /
-        <NavLink to={`/story-chapter-list/${story?.id}`}>Chapter List</NavLink> /
-        <i>{chapter?.chapterTitle}</i>
+        <Link to="/home">
+          <i className="fa-solid fa-house" aria-hidden="true" />
+        </Link>{" "}
+        / {story ? <Link to={`/story-chapter-list/${story.id}`}>Chapter List</Link> : <span>Chapter List</span>} /{" "}
+        <i>{chapter.chapterTitle}</i>
       </div>
-      <div className="read-bg">
-        {/* Series Header */}
-        <div className="chapter-header">
+
+      <article className="read-bg">
+        <header className="chapter-header">
           <div className="series-cover">
-            <img src={story?.coverImage} alt={`${story?.title} Cover`} />
+            <img
+              src={story?.coverImage || PLACEHOLDER_COVER}
+              alt={story ? `Cover of ${story.title}` : ""}
+            />
           </div>
 
           <div className="series-meta">
-            <h2 className="series-title">{story?.title}</h2>
-            <p className="author">by {author?.displayName}</p>
+            <h2 className="series-title">{story?.title || "Loading…"}</h2>
+            {author && <p className="author">by {displayNameOf(author)}</p>}
 
             <div className="meta-stats">
               <div className="stat">
-                <i className="fa-solid fa-eye"></i> {story?.views}
+                <i className="fa-solid fa-eye" aria-hidden="true" /> {formatNumber(story?.views)}
               </div>
               <div className="stat">
-                <i className="fa-solid fa-heart"></i> {story?.likes}
+                <i className="fa-solid fa-heart" aria-hidden="true" /> {formatNumber(story?.likes)}
               </div>
-              <div className="stat rating">
-                <i className="fa-solid fa-star"></i> {story?.rate}/5
-              </div>
+              {story?.rate > 0 && (
+                <div className="stat rating">
+                  <i className="fa-solid fa-star" aria-hidden="true" /> {(Number(story.rate) || 0).toFixed(1)}/5
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Chapter Title Navigation */}
         <div className="chapter-title">
-          <button
-            className="nav-btn prev"
-            onClick={handlePrevious}
-            disabled={currentIndex === 0}
-          >
-            Previous
-          </button>
+          {previous ? (
+            <button className="nav-btn prev" onClick={() => navigate(`/read-chapter/${previous.id}`)}>
+              <i className="fa-solid fa-angle-left" aria-hidden="true" /> Previous
+            </button>
+          ) : (
+            <button className="nav-btn prev" disabled>
+              Previous
+            </button>
+          )}
 
-          <h3>{chapter?.chapterTitle}</h3>
+          <h3>
+            {chapter.order ? `Chapter ${chapter.order}: ` : ""}
+            {chapter.chapterTitle}
+          </h3>
 
-          <button
-            className="nav-btn next"
-            onClick={handleNext}
-            disabled={currentIndex === chapters.length - 1}
-          >
-            Next
-          </button>
+          {next ? (
+            <button className="nav-btn next" onClick={() => navigate(`/read-chapter/${next.id}`)}>
+              Next <i className="fa-solid fa-angle-right" aria-hidden="true" />
+            </button>
+          ) : (
+            <button className="nav-btn next" disabled>
+              Next
+            </button>
+          )}
         </div>
 
-        {/* Chapter Content */}
-        <div className="chapter-content">
-          <div
-            className="ql-editor"
-            dangerouslySetInnerHTML={{ __html: chapter.content }} //nakukuha pati html behavior ng content
-          />
-        </div>
+        {safeContent ? (
+          <div className="chapter-content ql-editor" dangerouslySetInnerHTML={{ __html: safeContent }} />
+        ) : (
+          <p className="muted chapter-empty">This chapter has no content yet.</p>
+        )}
 
-        {/* Footer Navigation */}
-        <div className="chapter-footer">
-          <button
-            className="nav-btn prev"
-            onClick={handlePrevious}
-            disabled={currentIndex === 0}
-          >
-            Previous
-          </button>
+        <footer className="chapter-footer">
+          {previous ? (
+            <button className="nav-btn prev" onClick={() => navigate(`/read-chapter/${previous.id}`)}>
+              <i className="fa-solid fa-angle-left" aria-hidden="true" /> Previous
+            </button>
+          ) : (
+            <button className="nav-btn prev" disabled>
+              Previous
+            </button>
+          )}
 
-          <NavLink to={`/story-chapter-list/${story?.id}`} className="chapter-list-btn">
-            Chapter List
-          </NavLink>
+          {story && (
+            <Link to={`/story-chapter-list/${story.id}`} className="chapter-list-btn">
+              Chapter List
+            </Link>
+          )}
 
-          <button
-            className="nav-btn next"
-            onClick={handleNext}
-            disabled={currentIndex === chapters.length - 1}
-          >
-            Next
-          </button>
-        </div>
-      </div>
+          {next ? (
+            <button className="nav-btn next" onClick={() => navigate(`/read-chapter/${next.id}`)}>
+              Next <i className="fa-solid fa-angle-right" aria-hidden="true" />
+            </button>
+          ) : (
+            <button className="nav-btn next" disabled>
+              Next
+            </button>
+          )}
+        </footer>
+      </article>
     </div>
   );
 }
-
-export default ReadChapter;

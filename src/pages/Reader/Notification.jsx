@@ -1,98 +1,160 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import './reader.css'
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router";
+import "./reader.css";
+import Pagination from "../../components/Pagination";
+import { EmptyState, LoadingState } from "../../components/States";
+import { useToast } from "../../components/toast-context";
+import { useAuthUser } from "../../hooks/useAuthUser";
+import { useSubscription } from "../../hooks/useSubscription";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import {
+  subscribeNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from "../../firebase/db";
+import { timeAgo } from "../../lib/format";
 
-function Notification() {
+const PER_PAGE = 10;
 
-    // samplessss
-    const allNotifications = [
-        { id: 1, name: "Notif 1", message: "Message 1", read: false },
-        { id: 2, name: "Notif 2", message: "Message 2", read: true },
-        { id: 3, name: "Notif 3", message: "Message 3", read: false },
-        { id: 4, name: "Notif 4", message: "Message 4", read: true },
-        { id: 5, name: "Notif 5", message: "Message 5", read: false },
-        { id: 6, name: "Notif 6", message: "Message 6", read: true },
-        { id: 7, name: "Notif 7", message: "Message 7", read: false },
-        { id: 8, name: "Notif 8", message: "Message 8", read: true },
-        { id: 9, name: "Notif 9", message: "Message 9", read: false },
-        { id: 10, name: "Notif 10", message: "Message 10", read: true },
-        { id: 11, name: "Notif 11", message: "Message 11", read: false },
-        { id: 12, name: "Notif 12", message: "Message 12", read: true },
-    ];
+export default function Notification() {
+  const { user } = useAuthUser();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const { run, busy } = useAsyncAction();
 
-    const [filter, setFilter] = useState("all"); 
-    const [currentPage, setCurrentPage] = useState(1);
-    const notificationsPerPage = 10;
+  const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
-    const filteredNotifications = allNotifications.filter(notif => {
-        if (filter === "read") return notif.read;
-        if (filter === "unread") return !notif.read;
-        return true;
-    });
+  const { data: notifications, loading } = useSubscription(
+    (cb) => subscribeNotifications(user?.uid, cb),
+    [user?.uid],
+    { initial: [] }
+  );
 
-    const totalPages = Math.ceil(filteredNotifications.length / notificationsPerPage);
-    const startIndex = (currentPage - 1) * notificationsPerPage;
-    const currentNotifications = filteredNotifications.slice(startIndex, startIndex + notificationsPerPage);
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.read).length,
+    [notifications]
+  );
 
-    const handleFilter = (type) => {
-        setFilter(type);
-        setCurrentPage(1);
+  const filtered = useMemo(() => {
+    if (filter === "read") return notifications.filter((n) => n.read);
+    if (filter === "unread") return notifications.filter((n) => !n.read);
+    return notifications;
+  }, [notifications, filter]);
+
+  function handleFilter(next) {
+    setFilter(next);
+    setPage(1);
+  }
+
+  // Marking read happens on open, so the badge in the nav updates immediately.
+  async function openNotification(notification) {
+    if (!notification.read) {
+      await run(() => markNotificationRead(user.uid, notification.id));
     }
+    if (notification.link) navigate(notification.link);
+  }
 
-    const handlePrevPage = () => {
-        setCurrentPage(prev => Math.max(prev - 1, 1));
-    }
+  async function handleMarkAll() {
+    if (!unreadCount) return;
+    const result = await run(() => markAllNotificationsRead(user.uid));
+    if (result) toast.success(`Marked ${result} notification${result === 1 ? "" : "s"} as read.`);
+  }
 
-    const handleNextPage = () => {
-        setCurrentPage(prev => Math.min(prev + 1, totalPages));
-    }
+  if (loading) return <LoadingState label="Loading notifications…" />;
 
-    const navigate = useNavigate()
-    const handleClose = () => {
-        navigate(-1); 
-    };
+  return (
+    <div className="notifacation">
+      <div className="notif-cont">
+        <div className="top">
+          <p className="series">Notifications</p>
 
-    return (
-        <div className="notifacation">
-            <div className='notif-cont'>
-                <div className='top'>
-                    <p className='series'>Notifications</p>
+          <div className="btn-top" role="group" aria-label="Filter notifications">
+            <button
+              type="button"
+              className={filter === "unread" ? "is-active unread" : "unread"}
+              onClick={() => handleFilter("unread")}
+              aria-pressed={filter === "unread"}
+            >
+              Unread{unreadCount > 0 ? ` (${unreadCount})` : ""}
+            </button>
+            <button
+              type="button"
+              className={filter === "read" ? "is-active read" : "read"}
+              onClick={() => handleFilter("read")}
+              aria-pressed={filter === "read"}
+            >
+              Read
+            </button>
+            <button
+              type="button"
+              className={filter === "all" ? "is-active" : ""}
+              onClick={() => handleFilter("all")}
+              aria-pressed={filter === "all"}
+            >
+              All
+            </button>
+          </div>
 
-                    <div className='btn-top'>
-                        <button className='unread' onClick={() => handleFilter("unread")}>
-                            {`Unread${allNotifications.filter((notif) => !notif.read).length > 0 ? ` (${allNotifications.filter((notif) => !notif.read).length})`: ""}`}
-                        </button>
-                        <button className='read' onClick={() => handleFilter("read")}>Read</button>
-                        <button onClick={() => handleFilter("all")}>All</button>
-                    </div>
-
-                    <button onClick={handleClose}>X</button>
-                </div>
-
-                <div className='notif-container'>
-                    {currentNotifications.length === 0 ? (
-                        <p>No notifications found.</p>
-                    ) : (
-                        currentNotifications.map(notif => (
-                            <div key={notif.id} className='notif-item'>
-                                <p className='notif-name'>{notif.name}</p>
-                                <p className='message'>{notif.message}</p>
-                            </div>
-                        ))
-                    )}
-                </div>
-
-                <div className='bottom'>
-                    <p>{currentPage}/{totalPages}</p>
-
-                    <div className='btn-bot'>
-                        <button onClick={handlePrevPage} disabled={currentPage === 1}>Back</button>
-                        <button onClick={handleNextPage} disabled={currentPage === totalPages}>Next</button>
-                    </div>
-                </div>
-            </div>
+          <div className="btn-top">
+            {unreadCount > 0 && (
+              <button type="button" onClick={handleMarkAll} disabled={busy}>
+                Mark all read
+              </button>
+            )}
+            <button type="button" onClick={() => navigate(-1)} aria-label="Close notifications">
+              <i className="fa-solid fa-xmark" aria-hidden="true" />
+            </button>
+          </div>
         </div>
-    );
-}
 
-export default Notification;
+        {filtered.length === 0 ? (
+          <EmptyState
+            icon="fa-bell"
+            title={filter === "unread" ? "Nothing unread" : "No notifications yet"}
+            message={
+              filter === "unread"
+                ? "You are all caught up."
+                : "Follows, comments and new chapters on your series will show up here."
+            }
+            action={
+              filter !== "all" ? (
+                <button type="button" className="btn btn-gray" onClick={() => handleFilter("all")}>
+                  Show all
+                </button>
+              ) : (
+                <Link to="/search-discovery" className="btn btn-yellow">
+                  Find something to read
+                </Link>
+              )
+            }
+          />
+        ) : (
+          <div className="notif-container">
+            {filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE).map((notification) => (
+              <button
+                key={notification.id}
+                type="button"
+                className={`notif-item ${notification.read ? "" : "is-unread"}`}
+                onClick={() => openNotification(notification)}
+              >
+                <p className="notif-name">
+                  {notification.actorName && <strong>{notification.actorName}</strong>}{" "}
+                  {notification.title}
+                </p>
+                {notification.message && <p className="message">{notification.message}</p>}
+                <time className="muted">{timeAgo(notification.createdAt)}</time>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {filtered.length > PER_PAGE && (
+          <div className="bottom">
+            <Pagination page={page} total={filtered.length} perPage={PER_PAGE} onChange={setPage} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

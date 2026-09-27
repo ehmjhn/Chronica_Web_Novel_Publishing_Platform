@@ -1,43 +1,93 @@
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { NavLink } from 'react-router';
-import { deleteChapter } from '../firebase/db';
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Link } from "react-router";
+import "./components.css";
 
-function SeriesChapter({ id, chapterId, title, date }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-
+/**
+ * One draggable chapter row.
+ *
+ * `disabled` turns off dragging without removing the row, so the same markup
+ * serves read-only and editable views. The old version passed the chapter id
+ * as the story id to `onDelete`, which silently targeted the wrong series.
+ */
+function SeriesChapter({ chapter, onDelete, index, disabled }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: chapter.id,
+    disabled,
+  });
 
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
-    cursor: 'grab'
+    opacity: isDragging ? 0.6 : 1,
   };
 
-  function handleDelete() {
-    const userChoice = confirm("Do you want to delete this chapter?")
+  const formatDay = (value) =>
+    value
+      ? new Date(value).toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        })
+      : "—";
 
-    if (userChoice) {
-      deleteChapter(id, chapterId)
-    }
-
-  }
   return (
-    <div ref={setNodeRef} style={style} className="chapter-card">
+    <li ref={setNodeRef} style={style} className="chapter-card">
       <div className="chapter-info">
-        <i className="fa-solid fa-bars" {...listeners} {...attributes}></i>
+        <span
+          className={`chapter-drag-handle ${disabled ? "is-disabled" : ""}`}
+          aria-hidden={disabled || undefined}
+        >
+          <i className="fa-solid fa-bars" />
+        </span>
+
         <div>
-          <span>{title}</span>
+          <span className="chapter-order">{chapter.order ?? index + 1}</span>{" "}
+          <span className="chapter-card__title">{chapter.chapterTitle}</span>
           <span className="chapter-date">
-            {new Date(date).toLocaleDateString([], { month: '2-digit', day: '2-digit', year: 'numeric' })}{" "}
-            {new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+            {formatDay(chapter.publishDate)}
+            {chapter.updatedDate && ` · updated ${formatDay(chapter.updatedDate)}`}
           </span>
         </div>
       </div>
+
       <div className="chapter-control-icons">
-        <i className="fa-solid fa-trash" onClick={handleDelete}></i>
-        <NavLink to={`/edit-chapter/${chapterId}`}><i className="fa-solid fa-pen-fancy"></i></NavLink>
+        <Link
+          to={`/read-chapter/${chapter.id}`}
+          aria-label={`Preview ${chapter.chapterTitle}`}
+          title="Preview"
+        >
+          <i className="fa-solid fa-eye" aria-hidden="true" />
+        </Link>
+        <Link
+          to={`/edit-chapter/${chapter.id}`}
+          aria-label={`Edit ${chapter.chapterTitle}`}
+          title="Edit"
+        >
+          <i className="fa-solid fa-pen-fancy" aria-hidden="true" />
+        </Link>
+        <button
+          type="button"
+          onClick={() => onDelete(chapter)}
+          aria-label={`Delete ${chapter.chapterTitle}`}
+          title="Delete"
+        >
+          <i className="fa-solid fa-trash" aria-hidden="true" />
+        </button>
+
+        {!disabled && (
+          <button
+            type="button"
+            className="chapter-drag-handle chapter-drag-handle--button"
+            aria-label={`Reorder ${chapter.chapterTitle}`}
+            {...listeners}
+            {...attributes}
+          >
+            <i className="fa-solid fa-grip-vertical" aria-hidden="true" />
+          </button>
+        )}
       </div>
-    </div>
+    </li>
   );
 }
 

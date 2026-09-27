@@ -1,0 +1,196 @@
+/* Styles for <StoryForm />, shared by the Create Series and Edit Series pages.
+   These used to live in pages/Story/story.css, which forced the component to
+   depend on a page stylesheet that may not be loaded wherever it is reused. */
+
+.create-form-page {
+  width: 85%;
+  margin: 20px auto;
+  background: #1a1a27;
+  border-radius: 12px;
+  padding: 40px 60px;
+  color: #eee;
+  border: 1px solid goldenrod;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.create-form-title {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #f5c518;
+  margin-bottom: 25px;
+}
+
+.create-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.create-form-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-form-label {
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #f5c518;
+}
+
+.create-form-note {
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 10px;
+}
+
+.create-form-image-preview {
+  width: 250px;
+  max-width: 100%;
+  height: 350px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #444;
+  background: #2a2a3a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.create-form-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.create-form-placeholder {
+  color: #777;
+  font-size: 14px;
+}
+
+.create-form-file {
+  margin-top: 10px;
+  color: #ddd;
+}
+
+.create-form-file::file-selector-button {
+  background: #2a2a3a;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-right: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.create-form-section input,
+.create-form-section textarea,
+.create-form-section select {
+  background: #222235;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 10px;
+  color: #eee;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.create-form-section input:focus,
+.create-form-section textarea:focus,
+.create-form-section select:focus {
+  outline: 2px solid #f5c518;
+  outline-offset: 1px;
+}
+
+.create-form-section input[aria-invalid="true"],
+.create-form-section textarea[aria-invalid="true"] {
+  border-color: #e05252;
+}
+
+.create-form-section textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.create-form-flex {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.create-form-flex > * {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.create-form-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.create-form-chip {
+  background: #2a2a3a;
+  border: 1px solid #555;
+  border-radius: 20px;
+  padding: 5px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ddd;
+  font-size: 14px;
+}
+
+.create-form-remove-chip {
+  background: none;
+  border: none;
+  color: #f5c518;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.create-form-remove-chip:hover {
+  color: #ffe45c;
+}
+
+.create-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  gap: 12px;
+}
+
+.create-form-submit {
+  background: #f5c518;
+  border: none;
+  color: #111;
+  padding: 10px 25px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.create-form-submit:hover:not(:disabled) {
+  background: #ffe45c;
+}
+
+.create-form-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .create-form-page {
+    width: 94%;
+    padding: 24px 20px;
+  }
+}

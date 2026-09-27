@@ -1,19 +1,39 @@
-import './routes.css';
-import { Outlet, useLocation } from "react-router";
+import "./routes.css";
 import { useEffect } from "react";
-import Nav from '../components/Nav';
-import Footer from '../components/Footer';
-import { NavLink } from 'react-router';
+import { Outlet, useLocation, Link } from "react-router";
+import Nav from "../components/Nav";
+import Footer from "../components/Footer";
+import LOGO from "../assets/CHRONICA.webp";
 
-export function MainLayout() {
-  const { pathname } = useLocation();
+const AUTH_LINKS = [
+  { to: "/about-us", label: "About" },
+  { to: "/help", label: "Help" },
+  { to: "/search-discovery", label: "Browse Stories" },
+];
+
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
+    // Honour in-page anchors (e.g. /help#publishing) instead of yanking the
+    // reader back to the top and hiding the section they asked for.
+    if (hash) {
+      const target = document.getElementById(hash.slice(1));
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [pathname]);
+  }, [pathname, hash]);
 
+  return null;
+}
+
+export function MainLayout() {
   return (
     <>
+      <ScrollToTop />
       <Nav />
       <main>
         <Outlet />
@@ -24,19 +44,14 @@ export function MainLayout() {
 }
 
 export function AuthLayout() {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    
-  }, [pathname]);
-
   return (
     <div className="background">
+      <ScrollToTop />
+
       <div className="header">
-        <NavLink to="/home">
-          <img src="src/assets/CHRONICA.png" alt="Chronica logo" />
-        </NavLink>
+        <Link to="/home">
+          <img src={LOGO} alt="Chronica" />
+        </Link>
       </div>
 
       <main>
@@ -47,14 +62,16 @@ export function AuthLayout() {
         <div className="footer-top">
           <p className="footer-brand">Chronica</p>
           <p className="footer-copy">
-            © 2025 Paranoic Software Solutions. All Rights Reserved.
+            © {new Date().getFullYear()} Paranoic Software Solutions. All Rights Reserved.
           </p>
         </div>
 
         <div className="footer-links">
-          <a href="/privacy" className="footer-link">Privacy Policy</a>
-          <a href="/terms" className="footer-link">Terms of Service</a>
-          <a href="/contact" className="footer-link">Contact</a>
+          {AUTH_LINKS.map((link) => (
+            <Link key={link.to} to={link.to} className="footer-link">
+              {link.label}
+            </Link>
+          ))}
         </div>
       </div>
     </div>

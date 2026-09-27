@@ -1,168 +1,129 @@
-import './auth.css';
-import { NavLink, useNavigate } from 'react-router';
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { IoIosArrowRoundBack } from "react-icons/io";
+import "./auth.css";
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import { FiLock } from "react-icons/fi";
-import { useState, useEffect } from 'react';
-import { auth, setPasswordForGoogleUser } from '../../firebase/auth'; 
-import resetbgimg from '../../assets/AUTH.png';
+import PasswordField from "../../components/PasswordField";
+import { InlineMessage, LoadingState } from "../../components/States";
+import { useToast } from "../../components/toast-context";
+import { useAuthUser } from "../../hooks/useAuthUser";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { setPasswordForGoogleUser, friendlyAuthError, hasPasswordProvider } from "../../firebase/auth";
+import { isStrongPassword, isBlank } from "../../lib/validation";
+import resetbgimg from "../../assets/AUTH.webp";
 
-function SetPassword() {
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [user, setUser] = useState(null);
-
-  const [passValid, setPassValid] = useState({
-    length: false,
-    uppercase: false,
-    lowercase: false,
-    numeric: false,
-    special: false,
-  });
-
-  const [showPassValidation, setShowPassValidation] = useState(true);
-  const [passwordMismatch, setPasswordMismatch] = useState(false);
-
+export default function SetPassword() {
+  const { user, loading } = useAuthUser();
   const navigate = useNavigate();
+  const location = useLocation();
+  const toast = useToast();
+  const { run, busy } = useAsyncAction();
 
-  const toggleShowNew = () => setShowNew(prev => !prev);
-  const toggleShowConfirm = () => setShowConfirm(prev => !prev);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState("");
 
-  useEffect(() => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      navigate('/login'); 
-    } else {
-      setUser(currentUser);
-    }
-  }, [navigate]);
+  const from = location.state?.from || "/home";
 
-  const handlePasswordChange = (e) => {
-    const value = e.target.value;
-    setNewPassword(value);
+  if (loading) return <LoadingState label="Checking your account…" />;
 
-    const newPassValid = {
-      length: value.length >= 8,
-      uppercase: /[A-Z]/.test(value),
-      lowercase: /[a-z]/.test(value),
-      numeric: /[0-9]/.test(value),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(value),
-    };
-
-    setPassValid(newPassValid);
-    setShowPassValidation(true);
-
-    if(Object.values(newPassValid).every(v => v === true)){
-      setShowPassValidation(false);
-    }
-
-    if(confirmPassword !== ""){
-      setPasswordMismatch(value !== confirmPassword);
-    }
+  if (!user) {
+    return (
+      <div className="form-container">
+        <div className="reset-card">
+          <div className="reset-form">
+            <h2>Sign in first</h2>
+            <p>You need to be signed in to set a password on your account.</p>
+            <Link to="/login" className="submit-npassword-btn">
+              Go to sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  useEffect(() => {
-    if(confirmPassword === ""){
-      setPasswordMismatch(false);
+  if (hasPasswordProvider(user)) {
+    return (
+      <div className="form-container">
+        <div className="reset-card">
+          <div className="reset-form">
+            <h2>You already have a password</h2>
+            <p>Use “Forgot Password?” on the sign-in page to change it.</p>
+            <Link to={from} className="submit-npassword-btn">
+              Continue
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function validate() {
+    const next = {};
+    if (isBlank(password)) next.password = "Please choose a password.";
+    else if (!isStrongPassword(password))
+      next.password = "Your password does not meet all the requirements.";
+    if (password !== confirmPassword) next.confirmPassword = "The two passwords do not match.";
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setFormError("");
+    if (!validate()) return;
+
+    const result = await run(() => setPasswordForGoogleUser(user, password));
+    if (result) {
+      toast.success("Password set. You can now sign in with your email.");
+      navigate(from, { replace: true });
     } else {
-      setPasswordMismatch(newPassword !== confirmPassword);
+      setFormError(friendlyAuthError(new Error("Could not set the password.")));
     }
-  }, [newPassword, confirmPassword]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!newPassword || !confirmPassword) {
-      alert("Please fill both fields.");
-      return;
-    }
-
-    if(Object.values(passValid).includes(false)){
-      alert('Password does not meet all requirements.');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
-
-    if (!user) {
-      alert("No user found. Please login first.");
-      return;
-    }
-
-    try {
-      await setPasswordForGoogleUser(user, newPassword);
-      alert("Password set successfully!");
-      navigate('/home'); 
-    } catch (error) {
-      console.error(error);
-      alert(error.message);
-    }
-  };
+  }
 
   return (
     <div className="form-container">
       <div className="reset-card">
-        <div className="reset-form">
-          <FiLock className="lock-icon" />
+        <form className="reset-form" onSubmit={handleSubmit} noValidate>
+          <FiLock className="lock-icon" aria-hidden="true" />
           <h2>Set Your Password</h2>
-          <p>For your security, please choose a strong password.</p>
+          <p>
+            You signed in with Google. Add a password so you can also sign in with{" "}
+            <strong>{user.email}</strong>.
+          </p>
 
-          <form onSubmit={handleSubmit}>
-            <div className="pass-container">
-              {showPassValidation && (
-                <div className="password-validation">
-                  <span className={passValid.length ? 'valid' : 'invalid'}>At least 8 characters</span>
-                  <span className={passValid.uppercase ? 'valid' : 'invalid'}>Uppercase letter required</span>
-                  <span className={passValid.lowercase ? 'valid' : 'invalid'}>Lowercase letter required</span>
-                  <span className={passValid.numeric ? 'valid' : 'invalid'}>Numeric character required</span>
-                  <span className={passValid.special ? 'valid' : 'invalid'}>Special character required</span>
-                </div>
-              )}
-              <div className="password-input-container">
-                <input
-                  type={showNew ? "text" : "password"}
-                  placeholder="New password"
-                  value={newPassword}
-                  onChange={handlePasswordChange}
-                  required
-                />
-                <span className="icon-toggle" onClick={toggleShowNew}>
-                  {showNew ? <FaEyeSlash /> : <FaEye />}
-                </span>
-              </div>
+          <PasswordField
+            id="set-password"
+            label="New password"
+            value={password}
+            onChange={setPassword}
+            error={errors.password}
+          />
 
-              {passwordMismatch && <span className="validation-text">Passwords do not match</span>}
-              <div className="password-input-container">
-                <input
-                  type={showConfirm ? "text" : "password"}
-                  placeholder="Confirm password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-                <span className="icon-toggle" onClick={toggleShowConfirm}>
-                  {showConfirm ? <FaEyeSlash /> : <FaEye />}
-                </span>
-              </div>
-            </div>
+          <PasswordField
+            id="set-confirm-password"
+            label="Confirm new password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            showRules={false}
+            placeholder="Re-enter your new password"
+            error={errors.confirmPassword}
+          />
 
-            <button type="submit" className="submit-npassword-btn">
-              Set Password
-            </button>
-          </form>
-        </div>
+          <InlineMessage tone="error">{formError}</InlineMessage>
+
+          <button type="submit" className="submit-npassword-btn" disabled={busy}>
+            {busy ? "Saving…" : "Set Password"}
+          </button>
+        </form>
 
         <div className="reset-img">
-          <img src={resetbgimg} alt="Reset Password Illustration" />
+          <img src={resetbgimg} alt="" />
         </div>
       </div>
     </div>
   );
 }
-
-export default SetPassword;

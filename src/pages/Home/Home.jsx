@@ -1,60 +1,55 @@
-import './home.css';
-import StartJourney from '../../assets/StartJourney.png';
-import AngLihamNiLuna from '../../assets/AngLihamNiLuna.png';
-import SummerLove from '../../assets/SummerLove.png';
-import MyBaby from '../../assets/MyBaby.png';
-import { useEffect, useState } from 'react';
-import { readComic } from '../../firebase/db.js';
+import "./home.css";
+import { useMemo } from "react";
+import { daysSince, byNumberDesc, byIdDesc } from "../../lib/format";
+import { NEW_RELEASE_WINDOW_DAYS } from "../../lib/constants.js";
+import { useStoriesWithAuthors } from "../../hooks/useStories";
+import { LoadingState } from "../../components/States";
+import Carousel from "../../components/Carousel";
+import StorySection from "../../components/StorySection";
+import SLIDES from "../../data/carouselSlides";
 
-import Carousel from '../../components/Carousel.jsx';
-import StorySection from '../../components/StorySection.jsx';
+export default function Home() {
+  const { stories, loading } = useStoriesWithAuthors();
 
-function Home() {
-  const [featuredStories, setFeaturedStories] = useState([]);
-  const [latestStories, setLatestStories] = useState([]);
-  const [popularWorks, setPopularWorks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { featured, latest, popular } = useMemo(() => {
+    const published = stories.filter((story) => story.status !== "Hidden");
 
-  useEffect(() => {
-    const unsubscribe = readComic((comics) => {
+    return {
+      featured: published.filter((story) => story.isFeatured),
+      latest: published
+        .filter((story) => daysSince(story.createdAt) <= NEW_RELEASE_WINDOW_DAYS)
+        .sort(byIdDesc),
+      popular: [...published].sort(byNumberDesc("views")),
+    };
+  }, [stories]);
 
-      setFeaturedStories(comics.filter(c => c.isFeatured));
-
-      setPopularWorks([...comics].sort((a, b) => b.views - a.views));
-
-      const today = new Date();
-      setLatestStories(
-        comics
-          .filter(c => c.createdAt && (today - new Date(c.createdAt)) / (1000 * 60 * 60 * 24) <= 30)
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      );
-
-      setLoading(false);
-    });
-
-    return () => unsubscribe(); 
-
-  }, []);
-
-  if (loading) return <div className="homepage"><div style={{margin: "0 auto", fontSize:"20px", color:"white"}}>Loading...</div></div>;
-
-  const slides = [
-    { image: StartJourney, title: 'Start Your Journey', description: 'Create your own story and get featured on our homepage', author: 'Chronica', category: 'Promotion' },
-    { image: MyBaby, title: 'Featured Story', description: 'Discover amazing stories from talented authors', author: 'Jhae', category: 'Fantasy | Adventure' },
-    { image: SummerLove, title: 'Latest Release', description: 'Read the newest chapters and series', author: 'Arvs', category: 'Romance | Drama' },
-    { image: AngLihamNiLuna, title: 'Popular Works', description: 'Explore the most loved stories', author: 'sekkiii', category: 'Romance | Mystery | Slice of Life' }
-  ];
+  if (loading) return <LoadingState label="Loading stories…" />;
 
   return (
     <div className="homepage">
-      <Carousel slides={slides} />
+      <Carousel slides={SLIDES} />
+
       <div className="main-content">
-        <StorySection title="Featured Stories" stories={featuredStories} viewAllPath="/home/featured-stories" showFeaturedBadge />
-        <StorySection title="Latest Release" stories={latestStories} viewAllPath="/home/latest-releases" />
-        <StorySection title="Popular Works" stories={popularWorks} viewAllPath="/home/popular-works" />
+        <StorySection
+          title="Featured Stories"
+          stories={featured}
+          viewAllPath="/home/featured-stories"
+          showFeaturedBadge
+          emptyMessage="No featured stories yet — check back soon."
+        />
+        <StorySection
+          title="Latest Release"
+          stories={latest}
+          viewAllPath="/home/latest-releases"
+          emptyMessage={`No stories published in the last ${NEW_RELEASE_WINDOW_DAYS} days.`}
+        />
+        <StorySection
+          title="Popular Works"
+          stories={popular}
+          viewAllPath="/home/popular-works"
+          emptyMessage="No stories have been read yet."
+        />
       </div>
     </div>
   );
 }
-
-export default Home;

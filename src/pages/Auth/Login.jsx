@@ -1,107 +1,193 @@
 import "./auth.css";
-import AUTH from "../../assets/AUTH.png";
-import { NavLink } from "react-router";
-import { useEffect, useState } from "react";
-import { auth, loginUser, signInWithGoogle } from "../../firebase/auth";
-import { onAuthStateChanged } from "firebase/auth";
+import AUTH from "../../assets/AUTH.webp";
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
+import PasswordField from "../../components/PasswordField";
+import { InlineMessage } from "../../components/States";
+import { useToast } from "../../components/toast-context";
+import { useAuthUser } from "../../hooks/useAuthUser";
+import {
+  loginUser,
+  signInWithGoogle,
+  resendVerification,
+  friendlyAuthError,
+  isGoogleUser,
+  hasPasswordProvider,
+} from "../../firebase/auth";
+import { isBlank } from "../../lib/validation";
 
-function Login() {
+export default function Login() {
+  const { user } = useAuthUser();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const toast = useToast();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [pass, setShowPass] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const [emailValid, setEmailValid] = useState(true);
+  const from = location.state?.from || "/home";
+  const justRegistered = Boolean(location.state?.justRegistered);
 
+  async function handleSignIn(event) {
+    event.preventDefault();
+    setError("");
+    setNotice("");
 
-
-  function handleLogin() {
-    if (!email || !password) {
-      alert("Please fill in all fields");
+    if (isBlank(email) || !password) {
+      setError("Please fill in both fields.");
       return;
     }
-    if (!emailValid) {
-      alert("Invalid email format");
+
+    setBusy(true);
+    try {
+      const account = await loginUser(email.trim(), password);
+
+      // An unverified account is shown the verify prompt instead of the app.
+      if (!account.emailVerified) {
+        setNotice("Your email address is not verified yet. Resend the link below.");
+        return;
+      }
+
+      toast.success("Welcome back!");
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleGoogle() {
+    setError("");
+    setNotice("");
+    setBusy(true);
+    try {
+      const account = await signInWithGoogle();
+
+      // A Google-only account can't use the email form until it has a password.
+      if (isGoogleUser(account) && !hasPasswordProvider(account)) {
+        navigate("/set-password", { replace: true, state: { from } });
+        return;
+      }
+
+      toast.success("Signed in with Google.");
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleResend() {
+    setError("");
+    setNotice("");
+
+    if (!user) {
+      setNotice("Sign in with your email and password first, then resend verification.");
       return;
     }
-    loginUser(email, password);
-  }
 
-  function handleGoogleLogin() {
-    signInWithGoogle();
-  }
-
-  const handleEmailChange = (e) => {
-    const value = e.target.value;
-    setEmail(value);
-    if (value === "") {
-      setEmailValid(true);
-      return;
+    setBusy(true);
+    try {
+      const sent = await resendVerification(user);
+      setNotice(
+        sent
+          ? "Verification email sent. It can take a minute to arrive."
+          : "That account is already verified."
+      );
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setBusy(false);
     }
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    setEmailValid(regex.test(value));
   }
 
-
-
-  return (
-    <div className="login-page">
-      <div className="log-wrapper">
-        <div className="login-cont">
-          <div className="login-img">
-            <img src={AUTH} alt="image" />
-          </div>
-
-          <div className="login-form">
-            <div className="form-head">
-              <img src="src/assets/CHRONICA.png" alt="logo" />
-            </div>
-
-            <p className="login-text">Please enter your Login credentials</p>
-
-            <div className="input-icons">
-              {!emailValid && <span className="validation-text">Invalid email format</span>}
-              <div className="input-field-ul">
-                <i className="fas fa-envelope input-icon"></i>
-                <input
-                  className="input-field"
-                  type="email"
-                  placeholder="Email"
-                  onChange={handleEmailChange}
-                />
-              </div>
-            </div>
-
-            <div className="input-icons">
-              <div className="input-field-ul">
-                <i className="fas fa-lock input-icon"></i>
-                <input
-                  className="input-field"
-                  type={pass ? "text" : "password"}
-                  placeholder="Password"
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <i
-                  className={`fas ${pass ? "fa-eye-slash" : "fa-eye"} eye-icon`}
-                  onClick={() => setShowPass(!pass)}
-                  style={{ cursor: "pointer" }}
-                ></i>
-              </div>
-            </div>
-
-            <button onClick={handleLogin}>SIGN IN</button>
-            <button className="google-login-btn" onClick={handleGoogleLogin}>
-              <i className="fab fa-google"></i> Sign in with Google
-            </button>
-
-            <div className="log-link">
-              <NavLink to="/register">Create Account</NavLink> |{" "}
-              <NavLink to="/forgot-password">Forgot Password?</NavLink>
-            </div>
-          </div>
+  // Already fully signed in: offer a way forward instead of a dead form.
+  if (user?.emailVerified) {
+    return (
+      <div className="auth-page">
+        <div className="auth-form-container">
+          <h1>You are already signed in</h1>
+          <InlineMessage tone="success">Continue where you left off.</InlineMessage>
+          <Link to={from} className="auth-submit-btn">
+            Go to Chronica
+          </Link>
         </div>
       </div>
-    </div>
-  )
-}
+    );
+  }
 
-export default Login;
+  const needsVerification = Boolean(user && !user.emailVerified);
+
+  return (
+    <div className="auth-page">
+      <img src={AUTH} alt="" className="auth-image" />
+
+      <form className="auth-form-container" onSubmit={handleSignIn} noValidate>
+        <h1>Welcome back</h1>
+        <p className="auth-subtext">Sign in to keep reading and publishing.</p>
+
+        {justRegistered && (
+          <InlineMessage tone="success">
+            Account created. Check your inbox to verify your email, then sign in.
+          </InlineMessage>
+        )}
+
+        <label htmlFor="login-email">Email</label>
+        <input
+          id="login-email"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="you@example.com"
+        />
+
+        <PasswordField
+          id="login-password"
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          autoComplete="current-password"
+          placeholder="••••••••"
+          showRules={false}
+        />
+
+        <InlineMessage tone="error">{error}</InlineMessage>
+        <InlineMessage tone="info">{notice}</InlineMessage>
+
+        {needsVerification && (
+          <InlineMessage tone="error">
+            This account is not verified yet, so the rest of the app is unavailable.
+          </InlineMessage>
+        )}
+
+        <button type="submit" className="auth-submit-btn" disabled={busy}>
+          {busy ? "Signing in…" : "Sign in"}
+        </button>
+
+        <button type="button" className="auth-alt-btn" onClick={handleGoogle} disabled={busy}>
+          <i className="fa-brands fa-google" aria-hidden="true" /> Continue with Google
+        </button>
+
+        {needsVerification && (
+          <button type="button" className="auth-link-btn" onClick={handleResend} disabled={busy}>
+            Resend verification email
+          </button>
+        )}
+
+        <Link to="/forgot-password" className="auth-link-btn">
+          Forgot Password?
+        </Link>
+
+        <p className="auth-switch">
+          Don&apos;t have an account? <Link to="/register">Register</Link>
+        </p>
+      </form>
+    </div>
+  );
+}

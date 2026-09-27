@@ -1,0 +1,106 @@
+/* Styles for <ChapterEditor />, shared by AddChapter and EditChapter. */
+
+.chapter-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.chapter-editor__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chapter-editor__field label {
+  font-weight: bold;
+  color: #f5c518;
+}
+
+.chapter-editor__field input {
+  background: #222235;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 10px;
+  color: #eee;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.chapter-editor__field input:focus {
+  outline: 2px solid #f5c518;
+  outline-offset: 1px;
+}
+
+.chapter-editor__field small {
+  align-self: flex-end;
+}
+
+/* Quill paints its own light chrome; align it with the dark form. */
+.chapter-editor .ql-toolbar.ql-snow,
+.chapter-editor .ql-container.ql-snow {
+  border-color: #444;
+}
+
+.chapter-editor .ql-toolbar.ql-snow {
+  background: #2a2a3a;
+}
+
+.chapter-editor .ql-container.ql-snow {
+  background: #222235;
+  color: #eee;
+  min-height: 320px;
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.chapter-editor .ql-editor.ql-blank::before {
+  color: #888;
+  font-style: normal;
+}
+
+.chapter-editor .ql-snow .ql-stroke {
+  stroke: #ddd;
+}
+
+.chapter-editor .ql-snow .ql-fill {
+  fill: #ddd;
+}
+
+.chapter-editor .ql-snow .ql-picker {
+  color: #ddd;
+}
+
+.chapter-editor__actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.chapter-editor__actions .save-btn {
+  background: #f5c518;
+  border: none;
+  color: #111;
+  padding: 10px 25px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.chapter-editor__actions .save-btn:hover:not(:disabled) {
+  background: #ffe45c;
+}
+
+.chapter-editor__actions .save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .chapter-editor__actions .save-btn {
+    width: 100%;
+  }
+}

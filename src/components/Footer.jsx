@@ -1,70 +1,77 @@
-import './components.css'
+import "./components.css";
+import { Link } from "react-router";
 
-function Footer (){
+const QUICK_LINKS = [
+  { to: "/home", label: "Home" },
+  { to: "/search-discovery", label: "Browse Stories" },
+  { to: "/home/latest-releases", label: "Latest Releases" },
+  { to: "/about-us", label: "About Us" },
+  { to: "/help", label: "Help" },
+];
 
-    return(
-        <>
-            <div className="above-footer">
-                <div className="above-info">
+const HIGHLIGHTS = [
+  "Manage and organize your stories",
+  "Track chapter updates and analytics",
+  "Engage with your audience",
+  "Distribute content across multiple platforms",
+];
 
-                    <div className="footer-column about-box">
-                    <h3>About Chronica</h3>
-                    <p>
-                        Chronica is a Creative Content Management and Distribution System for
-                        authors, creators, and publishers. Streamline your storytelling,
-                        track readership, and distribute content seamlessly.
-                    </p>
-                    <ul>
-                        <li>Manage and organize your stories</li>
-                        <li>Track chapter updates and analytics</li>
-                        <li>Engage with your audience</li>
-                        <li>Distribute content across multiple platforms</li>
-                    </ul>
-                    </div>
+export default function Footer() {
+  return (
+    <>
+      <div className="above-footer">
+        <div className="above-info">
+          <div className="footer-column about-box">
+            <h3>About Chronica</h3>
+            <p>
+              Chronica is a Creative Content Management and Distribution System for authors, creators, and
+              publishers. Streamline your storytelling, track readership, and distribute content seamlessly.
+            </p>
+            <ul>
+              {HIGHLIGHTS.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
 
-                    <div className="footer-column links-box">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/stories">Stories</a></li>
-                        <li><a href="/about">About Us</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                    </ul>
-                    </div>
+          <div className="footer-column links-box">
+            <h3>Quick Links</h3>
+            <ul>
+              {QUICK_LINKS.map((link) => (
+                <li key={link.to}>
+                  <Link to={link.to}>{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-                    <div className="footer-column social-box">
-                    <h3>Follow Us</h3>
-                    <div className="social-icons">
-                        <i className="fa-brands fa-facebook"></i>
-                        <i className="fa-brands fa-youtube"></i>
-                        <i className="fa-brands fa-square-instagram"></i>
-                        <i className="fa-brands fa-twitter"></i>
-                        <i className="fa-brands fa-discord"></i>
-                    </div>
-                    </div>
+          <div className="footer-column contact-box">
+            <h3>Contact &amp; Ads</h3>
+            <p>
+              Email: <a href="mailto:support@chronica.com">support@chronica.com</a>
+            </p>
+            <p>
+              Advertising: <a href="mailto:ads@chronica.com">ads@chronica.com</a>
+            </p>
+          </div>
+        </div>
+      </div>
 
-                    <div className="footer-column contact-box">
-                    <h3>Contact & Ads</h3>
-                    <p>Email: support@chronica.com</p>
-                    <p>Advertising: ads@chronica.com</p>
-                    <p>Phone: +1 234 567 890</p>
-                    </div>
-
-                </div>
-            </div>
-
-            <footer>
-                <p className="footer-brand">Chronica</p>
-                <p>© 2025 Paranoic Software Solutions. All Rights Reserved.</p>
-                <div className="footer-links">
-                    <a href="/privacy">Privacy Policy</a>
-                    <a href="/terms">Terms of Service</a>
-                    <a href="/contact">Contact</a>
-                </div>
-            </footer>
-
-        </>
-    );
+      <footer>
+        <p className="footer-brand">Chronica</p>
+        <p>© {new Date().getFullYear()} Paranoic Software Solutions. All Rights Reserved.</p>
+        <div className="footer-links">
+          <Link to="/about-us" className="footer-link">
+            About
+          </Link>
+          <Link to="/help" className="footer-link">
+            Help
+          </Link>
+          <Link to="/search-discovery" className="footer-link">
+            Browse
+          </Link>
+        </div>
+      </footer>
+    </>
+  );
 }
-
-export default Footer
